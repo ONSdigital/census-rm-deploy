@@ -1,0 +1,41 @@
+---
+resource_types:
+- name: kubernetes
+  type: docker-image
+  source:
+    repository: zlabjp/kubernetes-resource
+    tag: "1.13"
+
+resources:
+- name: census-rm-kubernetes
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-kubernetes.git
+    private_key: ((github-private-key))
+
+- name: response-management-kubernetes
+  type: kubernetes
+  source:
+    server: ((kubernetes-server))
+    namespace: ((kubernetes-namespace))
+    token: ((kubernetes-token))
+    certificate_authority: ((kubernetes-certificate))
+
+jobs:
+- name: microservice-deploys
+  plan:
+  - get: census-rm-kubernetes
+  - put: response-management-kubernetes
+    params:
+      kubectl: apply -f census-rm-kubernetes/microservices
+      wait_until_ready_selector: "app in (actionsvc, casesvc, collectionexercisesvc, collectioninstrumentsvc, commstemplatesvc, iacsvc, partysvc, samplesvc, surveysvc)"
+      wait_until_ready: 200
+
+- name: handler-deploys
+  plan:
+  - get: census-rm-kubernetes
+  - put: response-management-kubernetes
+    params:
+      kubectl: apply -f census-rm-kubernetes/handlers
+      wait_until_ready_selector: "app in (actionexportersvc, notifygatewaysvc, fwmtgatewayjobsvc, fwmtgatewayrmadapter)"
+      wait_until_ready: 300
