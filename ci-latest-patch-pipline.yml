@@ -1,0 +1,212 @@
+---
+resource_types:
+- name: kubernetes
+  type: docker-image
+  source:
+    repository: zlabjp/kubernetes-resource
+    tag: "1.13"
+
+resources:
+- name: response-management-kubernetes
+  type: kubernetes
+  source:
+    server: ((kubernetes-server))
+    namespace: ((kubernetes-namespace))
+    token: ((kubernetes-token))
+    certificate_authority: ((kubernetes-certificate))
+
+- name: actionsvc-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-ci/census-rm-actionsvc
+
+- name: actionexportersvc-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-ci/census-rm-actionexportersvc
+
+- name: casesvc-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-ci/census-rm-casesvc
+
+- name: collectionexercisesvc-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-ci/census-rm-collectionexercisesvc
+
+- name: collectioninstrumentsvc-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-ci/census-rm-collectioninstrumentsvc
+
+- name: commstemplatesvc-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-ci/census-rm-commstemplatesvc
+
+- name: iacsvc-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-ci/census-rm-iacsvc
+
+- name: notifygatewaysvc-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-ci/census-rm-notifygatewaysvc
+
+- name: samplesvc-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-ci/census-rm-samplesvc
+
+- name: surveysvc-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-ci/census-rm-surveysvc
+
+- name: fwmtjobsvc-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-ci/census-rm-fwmtjobsvc
+
+- name: fwmtrmadapter-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-ci/census-rm-fwmtrmadapter
+
+- name: partysvcstub-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-ci/census-rm-partysvcstub
+
+jobs:
+- name: actionsvc-patch-to-latest
+  plan:
+  - get: actionsvc-docker-latest
+    trigger: true
+  - put: response-management-kubernetes
+    params:
+      kubectl: patch deployment actionsvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"date\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
+      wait_until_ready_selector: app=actionsvc
+      wait_until_ready: 300
+
+- name: actionexportersvc-patch-to-latest
+  plan:
+  - get: actionexportersvc-docker-latest
+    trigger: true
+  - put: response-management-kubernetes
+    params:
+      kubectl: patch deployment actionexportersvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"date\":\"`date +'%s'`\"}}}}}"
+      wait_until_ready_selector: app=actionexportersvc
+      wait_until_ready: 300
+
+- name: casesvc-patch-to-latest
+  plan:
+  - get: casesvc-docker-latest
+    trigger: true
+  - put: response-management-kubernetes
+    params:
+      kubectl: patch deployment casesvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"date\":\"`date +'%s'`\"}}}}}"
+      wait_until_ready_selector: app=casesvc
+      wait_until_ready: 300
+
+- name: collectionexercisesvc-patch-to-latest
+  plan:
+  - get: collectionexercisesvc-docker-latest
+    trigger: true
+  - put: response-management-kubernetes
+    params:
+      kubectl: patch deployment collectionexercisesvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"date\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
+      wait_until_ready_selector: app=collectionexercisesvc
+      wait_until_ready: 300
+
+- name: collectioninstrumentsvc-patch-to-latest
+  plan:
+  - get: collectioninstrumentsvc-docker-latest
+    trigger: true
+  - put: response-management-kubernetes
+    params:
+      kubectl: patch deployment collectioninstrumentsvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"date\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
+      wait_until_ready_selector: app=collectioninstrumentsvc
+      wait_until_ready: 300
+
+- name: commstemplatesvc-patch-to-latest
+  plan:
+  - get: commstemplatesvc-docker-latest
+    trigger: true
+  - put: response-management-kubernetes
+    params:
+      kubectl: patch deployment commstemplatesvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"date\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
+      wait_until_ready_selector: app=commstemplatesvc
+      wait_until_ready: 300
+
+- name: iacsvc-patch-to-latest
+  plan:
+  - get: iacsvc-docker-latest
+    trigger: true
+  - put: response-management-kubernetes
+    params:
+      kubectl: patch deployment iacsvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"date\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
+      wait_until_ready_selector: app=iacsvc
+      wait_until_ready: 300
+
+- name: notifygatewaysvc-patch-to-latest
+  plan:
+  - get: notifygatewaysvc-docker-latest
+    trigger: true
+  - put: response-management-kubernetes
+    params:
+      kubectl: patch deployment notifygatewaysvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"date\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
+      wait_until_ready_selector: app=notifygatewaysvc
+      wait_until_ready: 300
+
+- name: samplesvc-patch-to-latest
+  plan:
+  - get: samplesvc-docker-latest
+    trigger: true
+  - put: response-management-kubernetes
+    params:
+      kubectl: patch deployment samplesvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"date\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
+      wait_until_ready_selector: app=samplesvc
+      wait_until_ready: 300
+
+- name: surveysvc-patch-to-latest
+  plan:
+  - get: surveysvc-docker-latest
+    trigger: true
+  - put: response-management-kubernetes
+    params:
+      kubectl: patch deployment surveysvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"date\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
+      wait_until_ready_selector: app=surveysvc
+      wait_until_ready: 300
+
+- name: fwmtjobsvc-patch-to-latest
+  plan:
+  - get: fwmtjobsvc-docker-latest
+    trigger: true
+  - put: response-management-kubernetes
+    params:
+      kubectl: patch deployment fwmtgatewayjobsvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"date\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
+      wait_until_ready_selector: app=fwmtgatewayjobsvc
+      wait_until_ready: 300
+
+- name: fwmtrmadapter-patch-to-latest
+  plan:
+  - get: fwmtrmadapter-docker-latest
+    trigger: true
+  - put: response-management-kubernetes
+    params:
+      kubectl: patch deployment fwmtgatewayrmadapter -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"date\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
+      wait_until_ready_selector: app=fwmtgatewayrmadapter
+      wait_until_ready: 300
+
+- name: partysvcstub-patch-to-latest
+  plan:
+  - get: partysvcstub-docker-latest
+    trigger: true
+  - put: response-management-kubernetes
+    params:
+      kubectl: patch deployment partysvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"date\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
+      wait_until_ready_selector: app=partysvc
+      wait_until_ready: 300
