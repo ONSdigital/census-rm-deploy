@@ -81,132 +81,171 @@ resources:
     repository: eu.gcr.io/census-ci/census-rm-partysvcstub
 
 jobs:
-- name: actionsvc-patch-to-latest
+- name: actionsvc-deploy-latest
+  serial: true
   plan:
   - get: actionsvc-docker-latest
     trigger: true
+    params:
+      skip_download: true
   - put: response-management-kubernetes
     params:
-      kubectl: patch deployment actionsvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"date\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
+      kubectl: patch deployment actionsvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\"}}}}}"  # This triggers a fresh image pull if imagePullPolicy is Always
       wait_until_ready_selector: app=actionsvc
       wait_until_ready: 300
 
-- name: actionexportersvc-patch-to-latest
+- name: actionexportersvc-deploy-latest
+  serial: true
   plan:
   - get: actionexportersvc-docker-latest
     trigger: true
+    params:
+      skip_download: true
   - put: response-management-kubernetes
     params:
-      kubectl: patch deployment actionexportersvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"date\":\"`date +'%s'`\"}}}}}"
+      kubectl: patch deployment actionexportersvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\"}}}}}"
       wait_until_ready_selector: app=actionexportersvc
       wait_until_ready: 300
 
-- name: casesvc-patch-to-latest
+- name: casesvc-deploy-latest
+  serial: true
   plan:
   - get: casesvc-docker-latest
     trigger: true
+    params:
+      skip_download: true
   - put: response-management-kubernetes
     params:
-      kubectl: patch deployment casesvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"date\":\"`date +'%s'`\"}}}}}"
+      kubectl: patch deployment casesvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\"}}}}}"
       wait_until_ready_selector: app=casesvc
       wait_until_ready: 300
 
-- name: collectionexercisesvc-patch-to-latest
+- name: collectionexercisesvc-deploy-latest
+  serial: true
   plan:
   - get: collectionexercisesvc-docker-latest
     trigger: true
+    params:
+      skip_download: true
   - put: response-management-kubernetes
     params:
-      kubectl: patch deployment collectionexercisesvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"date\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
+      kubectl: patch deployment collectionexercisesvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
       wait_until_ready_selector: app=collectionexercisesvc
       wait_until_ready: 300
 
-- name: collectioninstrumentsvc-patch-to-latest
+- name: collectioninstrumentsvc-deploy-latest
+  serial: true
   plan:
   - get: collectioninstrumentsvc-docker-latest
     trigger: true
+    params:
+      skip_download: true
   - put: response-management-kubernetes
     params:
-      kubectl: patch deployment collectioninstrumentsvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"date\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
+      kubectl: patch deployment collectioninstrumentsvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
       wait_until_ready_selector: app=collectioninstrumentsvc
       wait_until_ready: 300
 
-- name: commstemplatesvc-patch-to-latest
+- name: commstemplatesvc-deploy-latest
+  serial: true
   plan:
   - get: commstemplatesvc-docker-latest
     trigger: true
+    params:
+      skip_download: true
   - put: response-management-kubernetes
     params:
-      kubectl: patch deployment commstemplatesvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"date\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
+      kubectl: patch deployment commstemplatesvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
       wait_until_ready_selector: app=commstemplatesvc
       wait_until_ready: 300
 
-- name: iacsvc-patch-to-latest
+- name: iacsvc-deploy-latest
+  serial: true
   plan:
   - get: iacsvc-docker-latest
     trigger: true
+    params:
+      skip_download: true
   - put: response-management-kubernetes
     params:
-      kubectl: patch deployment iacsvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"date\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
+      kubectl: patch deployment iacsvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
       wait_until_ready_selector: app=iacsvc
       wait_until_ready: 300
 
-- name: notifygatewaysvc-patch-to-latest
+- name: notifygatewaysvc-deploy-latest
+  serial: true
   plan:
   - get: notifygatewaysvc-docker-latest
     trigger: true
+    params:
+      skip_download: true
   - put: response-management-kubernetes
     params:
-      kubectl: patch deployment notifygatewaysvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"date\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
+      kubectl: patch deployment notifygatewaysvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
       wait_until_ready_selector: app=notifygatewaysvc
       wait_until_ready: 300
 
-- name: samplesvc-patch-to-latest
+- name: samplesvc-deploy-latest
+  serial: true
   plan:
   - get: samplesvc-docker-latest
     trigger: true
+    params:
+      skip_download: true
   - put: response-management-kubernetes
     params:
-      kubectl: patch deployment samplesvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"date\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
+      kubectl: patch deployment samplesvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
       wait_until_ready_selector: app=samplesvc
       wait_until_ready: 300
 
-- name: surveysvc-patch-to-latest
+- name: surveysvc-deploy-latest
+  serial: true
   plan:
   - get: surveysvc-docker-latest
     trigger: true
+    params:
+      skip_download: true
   - put: response-management-kubernetes
     params:
-      kubectl: patch deployment surveysvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"date\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
+      kubectl: patch deployment surveysvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
       wait_until_ready_selector: app=surveysvc
       wait_until_ready: 300
 
-- name: fwmtjobsvc-patch-to-latest
+- name: fwmtjobsvc-deploy-latest
+  serial: true
   plan:
   - get: fwmtjobsvc-docker-latest
     trigger: true
+    params:
+      skip_download: true
   - put: response-management-kubernetes
     params:
-      kubectl: patch deployment fwmtgatewayjobsvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"date\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
+      kubectl: patch deployment fwmtgatewayjobsvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
       wait_until_ready_selector: app=fwmtgatewayjobsvc
       wait_until_ready: 300
 
-- name: fwmtrmadapter-patch-to-latest
+- name: fwmtrmadapter-deploy-latest
+  serial: true
   plan:
   - get: fwmtrmadapter-docker-latest
     trigger: true
+    params:
+      skip_download: true
   - put: response-management-kubernetes
     params:
-      kubectl: patch deployment fwmtgatewayrmadapter -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"date\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
+      kubectl: patch deployment fwmtgatewayrmadapter -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
       wait_until_ready_selector: app=fwmtgatewayrmadapter
       wait_until_ready: 300
 
-- name: partysvcstub-patch-to-latest
+- name: partysvcstub-deploy-latest
+  serial: true
   plan:
   - get: partysvcstub-docker-latest
     trigger: true
+    params:
+      skip_download: true
   - put: response-management-kubernetes
     params:
-      kubectl: patch deployment partysvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"date\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
+      kubectl: patch deployment partysvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
       wait_until_ready_selector: app=partysvc
       wait_until_ready: 300
