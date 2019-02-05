@@ -7,7 +7,7 @@ resource_types:
     tag: "1.13"
 
 resources:
-- name: census-rm-kubernetes
+- name: census-rm-kubernetes-repo
   type: git
   source:
     uri: git@github.com:ONSdigital/census-rm-kubernetes.git
@@ -22,22 +22,241 @@ resources:
     certificate_authority: ((kubernetes-certificate))
 
 jobs:
-- name: microservice-deploys
+- name: actionsvc-config
+  serial: true
   plan:
-  - get: census-rm-kubernetes
+  - get: census-rm-kubernetes-repo
     trigger: true
   - put: response-management-kubernetes
     params:
-      kubectl: apply -f census-rm-kubernetes/microservices
-      wait_until_ready_selector: "app in (actionsvc, casesvc, collectionexercisesvc, collectioninstrumentsvc, commstemplatesvc, iacsvc, partysvc, samplesvc, surveysvc)"
-      wait_until_ready: 200
+      kubectl: apply -f census-rm-kubernetes-repo/microservices/action-service.yml
+      wait_until_ready: 0
+  - put: response-management-kubernetes
+    params:
+      kubectl: apply -f census-rm-kubernetes-repo/microservices/action-poddisruptionbudget.yml
+      wait_until_ready: 0
+  - put: response-management-kubernetes
+    params:
+      kubectl: apply -f census-rm-kubernetes-repo/microservices/action-deployment.yml
+      wait_until_ready_selector: app=actionsvc
+      wait_until_ready: 300
 
-- name: handler-deploys
+- name: actionexportersvc-config
+  serial: true
   plan:
-  - get: census-rm-kubernetes
+  - get: census-rm-kubernetes-repo
     trigger: true
   - put: response-management-kubernetes
     params:
-      kubectl: apply -f census-rm-kubernetes/handlers
-      wait_until_ready_selector: "app in (actionexportersvc, notifygatewaysvc, fwmtgatewayjobsvc, fwmtgatewayrmadapter)"
+      kubectl: apply -f census-rm-kubernetes-repo/handlers/actionexporter-service.yml
+      wait_until_ready: 0
+  - put: response-management-kubernetes
+    params:
+      kubectl: apply -f census-rm-kubernetes-repo/handlers/actionexporter-poddisruptionbudget.yml
+      wait_until_ready: 0
+  - put: response-management-kubernetes
+    params:
+      kubectl: apply -f census-rm-kubernetes-repo/handlers/actionexporter-deployment.yml
+      wait_until_ready_selector: app=actionexportersvc
+      wait_until_ready: 300
+
+- name: casesvc-config
+  serial: true
+  plan:
+  - get: census-rm-kubernetes-repo
+    trigger: true
+  - put: response-management-kubernetes
+    params:
+      kubectl: apply -f census-rm-kubernetes-repo/microservices/case-service.yml
+      wait_until_ready: 0
+  - put: response-management-kubernetes
+    params:
+      kubectl: apply -f census-rm-kubernetes-repo/microservices/case-poddisruptionbudget.yml
+      wait_until_ready: 0
+  - put: response-management-kubernetes
+    params:
+      kubectl: apply -f census-rm-kubernetes-repo/microservices/case-deployment.yml
+      wait_until_ready_selector: app=casesvc
+      wait_until_ready: 300
+
+- name: collectionexercisesvc-config
+  serial: true
+  plan:
+  - get: census-rm-kubernetes-repo
+    trigger: true
+  - put: response-management-kubernetes
+    params:
+      kubectl: apply -f census-rm-kubernetes-repo/microservices/collectionexercise-service.yml
+      wait_until_ready: 0
+  - put: response-management-kubernetes
+    params:
+      kubectl: apply -f census-rm-kubernetes-repo/microservices/collectionexercise-poddisruptionbudget.yml
+      wait_until_ready: 0
+  - put: response-management-kubernetes
+    params:
+      kubectl: apply -f census-rm-kubernetes-repo/microservices/collectionexercise-deployment.yml
+      wait_until_ready_selector: app=collectionexercisesvc
+      wait_until_ready: 300
+
+- name: collectioninstrumentsvc-config
+  serial: true
+  plan:
+  - get: census-rm-kubernetes-repo
+    trigger: true
+  - put: response-management-kubernetes
+    params:
+      kubectl: apply -f census-rm-kubernetes-repo/microservices/collectioninstrument-service.yml
+      wait_until_ready: 0
+  - put: response-management-kubernetes
+    params:
+      kubectl: apply -f census-rm-kubernetes-repo/microservices/collectioninstrument-poddisruptionbudget.yml
+      wait_until_ready: 0
+  - put: response-management-kubernetes
+    params:
+      kubectl: apply -f census-rm-kubernetes-repo/microservices/collectioninstrument-deployment.yml
+      wait_until_ready_selector: app=collectioninstrumentsvc
+      wait_until_ready: 300
+
+- name: commstemplatesvc-config
+  serial: true
+  plan:
+  - get: census-rm-kubernetes-repo
+    trigger: true
+  - put: response-management-kubernetes
+    params:
+      kubectl: apply -f census-rm-kubernetes-repo/microservices/commstemplate-service.yml
+      wait_until_ready: 0
+  - put: response-management-kubernetes
+    params:
+      kubectl: apply -f census-rm-kubernetes-repo/microservices/commstemplate-poddisruptionbudget.yml
+      wait_until_ready: 0
+  - put: response-management-kubernetes
+    params:
+      kubectl: apply -f census-rm-kubernetes-repo/microservices/commstemplate-deployment.yml
+      wait_until_ready_selector: app=commstemplatesvc
+      wait_until_ready: 300
+
+- name: iacsvc-config
+  serial: true
+  plan:
+  - get: census-rm-kubernetes-repo
+    trigger: true
+  - put: response-management-kubernetes
+    params:
+      kubectl: apply -f census-rm-kubernetes-repo/microservices/iac-service.yml
+      wait_until_ready: 0
+  - put: response-management-kubernetes
+    params:
+      kubectl: apply -f census-rm-kubernetes-repo/microservices/iac-poddisruptionbudget.yml
+      wait_until_ready: 0
+  - put: response-management-kubernetes
+    params:
+      kubectl: apply -f census-rm-kubernetes-repo/microservices/iac-deployment.yml
+      wait_until_ready_selector: app=iacsvc
+      wait_until_ready: 300
+
+- name: notifygatewaysvc-config
+  serial: true
+  plan:
+  - get: census-rm-kubernetes-repo
+    trigger: true
+  - put: response-management-kubernetes
+    params:
+      kubectl: apply -f census-rm-kubernetes-repo/handlers/notifygateway-service.yml
+      wait_until_ready: 0
+  - put: response-management-kubernetes
+    params:
+      kubectl: apply -f census-rm-kubernetes-repo/handlers/notifygateway-poddisruptionbudget.yml
+      wait_until_ready: 0
+  - put: response-management-kubernetes
+    params:
+      kubectl: apply -f census-rm-kubernetes-repo/handlers/notifygateway-deployment.yml
+      wait_until_ready_selector: app=notifygatewaysvc
+      wait_until_ready: 300
+
+- name: sample-config #TODO change to stubs once RM kubernetes is updated
+  serial: true
+  plan:
+  - get: census-rm-kubernetes-repo
+    trigger: true
+  - put: response-management-kubernetes
+    params:
+      kubectl: apply -f census-rm-kubernetes-repo/microservices/sample-service.yml
+      wait_until_ready: 0
+  - put: response-management-kubernetes
+    params:
+      kubectl: apply -f census-rm-kubernetes-repo/microservices/sample-poddisruptionbudget.yml
+      wait_until_ready: 0
+  - put: response-management-kubernetes
+    params:
+      kubectl: apply -f census-rm-kubernetes-repo/microservices/sample-deployment.yml
+      wait_until_ready_selector: app=samplesvc
+      wait_until_ready: 300
+
+- name: surveysvc-config
+  serial: true
+  plan:
+  - get: census-rm-kubernetes-repo
+    trigger: true
+  - put: response-management-kubernetes
+    params:
+      kubectl: apply -f census-rm-kubernetes-repo/microservices/survey-service.yml
+      wait_until_ready: 0
+  - put: response-management-kubernetes
+    params:
+      kubectl: apply -f census-rm-kubernetes-repo/microservices/survey-poddisruptionbudget.yml
+      wait_until_ready: 0
+  - put: response-management-kubernetes
+    params:
+      kubectl: apply -f census-rm-kubernetes-repo/microservices/survey-deployment.yml
+      wait_until_ready_selector: app=surveysvc
+      wait_until_ready: 300
+
+- name: fwmtjobsvc-config
+  serial: true
+  plan:
+  - get: census-rm-kubernetes-repo
+    trigger: true
+  - put: response-management-kubernetes
+    params:
+      kubectl: apply -f census-rm-kubernetes-repo/handlers/fwmtgateway-job-service.yml
+      wait_until_ready: 0
+  - put: response-management-kubernetes
+    params:
+      kubectl: apply -f census-rm-kubernetes-repo/handlers/fwmtgateway-poddisruptionbudget.yml
+      wait_until_ready: 0
+  - put: response-management-kubernetes
+    params:
+      kubectl: apply -f census-rm-kubernetes-repo/handlers/fwmtgateway-job-deployment.yml
+      wait_until_ready_selector: app=fwmtgatewayjobsvc
+      wait_until_ready: 300
+
+- name: fwmtadaptersvc-config
+  serial: true
+  plan:
+  - get: census-rm-kubernetes-repo
+    trigger: true
+  - put: response-management-kubernetes
+    params:
+      kubectl: apply -f census-rm-kubernetes-repo/handlers/fwmtgateway-rmadapter-service.yml
+      wait_until_ready: 0
+  - put: response-management-kubernetes
+    params:
+      kubectl: apply -f census-rm-kubernetes-repo/handlers/fwmtgateway-rmadapter-deployment.yml
+      wait_until_ready_selector: app=fwmtadaptersvc
+      wait_until_ready: 300
+
+- name: partysvc-stub-config
+  serial: true
+  plan:
+  - get: census-rm-kubernetes-repo
+    trigger: true
+  - put: response-management-kubernetes
+    params:
+      kubectl: apply -f census-rm-kubernetes-repo/microservices/party-service.yml
+      wait_until_ready: 0
+  - put: response-management-kubernetes
+    params:
+      kubectl: apply -f census-rm-kubernetes-repo/microservices/party-deployment.yml
+      wait_until_ready_selector: app=partysvc
       wait_until_ready: 300
