@@ -55,10 +55,10 @@ resources:
   source:
     repository: eu.gcr.io/census-ci/census-rm-notifygatewaysvc
 
-- name: samplesvc-docker-latest
+- name: samplesvc-stub-docker-latest
   type: docker-image
   source:
-    repository: eu.gcr.io/census-ci/census-rm-samplesvc
+    repository: eu.gcr.io/census-ci/census-rm-samplesvc-stub
 
 - name: surveysvc-docker-latest
   type: docker-image
@@ -185,17 +185,17 @@ jobs:
       wait_until_ready_selector: app=notifygatewaysvc
       wait_until_ready: 300
 
-- name: samplesvc-deploy-latest
+- name: samplesvc-stub-deploy-latest
   serial: true
   plan:
-  - get: samplesvc-docker-latest
+  - get: samplesvc-stub-docker-latest
     trigger: true
     params:
       skip_download: true
   - put: response-management-kubernetes
     params:
-      kubectl: patch deployment samplesvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
-      wait_until_ready_selector: app=samplesvc
+      kubectl: patch deployment samplesvc-stub -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
+      wait_until_ready_selector: app=samplesvc-stub
       wait_until_ready: 300
 
 - name: surveysvc-deploy-latest

@@ -25,6 +25,7 @@ jobs:
 - name: microservice-deploys
   plan:
   - get: census-rm-kubernetes
+    trigger: true
   - put: response-management-kubernetes
     params:
       kubectl: apply -f census-rm-kubernetes/microservices
@@ -34,6 +35,7 @@ jobs:
 - name: handler-deploys
   plan:
   - get: census-rm-kubernetes
+    trigger: true
   - put: response-management-kubernetes
     params:
       kubectl: apply -f census-rm-kubernetes/handlers
