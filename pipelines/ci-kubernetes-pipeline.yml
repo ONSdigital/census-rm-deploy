@@ -19,7 +19,7 @@ resources:
     server: ((kubernetes-server))
     namespace: ((kubernetes-namespace))
     token: ((kubernetes-token))
-    certificate_authority: ((kubernetes-certificate))
+    certificate_authority: ((kubernetes-certificate-authority))
 
 jobs:
 - name: actionsvc-config
