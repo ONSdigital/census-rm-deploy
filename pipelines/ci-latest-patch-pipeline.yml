@@ -55,10 +55,10 @@ resources:
   source:
     repository: eu.gcr.io/census-ci/census-rm-notifygatewaysvc
 
-- name: samplesvc-stub-docker-latest
+- name: samplesvc-docker-latest  # TODO change to census stub
   type: docker-image
   source:
-    repository: eu.gcr.io/census-ci/census-rm-samplesvc-stub
+    repository: eu.gcr.io/census-ci/census-rm-samplesvc
 
 - name: surveysvc-docker-latest
   type: docker-image
@@ -75,7 +75,7 @@ resources:
   source:
     repository: eu.gcr.io/census-ci/census-rm-fwmtrmadapter
 
-- name: partysvcstub-docker-latest
+- name: partysvc-stub-docker-latest
   type: docker-image
   source:
     repository: eu.gcr.io/census-ci/census-rm-partysvcstub
@@ -90,7 +90,7 @@ jobs:
       skip_download: true
   - put: response-management-kubernetes
     params:
-      kubectl: patch deployment actionsvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\"}}}}}"  # This triggers a fresh image pull if imagePullPolicy is Always
+      kubectl: patch deployment actionsvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat actionsvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}" # This triggers a fresh image pull if imagePullPolicy is Always
       wait_until_ready_selector: app=actionsvc
       wait_until_ready: 300
 
@@ -103,7 +103,7 @@ jobs:
       skip_download: true
   - put: response-management-kubernetes
     params:
-      kubectl: patch deployment actionexportersvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\"}}}}}"
+      kubectl: patch deployment actionexportersvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat actionexportersvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}"
       wait_until_ready_selector: app=actionexportersvc
       wait_until_ready: 300
 
@@ -116,7 +116,7 @@ jobs:
       skip_download: true
   - put: response-management-kubernetes
     params:
-      kubectl: patch deployment casesvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\"}}}}}"
+      kubectl: patch deployment casesvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat casesvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}"
       wait_until_ready_selector: app=casesvc
       wait_until_ready: 300
 
@@ -129,7 +129,7 @@ jobs:
       skip_download: true
   - put: response-management-kubernetes
     params:
-      kubectl: patch deployment collectionexercisesvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
+      kubectl: patch deployment collectionexercisesvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat collectionexercisesvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
       wait_until_ready_selector: app=collectionexercisesvc
       wait_until_ready: 300
 
@@ -142,7 +142,7 @@ jobs:
       skip_download: true
   - put: response-management-kubernetes
     params:
-      kubectl: patch deployment collectioninstrumentsvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
+      kubectl: patch deployment collectioninstrumentsvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat collectioninstrumentsvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
       wait_until_ready_selector: app=collectioninstrumentsvc
       wait_until_ready: 300
 
@@ -155,7 +155,7 @@ jobs:
       skip_download: true
   - put: response-management-kubernetes
     params:
-      kubectl: patch deployment commstemplatesvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
+      kubectl: patch deployment commstemplatesvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat commstemplatesvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
       wait_until_ready_selector: app=commstemplatesvc
       wait_until_ready: 300
 
@@ -168,7 +168,7 @@ jobs:
       skip_download: true
   - put: response-management-kubernetes
     params:
-      kubectl: patch deployment iacsvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
+      kubectl: patch deployment iacsvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat iacsvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
       wait_until_ready_selector: app=iacsvc
       wait_until_ready: 300
 
@@ -181,21 +181,21 @@ jobs:
       skip_download: true
   - put: response-management-kubernetes
     params:
-      kubectl: patch deployment notifygatewaysvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
+      kubectl: patch deployment notifygatewaysvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat notifygatewaysvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
       wait_until_ready_selector: app=notifygatewaysvc
       wait_until_ready: 300
 
-- name: samplesvc-stub-deploy-latest
+- name: samplesvc-deploy-latest
   serial: true
   plan:
-  - get: samplesvc-stub-docker-latest
+  - get: samplesvc-docker-latest
     trigger: true
     params:
       skip_download: true
   - put: response-management-kubernetes
     params:
-      kubectl: patch deployment samplesvc-stub -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
-      wait_until_ready_selector: app=samplesvc-stub
+      kubectl: patch deployment samplesvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat samplesvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
+      wait_until_ready_selector: app=samplesvc
       wait_until_ready: 300
 
 - name: surveysvc-deploy-latest
@@ -207,7 +207,7 @@ jobs:
       skip_download: true
   - put: response-management-kubernetes
     params:
-      kubectl: patch deployment surveysvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
+      kubectl: patch deployment surveysvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat surveysvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
       wait_until_ready_selector: app=surveysvc
       wait_until_ready: 300
 
@@ -220,7 +220,7 @@ jobs:
       skip_download: true
   - put: response-management-kubernetes
     params:
-      kubectl: patch deployment fwmtgatewayjobsvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
+      kubectl: patch deployment fwmtgatewayjobsvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat fwmtjobsvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
       wait_until_ready_selector: app=fwmtgatewayjobsvc
       wait_until_ready: 300
 
@@ -233,19 +233,19 @@ jobs:
       skip_download: true
   - put: response-management-kubernetes
     params:
-      kubectl: patch deployment fwmtgatewayrmadapter -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
+      kubectl: patch deployment fwmtgatewayrmadapter -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat fwmtrmadaptersvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
       wait_until_ready_selector: app=fwmtgatewayrmadapter
       wait_until_ready: 300
 
-- name: partysvcstub-deploy-latest
+- name: partysvc-stub-deploy-latest
   serial: true
   plan:
-  - get: partysvcstub-docker-latest
+  - get: partysvc-stub-docker-latest
     trigger: true
     params:
       skip_download: true
   - put: response-management-kubernetes
     params:
-      kubectl: patch deployment partysvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
+      kubectl: patch deployment partysvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat partysvc-stub-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}"  # This triggers a re-deploy while imagePullPolicy is Always
       wait_until_ready_selector: app=partysvc
       wait_until_ready: 300
