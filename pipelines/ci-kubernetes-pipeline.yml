@@ -21,12 +21,84 @@ resources:
     token: ((kubernetes-token))
     certificate_authority: ((kubernetes-certificate-authority))
 
+- name: actionsvc-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-ci/census-rm-actionsvc
+
+- name: actionexportersvc-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-ci/census-rm-actionexportersvc
+
+- name: casesvc-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-ci/census-rm-casesvc
+
+- name: collectionexercisesvc-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-ci/census-rm-collectionexercisesvc
+
+- name: collectioninstrumentsvc-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-ci/census-rm-collectioninstrumentsvc
+
+- name: commstemplatesvc-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-ci/census-rm-commstemplatesvc
+
+- name: iacsvc-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-ci/census-rm-iacsvc
+
+- name: notifygatewaysvc-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-ci/census-rm-notifygatewaysvc
+
+- name: samplesvc-docker-latest  # TODO change to census stub
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-ci/census-rm-samplesvc
+
+- name: surveysvc-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-ci/census-rm-surveysvc
+
+- name: fwmtjobsvc-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-ci/census-rm-fwmtjobsvc
+
+- name: fwmtrmadapter-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-ci/census-rm-fwmtrmadapter
+
+- name: partysvc-stub-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-ci/census-rm-partysvcstub
+
 jobs:
+
+# Kubernetes Config
 - name: actionsvc-config
   serial: true
+  serial_groups: [actionsvc]
   plan:
   - get: census-rm-kubernetes-repo
     trigger: true
+  - get: actionsvc-docker-latest
+    trigger: true
+    params:
+      skip_download: true
   - put: response-management-kubernetes
     params:
       kubectl: apply -f census-rm-kubernetes-repo/microservices/action-service.yml
@@ -43,9 +115,14 @@ jobs:
 
 - name: actionexportersvc-config
   serial: true
+  serial_groups: [actionexportersvc]
   plan:
   - get: census-rm-kubernetes-repo
     trigger: true
+  - get: actionexportersvc-docker-latest
+    trigger: true
+    params:
+      skip_download: true
   - put: response-management-kubernetes
     params:
       kubectl: apply -f census-rm-kubernetes-repo/handlers/actionexporter-service.yml
@@ -62,9 +139,14 @@ jobs:
 
 - name: casesvc-config
   serial: true
+  serial_groups: [casesvc]
   plan:
   - get: census-rm-kubernetes-repo
     trigger: true
+  - get: casesvc-docker-latest
+    trigger: true
+    params:
+      skip_download: true
   - put: response-management-kubernetes
     params:
       kubectl: apply -f census-rm-kubernetes-repo/microservices/case-service.yml
@@ -81,9 +163,14 @@ jobs:
 
 - name: collectionexercisesvc-config
   serial: true
+  serial_groups: [collectionexercisesvc]
   plan:
   - get: census-rm-kubernetes-repo
     trigger: true
+  - get: collectionexercisesvc-docker-latest
+    trigger: true
+    params:
+      skip_download: true
   - put: response-management-kubernetes
     params:
       kubectl: apply -f census-rm-kubernetes-repo/microservices/collectionexercise-service.yml
@@ -100,9 +187,14 @@ jobs:
 
 - name: collectioninstrumentsvc-config
   serial: true
+  serial_groups: [collectioninstrumentsvc]
   plan:
   - get: census-rm-kubernetes-repo
     trigger: true
+  - get: collectioninstrumentsvc-docker-latest
+    trigger: true
+    params:
+      skip_download: true
   - put: response-management-kubernetes
     params:
       kubectl: apply -f census-rm-kubernetes-repo/microservices/collectioninstrument-service.yml
@@ -119,9 +211,14 @@ jobs:
 
 - name: commstemplatesvc-config
   serial: true
+  serial_groups: [commstemplatesvc]
   plan:
   - get: census-rm-kubernetes-repo
     trigger: true
+  - get: commstemplatesvc-docker-latest
+    trigger: true
+    params:
+      skip_download: true
   - put: response-management-kubernetes
     params:
       kubectl: apply -f census-rm-kubernetes-repo/microservices/commstemplate-service.yml
@@ -138,9 +235,14 @@ jobs:
 
 - name: iacsvc-config
   serial: true
+  serial_groups: [iacsvc]
   plan:
   - get: census-rm-kubernetes-repo
     trigger: true
+  - get: iacsvc-docker-latest
+    trigger: true
+    params:
+      skip_download: true
   - put: response-management-kubernetes
     params:
       kubectl: apply -f census-rm-kubernetes-repo/microservices/iac-service.yml
@@ -157,9 +259,14 @@ jobs:
 
 - name: notifygatewaysvc-config
   serial: true
+  serial_groups: [notifygatewaysvc]
   plan:
   - get: census-rm-kubernetes-repo
     trigger: true
+  - get: notifygatewaysvc-docker-latest
+    trigger: true
+    params:
+      skip_download: true
   - put: response-management-kubernetes
     params:
       kubectl: apply -f census-rm-kubernetes-repo/handlers/notifygateway-service.yml
@@ -174,11 +281,16 @@ jobs:
       wait_until_ready_selector: app=notifygatewaysvc
       wait_until_ready: 300
 
-- name: sample-config #TODO change to stubs once RM kubernetes is updated
+- name: samplesvc-config #TODO change to stubs once RM kubernetes is updated
   serial: true
+  serial_groups: [samplesvc]
   plan:
   - get: census-rm-kubernetes-repo
     trigger: true
+  - get: samplesvc-docker-latest
+    trigger: true
+    params:
+      skip_download: true
   - put: response-management-kubernetes
     params:
       kubectl: apply -f census-rm-kubernetes-repo/microservices/sample-service.yml
@@ -195,9 +307,14 @@ jobs:
 
 - name: surveysvc-config
   serial: true
+  serial_groups: [surveysvc]
   plan:
   - get: census-rm-kubernetes-repo
     trigger: true
+  - get: surveysvc-docker-latest
+    trigger: true
+    params:
+      skip_download: true
   - put: response-management-kubernetes
     params:
       kubectl: apply -f census-rm-kubernetes-repo/microservices/survey-service.yml
@@ -214,9 +331,14 @@ jobs:
 
 - name: fwmtjobsvc-config
   serial: true
+  serial_groups: [fwmtjobsvc]
   plan:
   - get: census-rm-kubernetes-repo
     trigger: true
+  - get: fwmtjobsvc-docker-latest
+    trigger: true
+    params:
+      skip_download: true
   - put: response-management-kubernetes
     params:
       kubectl: apply -f census-rm-kubernetes-repo/handlers/fwmtgateway-job-service.yml
@@ -233,9 +355,14 @@ jobs:
 
 - name: fwmtadaptersvc-config
   serial: true
+  serial_groups: [fwmtadaptersvc]
   plan:
   - get: census-rm-kubernetes-repo
     trigger: true
+  - get: fwmtrmadapter-docker-latest
+    trigger: true
+    params:
+      skip_download: true
   - put: response-management-kubernetes
     params:
       kubectl: apply -f census-rm-kubernetes-repo/handlers/fwmtgateway-rmadapter-service.yml
@@ -248,9 +375,14 @@ jobs:
 
 - name: partysvc-stub-config
   serial: true
+  serial_groups: [partysvc-stub]
   plan:
   - get: census-rm-kubernetes-repo
     trigger: true
+  - get: partysvc-stub-docker-latest
+    trigger: true
+    params:
+      skip_download: true
   - put: response-management-kubernetes
     params:
       kubectl: apply -f census-rm-kubernetes-repo/microservices/party-service.yml
@@ -258,5 +390,201 @@ jobs:
   - put: response-management-kubernetes
     params:
       kubectl: apply -f census-rm-kubernetes-repo/microservices/party-deployment.yml
+      wait_until_ready_selector: app=partysvc
+      wait_until_ready: 300
+
+# Patch to trigger Kubernetes image pull on new latest tag builds
+- name: actionsvc-deploy-latest
+  serial: true
+  serial_groups: [actionsvc]
+  plan:
+  - get: actionsvc-docker-latest
+    trigger: true
+    passed: [actionsvc-config]
+    params:
+      skip_download: true
+  - put: response-management-kubernetes
+    params:
+      kubectl: patch deployment actionsvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat actionsvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}"
+      wait_until_ready_selector: app=actionsvc
+      wait_until_ready: 300
+
+- name: actionexportersvc-deploy-latest
+  serial: true
+  serial_groups: [actionexportersvc]
+  plan:
+  - get: actionexportersvc-docker-latest
+    trigger: true
+    passed: [actionexportersvc-config]
+    params:
+      skip_download: true
+  - put: response-management-kubernetes
+    params:
+      kubectl: patch deployment actionexportersvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat actionexportersvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}"
+      wait_until_ready_selector: app=actionexportersvc
+      wait_until_ready: 300
+
+- name: casesvc-deploy-latest
+  serial: true
+  serial_groups: [casesvc]
+  plan:
+  - get: casesvc-docker-latest
+    trigger: true
+    passed: [casesvc-config]
+    params:
+      skip_download: true
+  - put: response-management-kubernetes
+    params:
+      kubectl: patch deployment casesvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat casesvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}"
+      wait_until_ready_selector: app=casesvc
+      wait_until_ready: 300
+
+- name: collectionexercisesvc-deploy-latest
+  serial: true
+  serial_groups: [collectionexercisesvc]
+  plan:
+  - get: collectionexercisesvc-docker-latest
+    trigger: true
+    passed: [collectionexercisesvc-config]
+    params:
+      skip_download: true
+  - put: response-management-kubernetes
+    params:
+      kubectl: patch deployment collectionexercisesvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat collectionexercisesvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}"
+      wait_until_ready_selector: app=collectionexercisesvc
+      wait_until_ready: 300
+
+- name: collectioninstrumentsvc-deploy-latest
+  serial: true
+  serial_groups: [collectioninstrumentsvc]
+  plan:
+  - get: collectioninstrumentsvc-docker-latest
+    trigger: true
+    passed: [collectioninstrumentsvc-config]
+    params:
+      skip_download: true
+  - put: response-management-kubernetes
+    params:
+      kubectl: patch deployment collectioninstrumentsvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat collectioninstrumentsvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}"
+      wait_until_ready_selector: app=collectioninstrumentsvc
+      wait_until_ready: 300
+
+- name: commstemplatesvc-deploy-latest
+  serial: true
+  serial_groups: [commstemplatesvc]
+  plan:
+  - get: commstemplatesvc-docker-latest
+    trigger: true
+    passed: [commstemplatesvc-config]
+    params:
+      skip_download: true
+  - put: response-management-kubernetes
+    params:
+      kubectl: patch deployment commstemplatesvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat commstemplatesvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}"
+      wait_until_ready_selector: app=commstemplatesvc
+      wait_until_ready: 300
+
+- name: iacsvc-deploy-latest
+  serial: true
+  serial_groups: [iacsvc]
+  plan:
+  - get: iacsvc-docker-latest
+    trigger: true
+    passed: [iacsvc-config]
+    params:
+      skip_download: true
+  - put: response-management-kubernetes
+    params:
+      kubectl: patch deployment iacsvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat iacsvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}"
+      wait_until_ready_selector: app=iacsvc
+      wait_until_ready: 300
+
+- name: notifygatewaysvc-deploy-latest
+  serial: true
+  serial_groups: [notifygatewaysvc]
+  plan:
+  - get: notifygatewaysvc-docker-latest
+    trigger: true
+    passed: [notifygatewaysvc-config]
+    params:
+      skip_download: true
+  - put: response-management-kubernetes
+    params:
+      kubectl: patch deployment notifygatewaysvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat notifygatewaysvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}"
+      wait_until_ready_selector: app=notifygatewaysvc
+      wait_until_ready: 300
+
+- name: samplesvc-deploy-latest
+  serial: true
+  serial_groups: [samplesvc]
+  plan:
+  - get: samplesvc-docker-latest
+    trigger: true
+    passed: [samplesvc-config]
+    params:
+      skip_download: true
+  - put: response-management-kubernetes
+    params:
+      kubectl: patch deployment samplesvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat samplesvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}"
+      wait_until_ready_selector: app=samplesvc
+      wait_until_ready: 300
+
+- name: surveysvc-deploy-latest
+  serial: true
+  serial_groups: [surveysvc]
+  plan:
+  - get: surveysvc-docker-latest
+    trigger: true
+    passed: [surveysvc-config]
+    params:
+      skip_download: true
+  - put: response-management-kubernetes
+    params:
+      kubectl: patch deployment surveysvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat surveysvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}"
+      wait_until_ready_selector: app=surveysvc
+      wait_until_ready: 300
+
+- name: fwmtjobsvc-deploy-latest
+  serial: true
+  serial_groups: [fwmtjobsvc]
+  plan:
+  - get: fwmtjobsvc-docker-latest
+    trigger: true
+    passed: [fwmtjobsvc-config]
+    params:
+      skip_download: true
+  - put: response-management-kubernetes
+    params:
+      kubectl: patch deployment fwmtgatewayjobsvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat fwmtjobsvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}"
+      wait_until_ready_selector: app=fwmtgatewayjobsvc
+      wait_until_ready: 300
+
+- name: fwmtrmadapter-deploy-latest
+  serial: true
+  serial_groups: [fwmtadaptersvc]
+  plan:
+  - get: fwmtrmadapter-docker-latest
+    trigger: true
+    passed: [fwmtadaptersvc-config]
+    params:
+      skip_download: true
+  - put: response-management-kubernetes
+    params:
+      kubectl: patch deployment fwmtgatewayrmadapter -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat fwmtrmadaptersvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}"
+      wait_until_ready_selector: app=fwmtgatewayrmadapter
+      wait_until_ready: 300
+
+- name: partysvc-stub-deploy-latest
+  serial: true
+  serial_groups: [partysvc-stub]
+  plan:
+  - get: partysvc-stub-docker-latest
+    trigger: true
+    passed: [partysvc-stub-config]
+    params:
+      skip_download: true
+  - put: response-management-kubernetes
+    params:
+      kubectl: patch deployment partysvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat partysvc-stub-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}"
       wait_until_ready_selector: app=partysvc
       wait_until_ready: 300
