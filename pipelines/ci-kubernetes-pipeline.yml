@@ -158,6 +158,13 @@ jobs:
             # Get deployment status
             kubectl get deployments -o wide --namespace=${KUBERNETES_NAMESPACE}
 
+            # Allow time for deployments to start up
+            echo "Waiting for deployments to start"
+            sleep 120
+
+            # Get deployment status
+            kubectl get deployments -o wide --namespace=${KUBERNETES_NAMESPACE}
+
 - name: deploy-handlers
   serial: true
   serial_groups: [actionexportersvc, fwmtjobsvc, fwmtadaptersvc, notifygatewaysvc]
@@ -212,6 +219,13 @@ jobs:
             # Get deployment status
             kubectl get deployments -o wide --namespace=${KUBERNETES_NAMESPACE}
 
+            # Allow time for deployments to start up
+            echo "Waiting for deployments to start"
+            sleep 120
+
+            # Get deployment status
+            kubectl get deployments -o wide --namespace=${KUBERNETES_NAMESPACE}
+
 
 # Patch to trigger Kubernetes image pull on new latest tag builds
 - name: actionsvc-deploy-latest
@@ -253,6 +267,13 @@ jobs:
 
             # Patch a timestamp and image digest label to trigger an image pull
             kubectl patch deployment actionsvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat actionsvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}" --namespace=${KUBERNETES_NAMESPACE}
+
+            # Get deployment status
+            kubectl get deployments -l app=actionsvc -o wide --namespace=${KUBERNETES_NAMESPACE}
+
+            # Allow time for deployment to start up
+            echo "Waiting for deployment to start"
+            sleep 60
 
             # Get deployment status
             kubectl get deployments -l app=actionsvc -o wide --namespace=${KUBERNETES_NAMESPACE}
@@ -300,6 +321,13 @@ jobs:
             # Get deployment status
             kubectl get deployments -l app=actionexportersvc -o wide --namespace=${KUBERNETES_NAMESPACE}
 
+            # Allow time for deployment to start up
+            echo "Waiting for deployment to start"
+            sleep 60
+
+            # Get deployment status
+            kubectl get deployments -l app=actionexportersvc -o wide --namespace=${KUBERNETES_NAMESPACE}
+
 - name: casesvc-deploy-latest
   serial: true
   serial_groups: [casesvc]
@@ -339,6 +367,13 @@ jobs:
 
             # Patch a timestamp and image digest label to trigger an image pull
             kubectl patch deployment casesvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat casesvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}" --namespace=${KUBERNETES_NAMESPACE}
+
+            # Get deployment status
+            kubectl get deployments -l app=casesvc -o wide --namespace=${KUBERNETES_NAMESPACE}
+
+            # Allow time for deployment to start up
+            echo "Waiting for deployment to start"
+            sleep 60
 
             # Get deployment status
             kubectl get deployments -l app=casesvc -o wide --namespace=${KUBERNETES_NAMESPACE}
@@ -386,6 +421,13 @@ jobs:
             # Get deployment status
             kubectl get deployments -l app=collectionexercisesvc -o wide --namespace=${KUBERNETES_NAMESPACE}
 
+            # Allow time for deployment to start up
+            echo "Waiting for deployment to start"
+            sleep 60
+
+            # Get deployment status
+            kubectl get deployments -l app=collectionexercisesvc -o wide --namespace=${KUBERNETES_NAMESPACE}
+
 - name: collectioninstrumentsvc-deploy-latest
   serial: true
   serial_groups: [collectioninstrumentsvc]
@@ -425,6 +467,13 @@ jobs:
 
             # Patch a timestamp and image digest label to trigger an image pull
             kubectl patch deployment collectioninstrumentsvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat collectioninstrumentsvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}" --namespace=${KUBERNETES_NAMESPACE}
+
+            # Get deployment status
+            kubectl get deployments -l app=collectioninstrumentsvc -o wide --namespace=${KUBERNETES_NAMESPACE}
+
+            # Allow time for deployment to start up
+            echo "Waiting for deployment to start"
+            sleep 60
 
             # Get deployment status
             kubectl get deployments -l app=collectioninstrumentsvc -o wide --namespace=${KUBERNETES_NAMESPACE}
@@ -472,6 +521,13 @@ jobs:
             # Get deployment status
             kubectl get deployments -l app=commstemplatesvc -o wide --namespace=${KUBERNETES_NAMESPACE}
 
+            # Allow time for deployment to start up
+            echo "Waiting for deployment to start"
+            sleep 60
+
+            # Get deployment status
+            kubectl get deployments -l app=commstemplatesvc -o wide --namespace=${KUBERNETES_NAMESPACE}
+
 - name: iacsvc-deploy-latest
   serial: true
   serial_groups: [iacsvc]
@@ -511,6 +567,13 @@ jobs:
 
             # Patch a timestamp and image digest label to trigger an image pull
             kubectl patch deployment iacsvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat iacsvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}" --namespace=${KUBERNETES_NAMESPACE}
+
+            # Get deployment status
+            kubectl get deployments -l app=iacsvc -o wide --namespace=${KUBERNETES_NAMESPACE}
+
+            # Allow time for deployment to start up
+            echo "Waiting for deployment to start"
+            sleep 60
 
             # Get deployment status
             kubectl get deployments -l app=iacsvc -o wide --namespace=${KUBERNETES_NAMESPACE}
@@ -558,6 +621,13 @@ jobs:
             # Get deployment status
             kubectl get deployments -l app=notifygatewaysvc -o wide --namespace=${KUBERNETES_NAMESPACE}
 
+            # Allow time for deployment to start up
+            echo "Waiting for deployment to start"
+            sleep 60
+
+            # Get deployment status
+            kubectl get deployments -l app=notifygatewaysvc -o wide --namespace=${KUBERNETES_NAMESPACE}
+
 - name: samplesvc-deploy-latest
   serial: true
   serial_groups: [samplesvc]
@@ -597,6 +667,13 @@ jobs:
 
             # Patch a timestamp and image digest label to trigger an image pull
             kubectl patch deployment samplesvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat samplesvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}" --namespace=${KUBERNETES_NAMESPACE}
+
+            # Get deployment status
+            kubectl get deployments -l app=samplesvc -o wide --namespace=${KUBERNETES_NAMESPACE}
+
+            # Allow time for deployment to start up
+            echo "Waiting for deployment to start"
+            sleep 60
 
             # Get deployment status
             kubectl get deployments -l app=samplesvc -o wide --namespace=${KUBERNETES_NAMESPACE}
@@ -644,6 +721,13 @@ jobs:
             # Get deployment status
             kubectl get deployments -l app=surveysvc -o wide --namespace=${KUBERNETES_NAMESPACE}
 
+            # Allow time for deployment to start up
+            echo "Waiting for deployment to start"
+            sleep 60
+
+            # Get deployment status
+            kubectl get deployments -l app=surveysvc -o wide --namespace=${KUBERNETES_NAMESPACE}
+
 - name: fwmtjobsvc-deploy-latest
   serial: true
   serial_groups: [fwmtjobsvc]
@@ -683,6 +767,13 @@ jobs:
 
             # Patch a timestamp and image digest label to trigger an image pull
             kubectl patch deployment fwmtgatewayjobsvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat fwmtjobsvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}" --namespace=${KUBERNETES_NAMESPACE}
+
+            # Get deployment status
+            kubectl get deployments -l app=fwmtgatewayjobsvc -o wide --namespace=${KUBERNETES_NAMESPACE}
+
+            # Allow time for deployment to start up
+            echo "Waiting for deployment to start"
+            sleep 60
 
             # Get deployment status
             kubectl get deployments -l app=fwmtgatewayjobsvc -o wide --namespace=${KUBERNETES_NAMESPACE}
@@ -730,6 +821,13 @@ jobs:
             # Get deployment status
             kubectl get deployments -l app=fwmtgatewayrmadapter -o wide --namespace=${KUBERNETES_NAMESPACE}
 
+            # Allow time for deployment to start up
+            echo "Waiting for deployment to start"
+            sleep 60
+
+            # Get deployment status
+            kubectl get deployments -l app=fwmtgatewayrmadapter -o wide --namespace=${KUBERNETES_NAMESPACE}
+
 
 - name: partysvc-stub-deploy-latest
   serial: true
@@ -772,4 +870,11 @@ jobs:
             kubectl patch deployment partysvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat partysvc-stub-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}" --namespace=${KUBERNETES_NAMESPACE}
 
             # Get deployment status
-            kubectl get deployments -l app=partysvc -o wide --namespace=${KUBERNETES_NAMESPACE}
+            kubectl get deployments -l app=partysvc-stub -o wide --namespace=${KUBERNETES_NAMESPACE}
+
+            # Allow time for deployment to start up
+            echo "Waiting for deployment to start"
+            sleep 60
+
+            # Get deployment status
+            kubectl get deployments -l app=partysvc-stub -o wide --namespace=${KUBERNETES_NAMESPACE}
