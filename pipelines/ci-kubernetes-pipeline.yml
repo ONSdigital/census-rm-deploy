@@ -7,6 +7,13 @@ resource_types:
     tag: "1.13"
 
 resources:
+- name: census-rm-deploy
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-deploy.git
+    private_key: ((github-private-key))
+    branch: initial-ci-pipelines
+
 - name: census-rm-kubernetes-microservices-repo
   type: git
   source:
@@ -61,10 +68,10 @@ resources:
   source:
     repository: eu.gcr.io/census-ci/census-rm-notifygatewaysvc
 
-- name: samplesvc-docker-latest  # TODO change to census stub
+- name: samplesvc-stub-docker-latest
   type: docker-image
   source:
-    repository: eu.gcr.io/census-ci/census-rm-samplesvc
+    repository: eu.gcr.io/census-ci/census-rm-samplesvc-stub
 
 - name: surveysvc-docker-latest
   type: docker-image
@@ -111,7 +118,7 @@ jobs:
   - get: iacsvc-docker-latest
     params:
       skip_download: true
-  - get: samplesvc-docker-latest
+  - get: samplesvc-stub-docker-latest
     params:
       skip_download: true
   - get: surveysvc-docker-latest
@@ -122,48 +129,19 @@ jobs:
       skip_download: true
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
-  - task: deploy-rm
-    config:
-      platform: linux
-      image_resource:
-        type: docker-image
-        source:
-          repository: google/cloud-sdk
-          tag: slim
-      inputs:
-      - name: census-rm-kubernetes-microservices-repo
-      params:
-        SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
-        GCP_PROJECT_NAME: ((gcp-project-name))
-        KUBERNETES_NAMESPACE: ((kubernetes-namespace))
-        KUBERNETES_CLUSTER_NAME: ((kubernetes-cluster-name))
-      run:
-        path: sh
-        args:
-          - -exc
-          - |
-            apt install kubectl
+  - get: census-rm-deploy
+  - task: kubectl-apply-microservices
+    file: census-rm-deploy/tasks/kubectl-apply-file.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_FILE_PATH: kubernetes-file/microservices
+      KUBERNETES_SELECTOR: "app in (actionsvc, casesvc, collectionexercisesvc, collectioninstrumentsvc, commstemplatesvc, iacsvc, partysvc, samplesvc-stub, surveysvc)"
+      SLEEP_TIME_FOR_STARTUP: 120
 
-            cat >~/gcloud-service-key.json <<EOL
-            $SERVICE_ACCOUNT_JSON
-            EOL
-
-            # Use gcloud service account to configure kubectl
-            gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
-            gcloud container clusters get-credentials ${KUBERNETES_CLUSTER_NAME} --zone europe-west2 --project ${GCP_PROJECT_NAME}
-
-            # Deploy RM microservices
-            kubectl apply -f census-rm-kubernetes-microservices-repo/microservices/ --namespace=${KUBERNETES_NAMESPACE}
-
-            # Get deployment status
-            kubectl get deployments -o wide --namespace=${KUBERNETES_NAMESPACE}
-
-            # Allow time for deployments to start up
-            echo "Waiting for deployments to start"
-            sleep 120
-
-            # Get deployment status
-            kubectl get deployments -o wide --namespace=${KUBERNETES_NAMESPACE}
+    input_mapping: {kubernetes-file: census-rm-kubernetes-microservices-repo}
 
 - name: deploy-handlers
   serial: true
@@ -183,49 +161,18 @@ jobs:
       skip_download: true
   - get: census-rm-kubernetes-handlers-repo
     trigger: true
-  - task: deploy-rm
-    config:
-      platform: linux
-      image_resource:
-        type: docker-image
-        source:
-          repository: google/cloud-sdk
-          tag: slim
-      inputs:
-      - name: census-rm-kubernetes-handlers-repo
-      params:
-        SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
-        GCP_PROJECT_NAME: ((gcp-project-name))
-        KUBERNETES_NAMESPACE: ((kubernetes-namespace))
-        KUBERNETES_CLUSTER_NAME: ((kubernetes-cluster-name))
-      run:
-        path: sh
-        args:
-          - -exc
-          - |
-            apt install kubectl
-
-            cat >~/gcloud-service-key.json <<EOL
-            $SERVICE_ACCOUNT_JSON
-            EOL
-
-            # Use gcloud service account to configure kubectl
-            gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
-            gcloud container clusters get-credentials ${KUBERNETES_CLUSTER_NAME} --zone europe-west2 --project ${GCP_PROJECT_NAME}
-
-            # Deploy RM handlers
-            kubectl apply -f census-rm-kubernetes-handlers-repo/handlers/ --namespace=${KUBERNETES_NAMESPACE}
-
-            # Get deployment status
-            kubectl get deployments -o wide --namespace=${KUBERNETES_NAMESPACE}
-
-            # Allow time for deployments to start up
-            echo "Waiting for deployments to start"
-            sleep 120
-
-            # Get deployment status
-            kubectl get deployments -o wide --namespace=${KUBERNETES_NAMESPACE}
-
+  - get: census-rm-deploy
+  - task: kubectl-apply-hanlders
+    file: census-rm-deploy/tasks/kubectl-apply-file.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_FILE_PATH: kubernetes-file/handlers
+      KUBERNETES_SELECTOR: "app in (actionexportersvc, notifygatewaysvc, fwmtgatewayjobsvc, fwmtgatewayrmadapter)"
+      SLEEP_TIME_FOR_STARTUP: 120
+    input_mapping: {kubernetes-file: census-rm-kubernetes-handlers-repo}
 
 # Patch to trigger Kubernetes image pull on new latest tag builds
 - name: actionsvc-deploy-latest
@@ -237,46 +184,18 @@ jobs:
     passed: [deploy-microservices]
     params:
       skip_download: true
+  - get: census-rm-deploy
   - task: patch-to-pull-latest-image
-    config:
-      platform: linux
-      image_resource:
-        type: docker-image
-        source:
-          repository: google/cloud-sdk
-          tag: slim
-      params:
-        SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
-        GCP_PROJECT_NAME: ((gcp-project-name))
-        KUBERNETES_NAMESPACE: ((kubernetes-namespace))
-        KUBERNETES_CLUSTER_NAME: ((kubernetes-cluster-name))
-      run:
-        path: sh
-        args:
-          - -exc
-          - |
-            apt install kubectl
-
-            cat >~/gcloud-service-key.json <<EOL
-            $SERVICE_ACCOUNT_JSON
-            EOL
-
-            # Use gcloud service account to configure kubectl
-            gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
-            gcloud container clusters get-credentials ${KUBERNETES_CLUSTER_NAME} --zone europe-west2 --project ${GCP_PROJECT_NAME}
-
-            # Patch a timestamp and image digest label to trigger an image pull
-            kubectl patch deployment actionsvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat actionsvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}" --namespace=${KUBERNETES_NAMESPACE}
-
-            # Get deployment status
-            kubectl get deployments -l app=actionsvc -o wide --namespace=${KUBERNETES_NAMESPACE}
-
-            # Allow time for deployment to start up
-            echo "Waiting for deployment to start"
-            sleep 60
-
-            # Get deployment status
-            kubectl get deployments -l app=actionsvc -o wide --namespace=${KUBERNETES_NAMESPACE}
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: actionsvc
+      KUBERNETES_SELECTOR: app=actionsvc
+      SLEEP_TIME_FOR_STARTUP: 120
+    input_mapping: {docker-image-resource: actionsvc-docker-latest}
 
 - name: actionexportersvc-deploy-latest
   serial: true
@@ -287,46 +206,18 @@ jobs:
     passed: [deploy-handlers]
     params:
       skip_download: true
+  - get: census-rm-deploy
   - task: patch-to-pull-latest-image
-    config:
-      platform: linux
-      image_resource:
-        type: docker-image
-        source:
-          repository: google/cloud-sdk
-          tag: slim
-      params:
-        SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
-        GCP_PROJECT_NAME: ((gcp-project-name))
-        KUBERNETES_NAMESPACE: ((kubernetes-namespace))
-        KUBERNETES_CLUSTER_NAME: ((kubernetes-cluster-name))
-      run:
-        path: sh
-        args:
-          - -exc
-          - |
-            apt install kubectl
-
-            cat >~/gcloud-service-key.json <<EOL
-            $SERVICE_ACCOUNT_JSON
-            EOL
-
-            # Use gcloud service account to configure kubectl
-            gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
-            gcloud container clusters get-credentials ${KUBERNETES_CLUSTER_NAME} --zone europe-west2 --project ${GCP_PROJECT_NAME}
-
-            # Patch a timestamp and image digest label to trigger an image pull
-            kubectl patch deployment actionexportersvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat actionexportersvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}" --namespace=${KUBERNETES_NAMESPACE}
-
-            # Get deployment status
-            kubectl get deployments -l app=actionexportersvc -o wide --namespace=${KUBERNETES_NAMESPACE}
-
-            # Allow time for deployment to start up
-            echo "Waiting for deployment to start"
-            sleep 60
-
-            # Get deployment status
-            kubectl get deployments -l app=actionexportersvc -o wide --namespace=${KUBERNETES_NAMESPACE}
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: actionexportersvc
+      KUBERNETES_SELECTOR: app=actionexportersvc
+      SLEEP_TIME_FOR_STARTUP: 120
+    input_mapping: {docker-image-resource: actionexportersvc-docker-latest}
 
 - name: casesvc-deploy-latest
   serial: true
@@ -337,46 +228,18 @@ jobs:
     passed: [deploy-microservices]
     params:
       skip_download: true
+  - get: census-rm-deploy
   - task: patch-to-pull-latest-image
-    config:
-      platform: linux
-      image_resource:
-        type: docker-image
-        source:
-          repository: google/cloud-sdk
-          tag: slim
-      params:
-        SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
-        GCP_PROJECT_NAME: ((gcp-project-name))
-        KUBERNETES_NAMESPACE: ((kubernetes-namespace))
-        KUBERNETES_CLUSTER_NAME: ((kubernetes-cluster-name))
-      run:
-        path: sh
-        args:
-          - -exc
-          - |
-            apt install kubectl
-
-            cat >~/gcloud-service-key.json <<EOL
-            $SERVICE_ACCOUNT_JSON
-            EOL
-
-            # Use gcloud service account to configure kubectl
-            gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
-            gcloud container clusters get-credentials ${KUBERNETES_CLUSTER_NAME} --zone europe-west2 --project ${GCP_PROJECT_NAME}
-
-            # Patch a timestamp and image digest label to trigger an image pull
-            kubectl patch deployment casesvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat casesvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}" --namespace=${KUBERNETES_NAMESPACE}
-
-            # Get deployment status
-            kubectl get deployments -l app=casesvc -o wide --namespace=${KUBERNETES_NAMESPACE}
-
-            # Allow time for deployment to start up
-            echo "Waiting for deployment to start"
-            sleep 60
-
-            # Get deployment status
-            kubectl get deployments -l app=casesvc -o wide --namespace=${KUBERNETES_NAMESPACE}
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: casesvc
+      KUBERNETES_SELECTOR: app=casesvc
+      SLEEP_TIME_FOR_STARTUP: 120
+    input_mapping: {docker-image-resource: casesvc-docker-latest}
 
 - name: collectionexercisesvc-deploy-latest
   serial: true
@@ -387,46 +250,18 @@ jobs:
     passed: [deploy-microservices]
     params:
       skip_download: true
+  - get: census-rm-deploy
   - task: patch-to-pull-latest-image
-    config:
-      platform: linux
-      image_resource:
-        type: docker-image
-        source:
-          repository: google/cloud-sdk
-          tag: slim
-      params:
-        SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
-        GCP_PROJECT_NAME: ((gcp-project-name))
-        KUBERNETES_NAMESPACE: ((kubernetes-namespace))
-        KUBERNETES_CLUSTER_NAME: ((kubernetes-cluster-name))
-      run:
-        path: sh
-        args:
-          - -exc
-          - |
-            apt install kubectl
-
-            cat >~/gcloud-service-key.json <<EOL
-            $SERVICE_ACCOUNT_JSON
-            EOL
-
-            # Use gcloud service account to configure kubectl
-            gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
-            gcloud container clusters get-credentials ${KUBERNETES_CLUSTER_NAME} --zone europe-west2 --project ${GCP_PROJECT_NAME}
-
-            # Patch a timestamp and image digest label to trigger an image pull
-            kubectl patch deployment collectionexercisesvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat collectionexercisesvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}" --namespace=${KUBERNETES_NAMESPACE}
-
-            # Get deployment status
-            kubectl get deployments -l app=collectionexercisesvc -o wide --namespace=${KUBERNETES_NAMESPACE}
-
-            # Allow time for deployment to start up
-            echo "Waiting for deployment to start"
-            sleep 60
-
-            # Get deployment status
-            kubectl get deployments -l app=collectionexercisesvc -o wide --namespace=${KUBERNETES_NAMESPACE}
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: collectionexercisesvc
+      KUBERNETES_SELECTOR: app=collectionexercisesvc
+      SLEEP_TIME_FOR_STARTUP: 120
+    input_mapping: {docker-image-resource: collectionexercisesvc-docker-latest}
 
 - name: collectioninstrumentsvc-deploy-latest
   serial: true
@@ -437,46 +272,18 @@ jobs:
     passed: [deploy-microservices]
     params:
       skip_download: true
+  - get: census-rm-deploy
   - task: patch-to-pull-latest-image
-    config:
-      platform: linux
-      image_resource:
-        type: docker-image
-        source:
-          repository: google/cloud-sdk
-          tag: slim
-      params:
-        SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
-        GCP_PROJECT_NAME: ((gcp-project-name))
-        KUBERNETES_NAMESPACE: ((kubernetes-namespace))
-        KUBERNETES_CLUSTER_NAME: ((kubernetes-cluster-name))
-      run:
-        path: sh
-        args:
-          - -exc
-          - |
-            apt install kubectl
-
-            cat >~/gcloud-service-key.json <<EOL
-            $SERVICE_ACCOUNT_JSON
-            EOL
-
-            # Use gcloud service account to configure kubectl
-            gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
-            gcloud container clusters get-credentials ${KUBERNETES_CLUSTER_NAME} --zone europe-west2 --project ${GCP_PROJECT_NAME}
-
-            # Patch a timestamp and image digest label to trigger an image pull
-            kubectl patch deployment collectioninstrumentsvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat collectioninstrumentsvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}" --namespace=${KUBERNETES_NAMESPACE}
-
-            # Get deployment status
-            kubectl get deployments -l app=collectioninstrumentsvc -o wide --namespace=${KUBERNETES_NAMESPACE}
-
-            # Allow time for deployment to start up
-            echo "Waiting for deployment to start"
-            sleep 60
-
-            # Get deployment status
-            kubectl get deployments -l app=collectioninstrumentsvc -o wide --namespace=${KUBERNETES_NAMESPACE}
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: collectioninstrumentsvc
+      KUBERNETES_SELECTOR: app=collectioninstrumentsvc
+      SLEEP_TIME_FOR_STARTUP: 30
+    input_mapping: {docker-image-resource: collectioninstrumentsvc-docker-latest}
 
 - name: commstemplatesvc-deploy-latest
   serial: true
@@ -487,46 +294,18 @@ jobs:
     passed: [deploy-microservices]
     params:
       skip_download: true
+  - get: census-rm-deploy
   - task: patch-to-pull-latest-image
-    config:
-      platform: linux
-      image_resource:
-        type: docker-image
-        source:
-          repository: google/cloud-sdk
-          tag: slim
-      params:
-        SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
-        GCP_PROJECT_NAME: ((gcp-project-name))
-        KUBERNETES_NAMESPACE: ((kubernetes-namespace))
-        KUBERNETES_CLUSTER_NAME: ((kubernetes-cluster-name))
-      run:
-        path: sh
-        args:
-          - -exc
-          - |
-            apt install kubectl
-
-            cat >~/gcloud-service-key.json <<EOL
-            $SERVICE_ACCOUNT_JSON
-            EOL
-
-            # Use gcloud service account to configure kubectl
-            gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
-            gcloud container clusters get-credentials ${KUBERNETES_CLUSTER_NAME} --zone europe-west2 --project ${GCP_PROJECT_NAME}
-
-            # Patch a timestamp and image digest label to trigger an image pull
-            kubectl patch deployment commstemplatesvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat commstemplatesvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}" --namespace=${KUBERNETES_NAMESPACE}
-
-            # Get deployment status
-            kubectl get deployments -l app=commstemplatesvc -o wide --namespace=${KUBERNETES_NAMESPACE}
-
-            # Allow time for deployment to start up
-            echo "Waiting for deployment to start"
-            sleep 60
-
-            # Get deployment status
-            kubectl get deployments -l app=commstemplatesvc -o wide --namespace=${KUBERNETES_NAMESPACE}
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: commstemplate
+      KUBERNETES_SELECTOR: app=commstemplate
+      SLEEP_TIME_FOR_STARTUP: 30
+    input_mapping: {docker-image-resource: commstemplate-docker-latest}
 
 - name: iacsvc-deploy-latest
   serial: true
@@ -537,46 +316,18 @@ jobs:
     passed: [deploy-microservices]
     params:
       skip_download: true
+  - get: census-rm-deploy
   - task: patch-to-pull-latest-image
-    config:
-      platform: linux
-      image_resource:
-        type: docker-image
-        source:
-          repository: google/cloud-sdk
-          tag: slim
-      params:
-        SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
-        GCP_PROJECT_NAME: ((gcp-project-name))
-        KUBERNETES_NAMESPACE: ((kubernetes-namespace))
-        KUBERNETES_CLUSTER_NAME: ((kubernetes-cluster-name))
-      run:
-        path: sh
-        args:
-          - -exc
-          - |
-            apt install kubectl
-
-            cat >~/gcloud-service-key.json <<EOL
-            $SERVICE_ACCOUNT_JSON
-            EOL
-
-            # Use gcloud service account to configure kubectl
-            gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
-            gcloud container clusters get-credentials ${KUBERNETES_CLUSTER_NAME} --zone europe-west2 --project ${GCP_PROJECT_NAME}
-
-            # Patch a timestamp and image digest label to trigger an image pull
-            kubectl patch deployment iacsvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat iacsvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}" --namespace=${KUBERNETES_NAMESPACE}
-
-            # Get deployment status
-            kubectl get deployments -l app=iacsvc -o wide --namespace=${KUBERNETES_NAMESPACE}
-
-            # Allow time for deployment to start up
-            echo "Waiting for deployment to start"
-            sleep 60
-
-            # Get deployment status
-            kubectl get deployments -l app=iacsvc -o wide --namespace=${KUBERNETES_NAMESPACE}
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: iacsvc
+      KUBERNETES_SELECTOR: app=iacsvc
+      SLEEP_TIME_FOR_STARTUP: 120
+    input_mapping: {docker-image-resource: iacsvc-docker-latest}
 
 - name: notifygatewaysvc-deploy-latest
   serial: true
@@ -587,96 +338,40 @@ jobs:
     passed: [deploy-handlers]
     params:
       skip_download: true
+  - get: census-rm-deploy
   - task: patch-to-pull-latest-image
-    config:
-      platform: linux
-      image_resource:
-        type: docker-image
-        source:
-          repository: google/cloud-sdk
-          tag: slim
-      params:
-        SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
-        GCP_PROJECT_NAME: ((gcp-project-name))
-        KUBERNETES_NAMESPACE: ((kubernetes-namespace))
-        KUBERNETES_CLUSTER_NAME: ((kubernetes-cluster-name))
-      run:
-        path: sh
-        args:
-          - -exc
-          - |
-            apt install kubectl
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: notifygatewaysvc
+      KUBERNETES_SELECTOR: app=notifygatewaysvc
+      SLEEP_TIME_FOR_STARTUP: 120
+    input_mapping: {docker-image-resource: notifygatewaysvc-docker-latest}
 
-            cat >~/gcloud-service-key.json <<EOL
-            $SERVICE_ACCOUNT_JSON
-            EOL
-
-            # Use gcloud service account to configure kubectl
-            gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
-            gcloud container clusters get-credentials ${KUBERNETES_CLUSTER_NAME} --zone europe-west2 --project ${GCP_PROJECT_NAME}
-
-            # Patch a timestamp and image digest label to trigger an image pull
-            kubectl patch deployment notifygatewaysvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat notifygatewaysvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}" --namespace=${KUBERNETES_NAMESPACE}
-
-            # Get deployment status
-            kubectl get deployments -l app=notifygatewaysvc -o wide --namespace=${KUBERNETES_NAMESPACE}
-
-            # Allow time for deployment to start up
-            echo "Waiting for deployment to start"
-            sleep 60
-
-            # Get deployment status
-            kubectl get deployments -l app=notifygatewaysvc -o wide --namespace=${KUBERNETES_NAMESPACE}
-
-- name: samplesvc-deploy-latest
+- name: samplesvc-stub-deploy-latest
   serial: true
   serial_groups: [samplesvc]
   plan:
-  - get: samplesvc-docker-latest
+  - get: samplesvc-stub-docker-latest
     trigger: true
     passed: [deploy-microservices]
     params:
       skip_download: true
+  - get: census-rm-deploy
   - task: patch-to-pull-latest-image
-    config:
-      platform: linux
-      image_resource:
-        type: docker-image
-        source:
-          repository: google/cloud-sdk
-          tag: slim
-      params:
-        SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
-        GCP_PROJECT_NAME: ((gcp-project-name))
-        KUBERNETES_NAMESPACE: ((kubernetes-namespace))
-        KUBERNETES_CLUSTER_NAME: ((kubernetes-cluster-name))
-      run:
-        path: sh
-        args:
-          - -exc
-          - |
-            apt install kubectl
-
-            cat >~/gcloud-service-key.json <<EOL
-            $SERVICE_ACCOUNT_JSON
-            EOL
-
-            # Use gcloud service account to configure kubectl
-            gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
-            gcloud container clusters get-credentials ${KUBERNETES_CLUSTER_NAME} --zone europe-west2 --project ${GCP_PROJECT_NAME}
-
-            # Patch a timestamp and image digest label to trigger an image pull
-            kubectl patch deployment samplesvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat samplesvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}" --namespace=${KUBERNETES_NAMESPACE}
-
-            # Get deployment status
-            kubectl get deployments -l app=samplesvc -o wide --namespace=${KUBERNETES_NAMESPACE}
-
-            # Allow time for deployment to start up
-            echo "Waiting for deployment to start"
-            sleep 60
-
-            # Get deployment status
-            kubectl get deployments -l app=samplesvc -o wide --namespace=${KUBERNETES_NAMESPACE}
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: samplesvc-stub
+      KUBERNETES_SELECTOR: app=samplesvc-stub
+      SLEEP_TIME_FOR_STARTUP: 30
+    input_mapping: {docker-image-resource: samplesvc-stub-docker-latest}
 
 - name: surveysvc-deploy-latest
   serial: true
@@ -687,46 +382,18 @@ jobs:
     passed: [deploy-microservices]
     params:
       skip_download: true
+  - get: census-rm-deploy
   - task: patch-to-pull-latest-image
-    config:
-      platform: linux
-      image_resource:
-        type: docker-image
-        source:
-          repository: google/cloud-sdk
-          tag: slim
-      params:
-        SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
-        GCP_PROJECT_NAME: ((gcp-project-name))
-        KUBERNETES_NAMESPACE: ((kubernetes-namespace))
-        KUBERNETES_CLUSTER_NAME: ((kubernetes-cluster-name))
-      run:
-        path: sh
-        args:
-          - -exc
-          - |
-            apt install kubectl
-
-            cat >~/gcloud-service-key.json <<EOL
-            $SERVICE_ACCOUNT_JSON
-            EOL
-
-            # Use gcloud service account to configure kubectl
-            gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
-            gcloud container clusters get-credentials ${KUBERNETES_CLUSTER_NAME} --zone europe-west2 --project ${GCP_PROJECT_NAME}
-
-            # Patch a timestamp and image digest label to trigger an image pull
-            kubectl patch deployment surveysvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat surveysvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}" --namespace=${KUBERNETES_NAMESPACE}
-
-            # Get deployment status
-            kubectl get deployments -l app=surveysvc -o wide --namespace=${KUBERNETES_NAMESPACE}
-
-            # Allow time for deployment to start up
-            echo "Waiting for deployment to start"
-            sleep 60
-
-            # Get deployment status
-            kubectl get deployments -l app=surveysvc -o wide --namespace=${KUBERNETES_NAMESPACE}
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: surveysvc
+      KUBERNETES_SELECTOR: app=surveysvc
+      SLEEP_TIME_FOR_STARTUP: 30
+    input_mapping: {docker-image-resource: surveysvc-docker-latest}
 
 - name: fwmtjobsvc-deploy-latest
   serial: true
@@ -737,46 +404,18 @@ jobs:
     passed: [deploy-handlers]
     params:
       skip_download: true
+  - get: census-rm-deploy
   - task: patch-to-pull-latest-image
-    config:
-      platform: linux
-      image_resource:
-        type: docker-image
-        source:
-          repository: google/cloud-sdk
-          tag: slim
-      params:
-        SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
-        GCP_PROJECT_NAME: ((gcp-project-name))
-        KUBERNETES_NAMESPACE: ((kubernetes-namespace))
-        KUBERNETES_CLUSTER_NAME: ((kubernetes-cluster-name))
-      run:
-        path: sh
-        args:
-          - -exc
-          - |
-            apt install kubectl
-
-            cat >~/gcloud-service-key.json <<EOL
-            $SERVICE_ACCOUNT_JSON
-            EOL
-
-            # Use gcloud service account to configure kubectl
-            gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
-            gcloud container clusters get-credentials ${KUBERNETES_CLUSTER_NAME} --zone europe-west2 --project ${GCP_PROJECT_NAME}
-
-            # Patch a timestamp and image digest label to trigger an image pull
-            kubectl patch deployment fwmtgatewayjobsvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat fwmtjobsvc-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}" --namespace=${KUBERNETES_NAMESPACE}
-
-            # Get deployment status
-            kubectl get deployments -l app=fwmtgatewayjobsvc -o wide --namespace=${KUBERNETES_NAMESPACE}
-
-            # Allow time for deployment to start up
-            echo "Waiting for deployment to start"
-            sleep 60
-
-            # Get deployment status
-            kubectl get deployments -l app=fwmtgatewayjobsvc -o wide --namespace=${KUBERNETES_NAMESPACE}
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: fwmtgatewayjobsvc
+      KUBERNETES_SELECTOR: app=fwmtgatewayjobsvc
+      SLEEP_TIME_FOR_STARTUP: 120
+    input_mapping: {docker-image-resource: fwmtjobsvc-docker-latest}
 
 - name: fwmtrmadapter-deploy-latest
   serial: true
@@ -787,47 +426,18 @@ jobs:
     passed: [deploy-handlers]
     params:
       skip_download: true
+  - get: census-rm-deploy
   - task: patch-to-pull-latest-image
-    config:
-      platform: linux
-      image_resource:
-        type: docker-image
-        source:
-          repository: google/cloud-sdk
-          tag: slim
-      params:
-        SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
-        GCP_PROJECT_NAME: ((gcp-project-name))
-        KUBERNETES_NAMESPACE: ((kubernetes-namespace))
-        KUBERNETES_CLUSTER_NAME: ((kubernetes-cluster-name))
-      run:
-        path: sh
-        args:
-          - -exc
-          - |
-            apt install kubectl
-
-            cat >~/gcloud-service-key.json <<EOL
-            $SERVICE_ACCOUNT_JSON
-            EOL
-
-            # Use gcloud service account to configure kubectl
-            gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
-            gcloud container clusters get-credentials ${KUBERNETES_CLUSTER_NAME} --zone europe-west2 --project ${GCP_PROJECT_NAME}
-
-            # Patch a timestamp and image digest label to trigger an image pull
-            kubectl patch deployment fwmtgatewayrmadapter -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat fwmtrmadapter-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}" --namespace=${KUBERNETES_NAMESPACE}
-
-            # Get deployment status
-            kubectl get deployments -l app=fwmtgatewayrmadapter -o wide --namespace=${KUBERNETES_NAMESPACE}
-
-            # Allow time for deployment to start up
-            echo "Waiting for deployment to start"
-            sleep 60
-
-            # Get deployment status
-            kubectl get deployments -l app=fwmtgatewayrmadapter -o wide --namespace=${KUBERNETES_NAMESPACE}
-
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: fwmtgatewayrmadapter
+      KUBERNETES_SELECTOR: app=fwmtgatewayrmadapter
+      SLEEP_TIME_FOR_STARTUP: 120
+    input_mapping: {docker-image-resource: fwmtrmadapter-docker-latest}
 
 - name: partysvc-stub-deploy-latest
   serial: true
@@ -838,43 +448,15 @@ jobs:
     passed: [deploy-microservices]
     params:
       skip_download: true
+  - get: census-rm-deploy
   - task: patch-to-pull-latest-image
-    config:
-      platform: linux
-      image_resource:
-        type: docker-image
-        source:
-          repository: google/cloud-sdk
-          tag: slim
-      params:
-        SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
-        GCP_PROJECT_NAME: ((gcp-project-name))
-        KUBERNETES_NAMESPACE: ((kubernetes-namespace))
-        KUBERNETES_CLUSTER_NAME: ((kubernetes-cluster-name))
-      run:
-        path: sh
-        args:
-          - -exc
-          - |
-            apt install kubectl
-
-            cat >~/gcloud-service-key.json <<EOL
-            $SERVICE_ACCOUNT_JSON
-            EOL
-
-            # Use gcloud service account to configure kubectl
-            gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
-            gcloud container clusters get-credentials ${KUBERNETES_CLUSTER_NAME} --zone europe-west2 --project ${GCP_PROJECT_NAME}
-
-            # Patch a timestamp and image digest label to trigger an image pull
-            kubectl patch deployment partysvc -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat partysvc-stub-docker-latest/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}" --namespace=${KUBERNETES_NAMESPACE}
-
-            # Get deployment status
-            kubectl get deployments -l app=partysvc-stub -o wide --namespace=${KUBERNETES_NAMESPACE}
-
-            # Allow time for deployment to start up
-            echo "Waiting for deployment to start"
-            sleep 60
-
-            # Get deployment status
-            kubectl get deployments -l app=partysvc-stub -o wide --namespace=${KUBERNETES_NAMESPACE}
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: partysvc
+      KUBERNETES_SELECTOR: app=partysvc-stub
+      SLEEP_TIME_FOR_STARTUP: 30
+    input_mapping: {docker-image-resource: partysvc-stub-docker-latest}

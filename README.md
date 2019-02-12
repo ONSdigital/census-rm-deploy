@@ -7,7 +7,7 @@ Specified in `pipelines/ci-kubernetes-pipeline.yml`, this pipeline has two funct
 
 The first pulls from the [`census-rm-kubernetes`](https://github.com/ONSdigital/census-rm-kubernetes) repo triggered by commits to master and applies the latest microservice and handler configs to the kubernetes cluster specified by the pipeline configuration.
 
-The second checks for new builds for the `latest` tag for the RM container registry images. On being triggered by a new build, it runs through the applying the config from master, then runs `kubectl patch` for the newly built images deployment giving them a timestamp and image digest label. This causes kubernetes to re-pull the latest image and bring up new pods while we are using `imagePullPolicy: Always`.
+The second checks for new builds for the `latest` tag for the RM container registry images. On being triggered by a new image build it runs `kubectl patch` for the newly built images deployment giving them a timestamp and image digest label. This causes kubernetes to re-pull the latest image and bring up new pods while we are using `imagePullPolicy: Always`.
 
 #### How to fly
 Create a secrets YAML file containing the required configuration:
