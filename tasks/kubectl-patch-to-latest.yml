@@ -37,11 +37,11 @@ run:
       kubectl patch deployment ${KUBERNETES_DEPLOYMENT_NAME} -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat docker-image-resource/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}" --namespace=${KUBERNETES_NAMESPACE}
 
       # Get deployment status
-      kubectl get deployments -l ${KUBERNETES_SELECTOR} -o wide --namespace=${KUBERNETES_NAMESPACE}
+      kubectl get deployments -l "${KUBERNETES_SELECTOR}" -o wide --namespace=${KUBERNETES_NAMESPACE}
 
       # Allow time for deployment to start up
       echo "Waiting for deployment to start"
       sleep ${SLEEP_TIME_FOR_STARTUP}
 
       # Get deployment status
-      kubectl get deployments -l ${KUBERNETES_SELECTOR} -o wide --namespace=${KUBERNETES_NAMESPACE}
+      kubectl get deployments "-l ${KUBERNETES_SELECTOR}" -o wide --namespace=${KUBERNETES_NAMESPACE}

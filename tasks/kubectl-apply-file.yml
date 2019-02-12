@@ -37,10 +37,10 @@ run:
       kubectl apply -f ${KUBERNETES_FILE_PATH} --namespace=${KUBERNETES_NAMESPACE}
 
       # Get deployment status
-      kubectl get deployments -o wide --namespace=${KUBERNETES_NAMESPACE} -l ${KUBERNETES_SELECTOR}
+      kubectl get deployments -o wide --namespace=${KUBERNETES_NAMESPACE} -l "${KUBERNETES_SELECTOR}"
 
       # Sleep to give time for services to start
       sleep ${SLEEP_TIME_FOR_STARTUP}
 
       # Get deployment status
-      kubectl get deployments -o wide --namespace=${KUBERNETES_NAMESPACE} -l ${KUBERNETES_SELECTOR}
+      kubectl get deployments -o wide --namespace=${KUBERNETES_NAMESPACE} -l "${KUBERNETES_SELECTOR}"
