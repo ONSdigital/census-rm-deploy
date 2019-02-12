@@ -1,11 +1,4 @@
 ---
-resource_types:
-- name: kubernetes
-  type: docker-image
-  source:
-    repository: zlabjp/kubernetes-resource
-    tag: "1.13"
-
 resources:
 - name: census-rm-deploy
   type: git
@@ -62,11 +55,6 @@ resources:
   type: docker-image
   source:
     repository: eu.gcr.io/census-ci/census-rm-iacsvc
-
-- name: notifygatewaysvc-docker-latest
-  type: docker-image
-  source:
-    repository: eu.gcr.io/census-ci/census-rm-notifygatewaysvc
 
 - name: samplesvc-stub-docker-latest
   type: docker-image
@@ -270,31 +258,6 @@ jobs:
       KUBERNETES_FILE_PREFIX: iac
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
-
-- name: notifygatewaysvc-apply-config
-  serial: true
-  serial_groups: [notifygatewaysvc]
-  plan:
-  - get: census-rm-kubernetes-handlers-repo
-    trigger: true
-  - get: notifygatewaysvc-docker-latest
-    trigger: true
-    params:
-      skip_download: true
-  - get: census-rm-deploy
-  - task: apply-service-and-deploy
-    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
-    params:
-      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
-      GCP_PROJECT_NAME: ((gcp-project-name))
-      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
-      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
-      KUBERNETES_DEPLOYMENT_NAME: notifygatewaysvc
-      KUBERNETES_SELECTOR: app=notifygatewaysvc
-      KUBERNETES_FILE_PATH: kubernetes-repo/handlers
-      KUBERNETES_FILE_PREFIX: notifygateway
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {kubernetes-repo: census-rm-kubernetes-handlers-repo}
 
 - name: samplesvc-stub-apply-config
   serial: true
@@ -549,10 +512,10 @@ jobs:
       GCP_PROJECT_NAME: ((gcp-project-name))
       KUBERNETES_NAMESPACE: ((kubernetes-namespace))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
-      KUBERNETES_DEPLOYMENT_NAME: commstemplate
-      KUBERNETES_SELECTOR: app=commstemplate
+      KUBERNETES_DEPLOYMENT_NAME: commstemplatesvc
+      KUBERNETES_SELECTOR: app=commstemplatesvc
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 60s
-    input_mapping: {docker-image-resource: commstemplate-docker-latest}
+    input_mapping: {docker-image-resource: commstemplatesvc-docker-latest}
 
 - name: iacsvc-deploy-latest
   serial: true
@@ -576,28 +539,6 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {docker-image-resource: iacsvc-docker-latest}
 
-- name: notifygatewaysvc-deploy-latest
-  serial: true
-  serial_groups: [notifygatewaysvc]
-  plan:
-  - get: notifygatewaysvc-docker-latest
-    trigger: true
-    passed: [notifygatewaysvc-apply-config]
-    params:
-      skip_download: true
-  - get: census-rm-deploy
-  - task: patch-to-pull-latest-image
-    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
-    params:
-      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
-      GCP_PROJECT_NAME: ((gcp-project-name))
-      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
-      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
-      KUBERNETES_DEPLOYMENT_NAME: notifygatewaysvc
-      KUBERNETES_SELECTOR: app=notifygatewaysvc
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {docker-image-resource: notifygatewaysvc-docker-latest}
-
 - name: samplesvc-stub-deploy-latest
   serial: true
   serial_groups: [samplesvc]
@@ -617,7 +558,7 @@ jobs:
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: samplesvc-stub
       KUBERNETES_SELECTOR: app=samplesvc-stub
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 30s
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {docker-image-resource: samplesvc-stub-docker-latest}
 
 - name: surveysvc-deploy-latest
@@ -639,7 +580,7 @@ jobs:
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: surveysvc
       KUBERNETES_SELECTOR: app=surveysvc
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 30s
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 60s
     input_mapping: {docker-image-resource: surveysvc-docker-latest}
 
 - name: fwmtjobsvc-deploy-latest
