@@ -194,7 +194,7 @@ jobs:
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: actionsvc
       KUBERNETES_SELECTOR: app=actionsvc
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {docker-image-resource: actionsvc-docker-latest}
 
 - name: actionexportersvc-deploy-latest
@@ -216,7 +216,7 @@ jobs:
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: actionexportersvc
       KUBERNETES_SELECTOR: app=actionexportersvc
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {docker-image-resource: actionexportersvc-docker-latest}
 
 - name: casesvc-deploy-latest
@@ -238,7 +238,7 @@ jobs:
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: casesvc
       KUBERNETES_SELECTOR: app=casesvc
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {docker-image-resource: casesvc-docker-latest}
 
 - name: collectionexercisesvc-deploy-latest
@@ -260,7 +260,7 @@ jobs:
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: collectionexercisesvc
       KUBERNETES_SELECTOR: app=collectionexercisesvc
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {docker-image-resource: collectionexercisesvc-docker-latest}
 
 - name: collectioninstrumentsvc-deploy-latest
@@ -282,7 +282,7 @@ jobs:
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: collectioninstrumentsvc
       KUBERNETES_SELECTOR: app=collectioninstrumentsvc
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 60
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 60s
     input_mapping: {docker-image-resource: collectioninstrumentsvc-docker-latest}
 
 - name: commstemplatesvc-deploy-latest
@@ -304,7 +304,7 @@ jobs:
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: commstemplate
       KUBERNETES_SELECTOR: app=commstemplate
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 60
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 60s
     input_mapping: {docker-image-resource: commstemplate-docker-latest}
 
 - name: iacsvc-deploy-latest
@@ -326,7 +326,7 @@ jobs:
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: iacsvc
       KUBERNETES_SELECTOR: app=iacsvc
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {docker-image-resource: iacsvc-docker-latest}
 
 - name: notifygatewaysvc-deploy-latest
@@ -348,7 +348,7 @@ jobs:
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: notifygatewaysvc
       KUBERNETES_SELECTOR: app=notifygatewaysvc
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {docker-image-resource: notifygatewaysvc-docker-latest}
 
 - name: samplesvc-stub-deploy-latest
@@ -370,7 +370,7 @@ jobs:
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: samplesvc-stub
       KUBERNETES_SELECTOR: app=samplesvc-stub
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 30
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 30s
     input_mapping: {docker-image-resource: samplesvc-stub-docker-latest}
 
 - name: surveysvc-deploy-latest
@@ -392,7 +392,7 @@ jobs:
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: surveysvc
       KUBERNETES_SELECTOR: app=surveysvc
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 30
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 30s
     input_mapping: {docker-image-resource: surveysvc-docker-latest}
 
 - name: fwmtjobsvc-deploy-latest
@@ -414,7 +414,7 @@ jobs:
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: fwmtgatewayjobsvc
       KUBERNETES_SELECTOR: app=fwmtgatewayjobsvc
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {docker-image-resource: fwmtjobsvc-docker-latest}
 
 - name: fwmtrmadapter-deploy-latest
@@ -436,7 +436,7 @@ jobs:
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: fwmtgatewayrmadapter
       KUBERNETES_SELECTOR: app=fwmtgatewayrmadapter
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {docker-image-resource: fwmtrmadapter-docker-latest}
 
 - name: partysvc-stub-deploy-latest
@@ -458,5 +458,5 @@ jobs:
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: partysvc
       KUBERNETES_SELECTOR: app=partysvc-stub
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 60
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 60s
     input_mapping: {docker-image-resource: partysvc-stub-docker-latest}
