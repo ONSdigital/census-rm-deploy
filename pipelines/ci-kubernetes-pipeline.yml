@@ -96,83 +96,330 @@ resources:
 jobs:
 
 # Kubernetes Config
-- name: deploy-microservices
+- name: actionsvc-apply-config
   serial: true
-  serial_groups: [actionsvc, casesvc, collectionexercisesvc, collectioninstrumentsvc, commstemplatesvc, iacsvc, samplesvc, surveysvc, partysvc-stub]
+  serial_groups: [actionsvc]
   plan:
-  - get: actionsvc-docker-latest
-    params:
-      skip_download: true
-  - get: casesvc-docker-latest
-    params:
-      skip_download: true
-  - get: collectionexercisesvc-docker-latest
-    params:
-      skip_download: true
-  - get: collectioninstrumentsvc-docker-latest
-    params:
-      skip_download: true
-  - get: commstemplatesvc-docker-latest
-    params:
-      skip_download: true
-  - get: iacsvc-docker-latest
-    params:
-      skip_download: true
-  - get: samplesvc-stub-docker-latest
-    params:
-      skip_download: true
-  - get: surveysvc-docker-latest
-    params:
-      skip_download: true
-  - get: partysvc-stub-docker-latest
-    params:
-      skip_download: true
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
+  - get: actionsvc-docker-latest
+    trigger: true
+    params:
+      skip_download: true
   - get: census-rm-deploy
-  - task: kubectl-apply-microservices
-    file: census-rm-deploy/tasks/kubectl-apply-file.yml
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
     params:
       SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
       GCP_PROJECT_NAME: ((gcp-project-name))
       KUBERNETES_NAMESPACE: ((kubernetes-namespace))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
-      KUBERNETES_FILE_PATH: kubernetes-file/microservices
-      KUBERNETES_SELECTOR: "app in (actionsvc, casesvc, collectionexercisesvc, collectioninstrumentsvc, commstemplatesvc, iacsvc, partysvc, samplesvc-stub, surveysvc)"
-      SLEEP_TIME_FOR_STARTUP: 180
+      KUBERNETES_DEPLOYMENT_NAME: actionsvc
+      KUBERNETES_SELECTOR: app=actionsvc
+      KUBERNETES_FILE_PATH: kubernetes-repo/microservices
+      KUBERNETES_FILE_PREFIX: action
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
-    input_mapping: {kubernetes-file: census-rm-kubernetes-microservices-repo}
-
-- name: deploy-handlers
+- name: actionexportersvc-apply-config
   serial: true
-  serial_groups: [actionexportersvc, fwmtjobsvc, fwmtadaptersvc, notifygatewaysvc]
+  serial_groups: [actionexportersvc]
   plan:
-  - get: actionexportersvc-docker-latest
-    params:
-      skip_download: true
-  - get: fwmtjobsvc-docker-latest
-    params:
-      skip_download: true
-  - get: fwmtrmadapter-docker-latest
-    params:
-      skip_download: true
-  - get: notifygatewaysvc-docker-latest
-    params:
-      skip_download: true
   - get: census-rm-kubernetes-handlers-repo
     trigger: true
+  - get: actionexportersvc-docker-latest
+    trigger: true
+    params:
+      skip_download: true
   - get: census-rm-deploy
-  - task: kubectl-apply-hanlders
-    file: census-rm-deploy/tasks/kubectl-apply-file.yml
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
     params:
       SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
       GCP_PROJECT_NAME: ((gcp-project-name))
       KUBERNETES_NAMESPACE: ((kubernetes-namespace))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
-      KUBERNETES_FILE_PATH: kubernetes-file/handlers
-      KUBERNETES_SELECTOR: "app in (actionexportersvc, notifygatewaysvc, fwmtgatewayjobsvc, fwmtgatewayrmadapter)"
-      SLEEP_TIME_FOR_STARTUP: 180
-    input_mapping: {kubernetes-file: census-rm-kubernetes-handlers-repo}
+      KUBERNETES_DEPLOYMENT_NAME: actionexportersvc
+      KUBERNETES_SELECTOR: app=actionexportersvc
+      KUBERNETES_FILE_PATH: kubernetes-repo/handlers
+      KUBERNETES_FILE_PREFIX: actionexporter
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-handlers-repo}
+
+- name: casesvc-apply-config
+  serial: true
+  serial_groups: [casesvc]
+  plan:
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+  - get: casesvc-docker-latest
+    trigger: true
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: casesvc
+      KUBERNETES_SELECTOR: app=casesvc
+      KUBERNETES_FILE_PATH: kubernetes-repo/microservices
+      KUBERNETES_FILE_PREFIX: case
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
+
+- name: collectionexercisesvc-apply-config
+  serial: true
+  serial_groups: [collectionexercisesvc]
+  plan:
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+  - get: collectionexercisesvc-docker-latest
+    trigger: true
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: collectionexercisesvc
+      KUBERNETES_SELECTOR: app=collectionexercisesvc
+      KUBERNETES_FILE_PATH: kubernetes-repo/microservices
+      KUBERNETES_FILE_PREFIX: collectionexercise
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
+
+- name: collectioninstrumentsvc-apply-config
+  serial: true
+  serial_groups: [collectioninstrumentsvc]
+  plan:
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+  - get: collectioninstrumentsvc-docker-latest
+    trigger: true
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: collectioninstrumentsvc
+      KUBERNETES_SELECTOR: app=collectioninstrumentsvc
+      KUBERNETES_FILE_PATH: kubernetes-repo/microservices
+      KUBERNETES_FILE_PREFIX: collectioninstrument
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
+
+- name: commstemplatesvc-apply-config
+  serial: true
+  serial_groups: [commstemplatesvc]
+  plan:
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+  - get: commstemplatesvc-docker-latest
+    trigger: true
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: commstemplatesvc
+      KUBERNETES_SELECTOR: app=commstemplatesvc
+      KUBERNETES_FILE_PATH: kubernetes-repo/microservices
+      KUBERNETES_FILE_PREFIX: commstemplate
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
+
+- name: iacsvc-apply-config
+  serial: true
+  serial_groups: [iacsvc]
+  plan:
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+  - get: iacsvc-docker-latest
+    trigger: true
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: iacsvc
+      KUBERNETES_SELECTOR: app=iacsvc
+      KUBERNETES_FILE_PATH: kubernetes-repo/microservices
+      KUBERNETES_FILE_PREFIX: iac
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
+
+- name: notifygatewaysvc-apply-config
+  serial: true
+  serial_groups: [notifygatewaysvc]
+  plan:
+  - get: census-rm-kubernetes-handlers-repo
+    trigger: true
+  - get: notifygatewaysvc-docker-latest
+    trigger: true
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: notifygatewaysvc
+      KUBERNETES_SELECTOR: app=notifygatewaysvc
+      KUBERNETES_FILE_PATH: kubernetes-repo/handlers
+      KUBERNETES_FILE_PREFIX: notifygateway
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-handlers-repo}
+
+- name: samplesvc-stub-apply-config
+  serial: true
+  serial_groups: [samplesvc]
+  plan:
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+  - get: samplesvc-stub-docker-latest
+    trigger: true
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: samplesvc-stub
+      KUBERNETES_SELECTOR: app=samplesvc-stub
+      KUBERNETES_FILE_PATH: kubernetes-repo/microservices
+      KUBERNETES_FILE_PREFIX: sample-stub
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
+
+- name: surveysvc-apply-config
+  serial: true
+  serial_groups: [surveysvc]
+  plan:
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+  - get: surveysvc-docker-latest
+    trigger: true
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: surveysvc
+      KUBERNETES_SELECTOR: app=surveysvc
+      KUBERNETES_FILE_PATH: kubernetes-repo/microservices
+      KUBERNETES_FILE_PREFIX: survey
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
+
+- name: fwmtjobsvc-apply-config
+  serial: true
+  serial_groups: [fwmtjobsvc]
+  plan:
+  - get: census-rm-kubernetes-handlers-repo
+    trigger: true
+  - get: fwmtjobsvc-docker-latest
+    trigger: true
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: fwmtgatewayjobsvc
+      KUBERNETES_SELECTOR: app=fwmtgatewayjobsvc
+      KUBERNETES_FILE_PATH: kubernetes-repo/handlers
+      KUBERNETES_FILE_PREFIX: fwmtgateway-job
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-handlers-repo}
+
+- name: fwmtadaptersvc-apply-config
+  serial: true
+  serial_groups: [fwmtadaptersvc]
+  plan:
+  - get: census-rm-kubernetes-handlers-repo
+    trigger: true
+  - get: fwmtrmadapter-docker-latest
+    trigger: true
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: fwmtgatewayrmadapter
+      KUBERNETES_SELECTOR: app=fwmtgatewayrmadapter
+      KUBERNETES_FILE_PATH: kubernetes-repo/handlers
+      KUBERNETES_FILE_PREFIX: fwmtgateway-rmadapter
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-handlers-repo}
+
+- name: partysvc-stub-apply-config
+  serial: true
+  serial_groups: [partysvc-stub]
+  plan:
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+  - get: partysvc-stub-docker-latest
+    trigger: true
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: partysvc
+      KUBERNETES_SELECTOR: app=partysvc
+      KUBERNETES_FILE_PATH: kubernetes-repo/microservices
+      KUBERNETES_FILE_PREFIX: party
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
 # Patch to trigger Kubernetes image pull on new latest tag builds
 - name: actionsvc-deploy-latest
@@ -181,7 +428,7 @@ jobs:
   plan:
   - get: actionsvc-docker-latest
     trigger: true
-    passed: [deploy-microservices]
+    passed: [actionsvc-apply-config]
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -203,7 +450,7 @@ jobs:
   plan:
   - get: actionexportersvc-docker-latest
     trigger: true
-    passed: [deploy-handlers]
+    passed: [actionexportersvc-apply-config]
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -225,7 +472,7 @@ jobs:
   plan:
   - get: casesvc-docker-latest
     trigger: true
-    passed: [deploy-microservices]
+    passed: [casesvc-apply-config]
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -247,7 +494,7 @@ jobs:
   plan:
   - get: collectionexercisesvc-docker-latest
     trigger: true
-    passed: [deploy-microservices]
+    passed: [collectionexercisesvc-apply-config]
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -269,7 +516,7 @@ jobs:
   plan:
   - get: collectioninstrumentsvc-docker-latest
     trigger: true
-    passed: [deploy-microservices]
+    passed: [collectioninstrumentsvc-apply-config]
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -291,7 +538,7 @@ jobs:
   plan:
   - get: commstemplatesvc-docker-latest
     trigger: true
-    passed: [deploy-microservices]
+    passed: [commstemplatesvc-apply-config]
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -313,7 +560,7 @@ jobs:
   plan:
   - get: iacsvc-docker-latest
     trigger: true
-    passed: [deploy-microservices]
+    passed: [iacsvc-apply-config]
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -335,7 +582,7 @@ jobs:
   plan:
   - get: notifygatewaysvc-docker-latest
     trigger: true
-    passed: [deploy-handlers]
+    passed: [notifygatewaysvc-apply-config]
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -357,7 +604,7 @@ jobs:
   plan:
   - get: samplesvc-stub-docker-latest
     trigger: true
-    passed: [deploy-microservices]
+    passed: [samplesvc-stub-apply-config]
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -379,7 +626,7 @@ jobs:
   plan:
   - get: surveysvc-docker-latest
     trigger: true
-    passed: [deploy-microservices]
+    passed: [surveysvc-apply-config]
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -401,7 +648,7 @@ jobs:
   plan:
   - get: fwmtjobsvc-docker-latest
     trigger: true
-    passed: [deploy-handlers]
+    passed: [fwmtjobsvc-apply-config]
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -423,7 +670,7 @@ jobs:
   plan:
   - get: fwmtrmadapter-docker-latest
     trigger: true
-    passed: [deploy-handlers]
+    passed: [fwmtadaptersvc-apply-config]
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -445,7 +692,7 @@ jobs:
   plan:
   - get: partysvc-stub-docker-latest
     trigger: true
-    passed: [deploy-microservices]
+    passed: [partysvc-stub-apply-config]
     params:
       skip_download: true
   - get: census-rm-deploy
