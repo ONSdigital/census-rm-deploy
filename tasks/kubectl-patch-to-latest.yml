@@ -1,0 +1,43 @@
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: google/cloud-sdk
+    tag: slim
+
+params:
+  SERVICE_ACCOUNT_JSON:
+  KUBERNETES_NAMESPACE:
+  KUBERNETES_CLUSTER:
+  GCP_PROJECT_NAME:
+  KUBERNETES_DEPLOYMENT_NAME:
+  KUBERNETES_SELECTOR:
+  WAIT_UNTIL_AVAILABLE_TIMEOUT:
+
+inputs:
+  - name: docker-image-resource
+
+run:
+  path: sh
+  args:
+    - -exc
+    - |
+      apt install kubectl
+
+      cat >~/gcloud-service-key.json <<EOL
+      $SERVICE_ACCOUNT_JSON
+      EOL
+
+      # Use gcloud service account to configure kubectl
+      gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
+      gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
+
+      # Patch a timestamp and image digest label to trigger an image pull
+      kubectl patch deployment ${KUBERNETES_DEPLOYMENT_NAME} -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat docker-image-resource/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}" --namespace=${KUBERNETES_NAMESPACE}
+
+      # Wait for rollout to finish
+      kubectl rollout status deploy ${KUBERNETES_DEPLOYMENT_NAME} --watch=true --timeout=${WAIT_UNTIL_AVAILABLE_TIMEOUT} --namespace=${KUBERNETES_NAMESPACE}
+
+      # Get deployment status
+      kubectl get deployments "-l ${KUBERNETES_SELECTOR}" -o wide --namespace=${KUBERNETES_NAMESPACE}

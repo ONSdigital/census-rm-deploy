@@ -1,0 +1,650 @@
+---
+resources:
+- name: census-rm-deploy
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-deploy.git
+    private_key: ((github-private-key))
+    branch: initial-ci-pipelines
+
+- name: census-rm-kubernetes-microservices-repo
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-kubernetes.git
+    private_key: ((github-private-key))
+    paths: [microservices/*]
+
+- name: census-rm-kubernetes-handlers-repo
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-kubernetes.git
+    private_key: ((github-private-key))
+    paths: [handlers/*]
+
+- name: actionsvc-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-ci/census-rm-actionsvc
+
+- name: actionexportersvc-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-ci/census-rm-actionexportersvc
+
+- name: casesvc-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-ci/census-rm-casesvc
+
+- name: collectionexercisesvc-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-ci/census-rm-collectionexercisesvc
+
+- name: collectioninstrumentsvc-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-ci/census-rm-collectioninstrumentsvc
+
+- name: commstemplatesvc-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-ci/census-rm-commstemplatesvc
+
+- name: iacsvc-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-ci/census-rm-iacsvc
+
+- name: samplesvc-stub-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-ci/census-rm-samplesvc-stub
+
+- name: surveysvc-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-ci/census-rm-surveysvc
+
+- name: fwmtjobsvc-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-ci/census-rm-fwmtjobsvc
+
+- name: fwmtrmadapter-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-ci/census-rm-fwmtrmadapter
+
+- name: partysvc-stub-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-ci/census-rm-partysvcstub
+
+jobs:
+
+# Kubernetes Config
+- name: actionsvc-apply-config
+  serial: true
+  serial_groups: [actionsvc]
+  plan:
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+  - get: actionsvc-docker-latest
+    trigger: true
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: actionsvc
+      KUBERNETES_SELECTOR: app=actionsvc
+      KUBERNETES_FILE_PATH: kubernetes-repo/microservices
+      KUBERNETES_FILE_PREFIX: action
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
+
+- name: actionexportersvc-apply-config
+  serial: true
+  serial_groups: [actionexportersvc]
+  plan:
+  - get: census-rm-kubernetes-handlers-repo
+    trigger: true
+  - get: actionexportersvc-docker-latest
+    trigger: true
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: actionexportersvc
+      KUBERNETES_SELECTOR: app=actionexportersvc
+      KUBERNETES_FILE_PATH: kubernetes-repo/handlers
+      KUBERNETES_FILE_PREFIX: actionexporter
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-handlers-repo}
+
+- name: casesvc-apply-config
+  serial: true
+  serial_groups: [casesvc]
+  plan:
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+  - get: casesvc-docker-latest
+    trigger: true
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: casesvc
+      KUBERNETES_SELECTOR: app=casesvc
+      KUBERNETES_FILE_PATH: kubernetes-repo/microservices
+      KUBERNETES_FILE_PREFIX: case
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
+
+- name: collectionexercisesvc-apply-config
+  serial: true
+  serial_groups: [collectionexercisesvc]
+  plan:
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+  - get: collectionexercisesvc-docker-latest
+    trigger: true
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: collectionexercisesvc
+      KUBERNETES_SELECTOR: app=collectionexercisesvc
+      KUBERNETES_FILE_PATH: kubernetes-repo/microservices
+      KUBERNETES_FILE_PREFIX: collectionexercise
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
+
+- name: collectioninstrumentsvc-apply-config
+  serial: true
+  serial_groups: [collectioninstrumentsvc]
+  plan:
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+  - get: collectioninstrumentsvc-docker-latest
+    trigger: true
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: collectioninstrumentsvc
+      KUBERNETES_SELECTOR: app=collectioninstrumentsvc
+      KUBERNETES_FILE_PATH: kubernetes-repo/microservices
+      KUBERNETES_FILE_PREFIX: collectioninstrument
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
+
+- name: commstemplatesvc-apply-config
+  serial: true
+  serial_groups: [commstemplatesvc]
+  plan:
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+  - get: commstemplatesvc-docker-latest
+    trigger: true
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: commstemplatesvc
+      KUBERNETES_SELECTOR: app=commstemplatesvc
+      KUBERNETES_FILE_PATH: kubernetes-repo/microservices
+      KUBERNETES_FILE_PREFIX: commstemplate
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
+
+- name: iacsvc-apply-config
+  serial: true
+  serial_groups: [iacsvc]
+  plan:
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+  - get: iacsvc-docker-latest
+    trigger: true
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: iacsvc
+      KUBERNETES_SELECTOR: app=iacsvc
+      KUBERNETES_FILE_PATH: kubernetes-repo/microservices
+      KUBERNETES_FILE_PREFIX: iac
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
+
+- name: samplesvc-stub-apply-config
+  serial: true
+  serial_groups: [samplesvc]
+  plan:
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+  - get: samplesvc-stub-docker-latest
+    trigger: true
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: samplesvc-stub
+      KUBERNETES_SELECTOR: app=samplesvc-stub
+      KUBERNETES_FILE_PATH: kubernetes-repo/microservices
+      KUBERNETES_FILE_PREFIX: sample-stub
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
+
+- name: surveysvc-apply-config
+  serial: true
+  serial_groups: [surveysvc]
+  plan:
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+  - get: surveysvc-docker-latest
+    trigger: true
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: surveysvc
+      KUBERNETES_SELECTOR: app=surveysvc
+      KUBERNETES_FILE_PATH: kubernetes-repo/microservices
+      KUBERNETES_FILE_PREFIX: survey
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
+
+- name: fwmtjobsvc-apply-config
+  serial: true
+  serial_groups: [fwmtjobsvc]
+  plan:
+  - get: census-rm-kubernetes-handlers-repo
+    trigger: true
+  - get: fwmtjobsvc-docker-latest
+    trigger: true
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: fwmtgatewayjobsvc
+      KUBERNETES_SELECTOR: app=fwmtgatewayjobsvc
+      KUBERNETES_FILE_PATH: kubernetes-repo/handlers
+      KUBERNETES_FILE_PREFIX: fwmtgateway-job
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-handlers-repo}
+
+- name: fwmtadaptersvc-apply-config
+  serial: true
+  serial_groups: [fwmtadaptersvc]
+  plan:
+  - get: census-rm-kubernetes-handlers-repo
+    trigger: true
+  - get: fwmtrmadapter-docker-latest
+    trigger: true
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: fwmtgatewayrmadapter
+      KUBERNETES_SELECTOR: app=fwmtgatewayrmadapter
+      KUBERNETES_FILE_PATH: kubernetes-repo/handlers
+      KUBERNETES_FILE_PREFIX: fwmtgateway-rmadapter
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-handlers-repo}
+
+- name: partysvc-stub-apply-config
+  serial: true
+  serial_groups: [partysvc-stub]
+  plan:
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+  - get: partysvc-stub-docker-latest
+    trigger: true
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: partysvc
+      KUBERNETES_SELECTOR: app=partysvc
+      KUBERNETES_FILE_PATH: kubernetes-repo/microservices
+      KUBERNETES_FILE_PREFIX: party
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
+
+# Patch to trigger Kubernetes image pull on new latest tag builds
+- name: actionsvc-deploy-latest
+  serial: true
+  serial_groups: [actionsvc]
+  plan:
+  - get: actionsvc-docker-latest
+    trigger: true
+    passed: [actionsvc-apply-config]
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: patch-to-pull-latest-image
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: actionsvc
+      KUBERNETES_SELECTOR: app=actionsvc
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {docker-image-resource: actionsvc-docker-latest}
+
+- name: actionexportersvc-deploy-latest
+  serial: true
+  serial_groups: [actionexportersvc]
+  plan:
+  - get: actionexportersvc-docker-latest
+    trigger: true
+    passed: [actionexportersvc-apply-config]
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: patch-to-pull-latest-image
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: actionexportersvc
+      KUBERNETES_SELECTOR: app=actionexportersvc
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {docker-image-resource: actionexportersvc-docker-latest}
+
+- name: casesvc-deploy-latest
+  serial: true
+  serial_groups: [casesvc]
+  plan:
+  - get: casesvc-docker-latest
+    trigger: true
+    passed: [casesvc-apply-config]
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: patch-to-pull-latest-image
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: casesvc
+      KUBERNETES_SELECTOR: app=casesvc
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {docker-image-resource: casesvc-docker-latest}
+
+- name: collectionexercisesvc-deploy-latest
+  serial: true
+  serial_groups: [collectionexercisesvc]
+  plan:
+  - get: collectionexercisesvc-docker-latest
+    trigger: true
+    passed: [collectionexercisesvc-apply-config]
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: patch-to-pull-latest-image
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: collectionexercisesvc
+      KUBERNETES_SELECTOR: app=collectionexercisesvc
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {docker-image-resource: collectionexercisesvc-docker-latest}
+
+- name: collectioninstrumentsvc-deploy-latest
+  serial: true
+  serial_groups: [collectioninstrumentsvc]
+  plan:
+  - get: collectioninstrumentsvc-docker-latest
+    trigger: true
+    passed: [collectioninstrumentsvc-apply-config]
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: patch-to-pull-latest-image
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: collectioninstrumentsvc
+      KUBERNETES_SELECTOR: app=collectioninstrumentsvc
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 60s
+    input_mapping: {docker-image-resource: collectioninstrumentsvc-docker-latest}
+
+- name: commstemplatesvc-deploy-latest
+  serial: true
+  serial_groups: [commstemplatesvc]
+  plan:
+  - get: commstemplatesvc-docker-latest
+    trigger: true
+    passed: [commstemplatesvc-apply-config]
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: patch-to-pull-latest-image
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: commstemplatesvc
+      KUBERNETES_SELECTOR: app=commstemplatesvc
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 60s
+    input_mapping: {docker-image-resource: commstemplatesvc-docker-latest}
+
+- name: iacsvc-deploy-latest
+  serial: true
+  serial_groups: [iacsvc]
+  plan:
+  - get: iacsvc-docker-latest
+    trigger: true
+    passed: [iacsvc-apply-config]
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: patch-to-pull-latest-image
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: iacsvc
+      KUBERNETES_SELECTOR: app=iacsvc
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {docker-image-resource: iacsvc-docker-latest}
+
+- name: samplesvc-stub-deploy-latest
+  serial: true
+  serial_groups: [samplesvc]
+  plan:
+  - get: samplesvc-stub-docker-latest
+    trigger: true
+    passed: [samplesvc-stub-apply-config]
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: patch-to-pull-latest-image
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: samplesvc-stub
+      KUBERNETES_SELECTOR: app=samplesvc-stub
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {docker-image-resource: samplesvc-stub-docker-latest}
+
+- name: surveysvc-deploy-latest
+  serial: true
+  serial_groups: [surveysvc]
+  plan:
+  - get: surveysvc-docker-latest
+    trigger: true
+    passed: [surveysvc-apply-config]
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: patch-to-pull-latest-image
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: surveysvc
+      KUBERNETES_SELECTOR: app=surveysvc
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 60s
+    input_mapping: {docker-image-resource: surveysvc-docker-latest}
+
+- name: fwmtjobsvc-deploy-latest
+  serial: true
+  serial_groups: [fwmtjobsvc]
+  plan:
+  - get: fwmtjobsvc-docker-latest
+    trigger: true
+    passed: [fwmtjobsvc-apply-config]
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: patch-to-pull-latest-image
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: fwmtgatewayjobsvc
+      KUBERNETES_SELECTOR: app=fwmtgatewayjobsvc
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {docker-image-resource: fwmtjobsvc-docker-latest}
+
+- name: fwmtrmadapter-deploy-latest
+  serial: true
+  serial_groups: [fwmtadaptersvc]
+  plan:
+  - get: fwmtrmadapter-docker-latest
+    trigger: true
+    passed: [fwmtadaptersvc-apply-config]
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: patch-to-pull-latest-image
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: fwmtgatewayrmadapter
+      KUBERNETES_SELECTOR: app=fwmtgatewayrmadapter
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {docker-image-resource: fwmtrmadapter-docker-latest}
+
+- name: partysvc-stub-deploy-latest
+  serial: true
+  serial_groups: [partysvc-stub]
+  plan:
+  - get: partysvc-stub-docker-latest
+    trigger: true
+    passed: [partysvc-stub-apply-config]
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: patch-to-pull-latest-image
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: partysvc
+      KUBERNETES_SELECTOR: app=partysvc-stub
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 60s
+    input_mapping: {docker-image-resource: partysvc-stub-docker-latest}

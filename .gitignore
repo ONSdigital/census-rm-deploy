@@ -102,3 +102,12 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# Secrets
+*secrets.yml
+
+# IDE files
+.idea/
+
+# MacOS files
+.DS_Store
