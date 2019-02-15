@@ -34,7 +34,7 @@ run:
       gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
 
       # Patch a timestamp and image digest label to trigger an image pull
-      kubectl patch deployment ${KUBERNETES_DEPLOYMENT_NAME} -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat docker-image-resource/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}" --namespace=${KUBERNETES_NAMESPACE}
+      kubectl patch deployment ${KUBERNETES_DEPLOYMENT_NAME} -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat docker-image-resource/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}" --namespace=${KUBERNETES_NAMESPACE} --record
 
       # Wait for rollout to finish
       kubectl rollout status deploy ${KUBERNETES_DEPLOYMENT_NAME} --watch=true --timeout=${WAIT_UNTIL_AVAILABLE_TIMEOUT} --namespace=${KUBERNETES_NAMESPACE}

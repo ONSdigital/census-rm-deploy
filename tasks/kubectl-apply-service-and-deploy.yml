@@ -35,10 +35,10 @@ run:
       gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
 
       # Apply service config
-      kubectl apply -f ${KUBERNETES_FILE_PATH}/${KUBERNETES_FILE_PREFIX}-service.yml --namespace=${KUBERNETES_NAMESPACE}
+      kubectl apply -f ${KUBERNETES_FILE_PATH}/${KUBERNETES_FILE_PREFIX}-service.yml --namespace=${KUBERNETES_NAMESPACE} --record
 
       # Apply deployment config
-      kubectl apply -f ${KUBERNETES_FILE_PATH}/${KUBERNETES_FILE_PREFIX}-deployment.yml --namespace=${KUBERNETES_NAMESPACE}
+      kubectl apply -f ${KUBERNETES_FILE_PATH}/${KUBERNETES_FILE_PREFIX}-deployment.yml --namespace=${KUBERNETES_NAMESPACE} --record
 
       # Wait for rollout to finish
       kubectl rollout status deploy ${KUBERNETES_DEPLOYMENT_NAME} --watch=true --timeout=${WAIT_UNTIL_AVAILABLE_TIMEOUT} --namespace=${KUBERNETES_NAMESPACE}
