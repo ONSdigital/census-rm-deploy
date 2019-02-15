@@ -309,7 +309,7 @@ jobs:
     params:
       skip_download: true
   - get: census-rm-deploy
-  - task: apply-service-and-deploy
+  - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
     params:
       SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
