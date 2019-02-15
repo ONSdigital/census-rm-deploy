@@ -23,27 +23,27 @@ resources:
 - name: actionsvc-docker-latest
   type: docker-image
   source:
-    repository: eu.gcr.io/census-ci/census-rm-actionsvc
+    repository: eu.gcr.io/census-ci/rm/census-rm-actionsvc
 
 - name: actionexportersvc-docker-latest
   type: docker-image
   source:
-    repository: eu.gcr.io/census-ci/census-rm-actionexportersvc
+    repository: eu.gcr.io/census-ci/rm/census-rm-actionexportersvc
 
 - name: casesvc-docker-latest
   type: docker-image
   source:
-    repository: eu.gcr.io/census-ci/census-rm-casesvc
+    repository: eu.gcr.io/census-ci/rm/census-rm-casesvc
 
 - name: collectionexercisesvc-docker-latest
   type: docker-image
   source:
-    repository: eu.gcr.io/census-ci/census-rm-collectionexercisesvc
+    repository: eu.gcr.io/census-ci/rm/census-rm-collectionexercisesvc
 
 - name: collectioninstrumentsvc-docker-latest
   type: docker-image
   source:
-    repository: eu.gcr.io/census-ci/census-rm-collectioninstrumentsvc
+    repository: eu.gcr.io/census-ci/rm/census-rm-collectioninstrumentsvc
 
 - name: iacsvc-docker-latest
   type: docker-image
@@ -53,17 +53,17 @@ resources:
 - name: samplesvc-stub-docker-latest
   type: docker-image
   source:
-    repository: eu.gcr.io/census-ci/census-rm-samplesvc-stub
+    repository: eu.gcr.io/census-ci/rm/census-rm-samplesvc-stub
 
 - name: surveysvc-docker-latest
   type: docker-image
   source:
-    repository: eu.gcr.io/census-ci/census-rm-surveysvc
+    repository: eu.gcr.io/census-ci/rm/census-rm-surveysvc
 
 - name: partysvc-stub-docker-latest
   type: docker-image
   source:
-    repository: eu.gcr.io/census-ci/census-rm-partysvcstub
+    repository: eu.gcr.io/census-ci/rm/census-rm-partysvc-stub
 
 jobs:
 
