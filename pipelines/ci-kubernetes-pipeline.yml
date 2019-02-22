@@ -24,51 +24,71 @@ resources:
   type: docker-image
   source:
     repository: eu.gcr.io/census-ci/rm/census-rm-actionsvc
+    username: _json_key
+    password: ((gcp-service-account-json))
 
 - name: actionexportersvc-docker-latest
   type: docker-image
   source:
     repository: eu.gcr.io/census-ci/rm/census-rm-actionexportersvc
+    username: _json_key
+    password: ((gcp-service-account-json))
 
 - name: casesvc-docker-latest
   type: docker-image
   source:
     repository: eu.gcr.io/census-ci/rm/census-rm-casesvc
+    username: _json_key
+    password: ((gcp-service-account-json))
 
 - name: collectionexercisesvc-docker-latest
   type: docker-image
   source:
     repository: eu.gcr.io/census-ci/rm/census-rm-collectionexercisesvc
+    username: _json_key
+    password: ((gcp-service-account-json))
 
 - name: collectioninstrumentsvc-docker-latest
   type: docker-image
   source:
     repository: eu.gcr.io/census-ci/rm/census-rm-collectioninstrumentsvc
+    username: _json_key
+    password: ((gcp-service-account-json))
 
 - name: iacsvc-docker-latest
   type: docker-image
   source:
     repository: eu.gcr.io/census-ci/census-rm-iacsvc
+    username: _json_key
+    password: ((gcp-service-account-json))
 
 - name: samplesvc-stub-docker-latest
   type: docker-image
   source:
     repository: eu.gcr.io/census-ci/rm/census-rm-samplesvc-stub
+    username: _json_key
+    password: ((gcp-service-account-json))
 
 - name: surveysvc-docker-latest
   type: docker-image
   source:
     repository: eu.gcr.io/census-ci/rm/census-rm-surveysvc
+    username: _json_key
+    password: ((gcp-service-account-json))
 
 - name: partysvc-stub-docker-latest
   type: docker-image
   source:
     repository: eu.gcr.io/census-ci/rm/census-rm-partysvc-stub
+    username: _json_key
+    password: ((gcp-service-account-json))
 
 - name: pubsubsvc-docker-latest
   type: docker-image
   source:
     repository: eu.gcr.io/census-ci/rm/census-rm-pubsub
+    username: _json_key
+    password: ((gcp-service-account-json))
 
 jobs:
 
