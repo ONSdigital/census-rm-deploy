@@ -681,7 +681,7 @@ jobs:
             # Create an acceptance tests pod and run the acceptance tests in it
             # Env vars have to passed one by one as a --env flag each
             # The sleep is to give kubectl time to attach properly, otherwise the first few log lines are lost
-            kubectl run acceptance-tests -it --command --rm \
+            kubectl run acceptance-tests -it --command --rm --quiet \
             --namespace=${KUBERNETES_NAMESPACE} \
             --generator=run-pod/v1 \
             --image=eu.gcr.io/census-rm-adamhawtin/census-rm-acceptance-tests \
