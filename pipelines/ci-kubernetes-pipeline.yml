@@ -20,6 +20,21 @@ resources:
     private_key: ((github-private-key))
     paths: [handlers/*]
 
+- name: acceptance-tests-repo
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-acceptance-tests.git
+    private_key: ((github-private-key))
+    paths: [kubernetes.env]
+    branch: run-acceptance-tests-in-ci
+
+- name: acceptance-tests-docker-image
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-ci/rm/census-rm-acceptance-tests
+    username: _json_key
+    password: ((gcp-service-account-json))
+
 - name: actionsvc-docker-latest
   type: docker-image
   source:
@@ -563,3 +578,113 @@ jobs:
       KUBERNETES_SELECTOR: app=pubsubsvc
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {docker-image-resource: pubsubsvc-docker-latest}
+
+- name: "Acceptance Tests"
+  serial: true
+  serial_groups: [actionsvc, actionexportersvc, casesvc, collectionexercisesvc, collectioninstrumentsvc, iacsvc, samplesvc, surveysvc, partysvc-stub, pubsubsvc]
+  plan:
+  - get: acceptance-tests-repo
+  - get: acceptance-tests-docker-image
+    trigger: true
+    params:
+      skip_download: true
+  - get: census-rm-kubernetes-handlers-repo
+    trigger: true
+    passed: [actionexportersvc-apply-config]
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+    passed: [actionsvc-apply-config, collectionexercisesvc-apply-config, collectioninstrumentsvc-apply-config, iacsvc-apply-config, samplesvc-stub-apply-config, surveysvc-apply-config, partysvc-stub-apply-config, pubsubsvc-apply-config]
+  - get: actionsvc-docker-latest
+    trigger: true
+    passed: [actionsvc-deploy-latest]
+    params:
+      skip_download: true
+  - get: actionexportersvc-docker-latest
+    trigger: true
+    passed: [actionexportersvc-deploy-latest]
+    params:
+      skip_download: true
+  - get: casesvc-docker-latest
+    trigger: true
+    passed: [casesvc-deploy-latest]
+    params:
+      skip_download: true
+  - get: collectionexercisesvc-docker-latest
+    trigger: true
+    passed: [collectionexercisesvc-deploy-latest]
+    params:
+      skip_download: true
+  - get: collectioninstrumentsvc-docker-latest
+    trigger: true
+    passed: [collectioninstrumentsvc-deploy-latest]
+    params:
+      skip_download: true
+  - get: iacsvc-docker-latest
+    trigger: true
+    passed: [iacsvc-deploy-latest]
+    params:
+      skip_download: true
+  - get: samplesvc-stub-docker-latest
+    trigger: true
+    passed: [samplesvc-stub-deploy-latest]
+    params:
+      skip_download: true
+  - get: surveysvc-docker-latest
+    trigger: true
+    passed: [surveysvc-deploy-latest]
+    params:
+      skip_download: true
+  - get: partysvc-stub-docker-latest
+    trigger: true
+    passed: [partysvc-stub-deploy-latest]
+    params:
+      skip_download: true
+  - get: pubsubsvc-docker-latest
+    trigger: true
+    passed: [pubsubsvc-deploy-latest]
+    params:
+      skip_download: true
+  - task: "Run Acceptance Tests (in K8s)"
+    config:
+      platform: linux
+
+      image_resource:
+        type: docker-image
+        source:
+          repository: google/cloud-sdk
+          tag: slim
+
+      params:
+        SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+        GCP_PROJECT_NAME: ((gcp-project-name))
+        KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+        KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+
+      inputs:
+        - name: acceptance-tests-repo
+
+      run:
+        path: sh
+        args:
+          - -exc
+          - |
+            apt install kubectl
+
+            cat >~/gcloud-service-key.json <<EOL
+            $SERVICE_ACCOUNT_JSON
+            EOL
+
+            # Use gcloud service account to configure kubectl
+            gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
+            gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
+
+            # Create an acceptance tests pod and run the acceptance tests in it
+            # Env vars have to passed one by one as a --env flag each
+            # The sleep is to give kubectl time to attach properly, otherwise the first few log lines are lost
+            kubectl run acceptance-tests -it --command --rm \
+            --namespace=${KUBERNETES_NAMESPACE} \
+            --generator=run-pod/v1 \
+            --image=eu.gcr.io/census-rm-adamhawtin/census-rm-acceptance-tests \
+            --restart=Never \
+            $(while read env; do echo --env=${env}; done < acceptance-tests-repo/kubernetes.env) \
+            -- /bin/bash -c "sleep 2; behave acceptance_tests/features"  
