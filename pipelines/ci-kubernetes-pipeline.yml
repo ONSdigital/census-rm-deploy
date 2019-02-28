@@ -651,4 +651,3 @@ jobs:
       KUBERNETES_NAMESPACE: ((kubernetes-namespace))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
     input_mapping: {acceptance-tests-repo: acceptance-tests-repo}
- 
