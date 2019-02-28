@@ -26,7 +26,6 @@ resources:
     uri: git@github.com:ONSdigital/census-rm-acceptance-tests.git
     private_key: ((github-private-key))
     paths: [kubernetes.env, tasks/*]
-    branch: run-acceptance-tests-in-ci
 
 - name: acceptance-tests-docker-image
   type: docker-image
