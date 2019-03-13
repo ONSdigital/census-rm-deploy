@@ -20,6 +20,13 @@ resources:
     private_key: ((github-private-key))
     paths: [handlers/*]
 
+- name: census-rm-kubernetes-ops-repo
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-kubernetes.git
+    private_key: ((github-private-key))
+    paths: [optional/ops-*]
+
 - name: acceptance-tests-repo
   type: git
   source:
@@ -101,6 +108,13 @@ resources:
   type: docker-image
   source:
     repository: eu.gcr.io/census-ci/rm/census-rm-pubsub
+    username: _json_key
+    password: ((gcp-service-account-json))
+
+- name: ops-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-ci/rm/census-rm-ops
     username: _json_key
     password: ((gcp-service-account-json))
 
@@ -357,6 +371,31 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
+- name: ops-apply-config
+  serial: true
+  serial_groups: [ops]
+  plan:
+  - get: census-rm-kubernetes-ops-repo
+    trigger: true
+  - get: ops-docker-latest
+    trigger: true
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-deployment
+    file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: ops
+      KUBERNETES_SELECTOR: app=ops
+      KUBERNETES_FILE_PATH: kubernetes-repo/optional
+      KUBERNETES_FILE_PREFIX: ops
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-ops-repo}
+
 # Patch to trigger Kubernetes image pull on new latest tag builds
 - name: actionsvc-deploy-latest
   serial: true
@@ -577,6 +616,29 @@ jobs:
       KUBERNETES_SELECTOR: app=pubsubsvc
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {docker-image-resource: pubsubsvc-docker-latest}
+
+- name: ops-deploy-latest
+  serial: true
+  serial_groups: [ops]
+  plan:
+  - get: ops-docker-latest
+    trigger: true
+    passed: [ops-apply-config]
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: patch-to-pull-latest-image
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: ops
+      KUBERNETES_SELECTOR: app=pubsubsvc
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {docker-image-resource: pubsubsvc-docker-latest}
+
 
 - name: "Acceptance Tests"
   serial: true
