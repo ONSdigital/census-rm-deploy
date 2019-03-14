@@ -114,7 +114,7 @@ resources:
 - name: ops-docker-latest
   type: docker-image
   source:
-    repository: eu.gcr.io/census-ci/rm/census-rm-ops
+    repository: eu.gcr.io/census-rm-ci/census-rm-ops
     username: _json_key
     password: ((gcp-service-account-json))
 
@@ -383,7 +383,7 @@ jobs:
       skip_download: true
   - get: census-rm-deploy
   - task: apply-deployment
-    file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
     params:
       SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
       GCP_PROJECT_NAME: ((gcp-project-name))
