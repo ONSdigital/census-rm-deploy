@@ -114,7 +114,7 @@ resources:
 - name: ops-docker-latest
   type: docker-image
   source:
-    repository: eu.gcr.io/census-rm-ci/census-rm-ops
+    repository: eu.gcr.io/census-rm-ci/rm/census-rm-ops
     username: _json_key
     password: ((gcp-service-account-json))
 
