@@ -137,7 +137,6 @@ jobs:
     params:
       SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
       GCP_PROJECT_NAME: ((gcp-project-name))
-      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: actionsvc
       KUBERNETES_SELECTOR: app=actionsvc
@@ -162,7 +161,6 @@ jobs:
     params:
       SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
       GCP_PROJECT_NAME: ((gcp-project-name))
-      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: actionexportersvc
       KUBERNETES_SELECTOR: app=actionexportersvc
@@ -187,7 +185,6 @@ jobs:
     params:
       SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
       GCP_PROJECT_NAME: ((gcp-project-name))
-      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: casesvc
       KUBERNETES_SELECTOR: app=casesvc
@@ -212,7 +209,6 @@ jobs:
     params:
       SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
       GCP_PROJECT_NAME: ((gcp-project-name))
-      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: collectionexercisesvc
       KUBERNETES_SELECTOR: app=collectionexercisesvc
@@ -237,7 +233,6 @@ jobs:
     params:
       SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
       GCP_PROJECT_NAME: ((gcp-project-name))
-      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: collectioninstrumentsvc
       KUBERNETES_SELECTOR: app=collectioninstrumentsvc
@@ -262,7 +257,6 @@ jobs:
     params:
       SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
       GCP_PROJECT_NAME: ((gcp-project-name))
-      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: iacsvc
       KUBERNETES_SELECTOR: app=iacsvc
@@ -287,7 +281,6 @@ jobs:
     params:
       SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
       GCP_PROJECT_NAME: ((gcp-project-name))
-      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: samplesvc-stub
       KUBERNETES_SELECTOR: app=samplesvc-stub
@@ -312,7 +305,6 @@ jobs:
     params:
       SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
       GCP_PROJECT_NAME: ((gcp-project-name))
-      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: surveysvc
       KUBERNETES_SELECTOR: app=surveysvc
@@ -337,7 +329,6 @@ jobs:
     params:
       SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
       GCP_PROJECT_NAME: ((gcp-project-name))
-      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: partysvc
       KUBERNETES_SELECTOR: app=partysvc
@@ -362,7 +353,6 @@ jobs:
     params:
       SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
       GCP_PROJECT_NAME: ((gcp-project-name))
-      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: pubsubsvc
       KUBERNETES_SELECTOR: app=pubsubsvc
@@ -387,7 +377,6 @@ jobs:
     params:
       SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
       GCP_PROJECT_NAME: ((gcp-project-name))
-      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: ops
       KUBERNETES_SELECTOR: app=ops
@@ -412,7 +401,6 @@ jobs:
     params:
       SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
       GCP_PROJECT_NAME: ((gcp-project-name))
-      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: actionsvc
       KUBERNETES_SELECTOR: app=actionsvc
@@ -434,7 +422,6 @@ jobs:
     params:
       SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
       GCP_PROJECT_NAME: ((gcp-project-name))
-      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: actionexportersvc
       KUBERNETES_SELECTOR: app=actionexportersvc
@@ -456,7 +443,6 @@ jobs:
     params:
       SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
       GCP_PROJECT_NAME: ((gcp-project-name))
-      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: casesvc
       KUBERNETES_SELECTOR: app=casesvc
@@ -478,7 +464,6 @@ jobs:
     params:
       SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
       GCP_PROJECT_NAME: ((gcp-project-name))
-      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: collectionexercisesvc
       KUBERNETES_SELECTOR: app=collectionexercisesvc
@@ -500,7 +485,6 @@ jobs:
     params:
       SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
       GCP_PROJECT_NAME: ((gcp-project-name))
-      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: collectioninstrumentsvc
       KUBERNETES_SELECTOR: app=collectioninstrumentsvc
@@ -522,7 +506,6 @@ jobs:
     params:
       SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
       GCP_PROJECT_NAME: ((gcp-project-name))
-      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: iacsvc
       KUBERNETES_SELECTOR: app=iacsvc
@@ -544,7 +527,6 @@ jobs:
     params:
       SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
       GCP_PROJECT_NAME: ((gcp-project-name))
-      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: samplesvc-stub
       KUBERNETES_SELECTOR: app=samplesvc-stub
@@ -566,7 +548,6 @@ jobs:
     params:
       SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
       GCP_PROJECT_NAME: ((gcp-project-name))
-      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: surveysvc
       KUBERNETES_SELECTOR: app=surveysvc
@@ -588,7 +569,6 @@ jobs:
     params:
       SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
       GCP_PROJECT_NAME: ((gcp-project-name))
-      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: partysvc
       KUBERNETES_SELECTOR: app=partysvc-stub
@@ -610,7 +590,6 @@ jobs:
     params:
       SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
       GCP_PROJECT_NAME: ((gcp-project-name))
-      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: pubsubsvc
       KUBERNETES_SELECTOR: app=pubsubsvc
@@ -632,7 +611,6 @@ jobs:
     params:
       SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
       GCP_PROJECT_NAME: ((gcp-project-name))
-      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: ops
       KUBERNETES_SELECTOR: app=ops
@@ -710,6 +688,5 @@ jobs:
     params:
       SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
       GCP_PROJECT_NAME: ((gcp-project-name))
-      KUBERNETES_NAMESPACE: ((kubernetes-namespace))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
     input_mapping: {acceptance-tests-repo: acceptance-tests-repo}

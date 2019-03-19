@@ -16,7 +16,6 @@ Create a secrets YAML file containing the required configuration:
 
 | Variable | Format | Description |
 | --- | --- | ---: |
-| kubernetes-namespace | String | The kubernetes namespace for concourse to deploy to |
 | kubernetes-cluster-name | String | The name of the kubernetes cluster |
 | github-private-key | \| <br>-----BEGIN PRIVATE KEY----- <br>\<private key> <br>-----END PRIVATE KEY----- | A private SSH key for Github with permissions to clone private repositories |
 | gcp-service-account-json | \| <br>\<GCP service account key json> | JSON representation of a GCloud service account access key with required IAM permissions |
