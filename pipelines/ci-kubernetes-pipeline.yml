@@ -4,7 +4,6 @@ resources:
   type: git
   source:
     uri: git@github.com:ONSdigital/census-rm-deploy.git
-    branch: label-services
     private_key: ((github-private-key))
 
 - name: census-rm-kubernetes-microservices-repo
