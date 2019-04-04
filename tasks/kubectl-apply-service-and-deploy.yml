@@ -6,6 +6,9 @@ image_resource:
     repository: eu.gcr.io/census-ci/gcloud-kubectl
 
 params:
+  IAC_SERVICE_VERSION:
+  CASE_SERVICE_VERSION:
+  ENVIRONMENT:
   SERVICE_ACCOUNT_JSON:
   KUBERNETES_CLUSTER:
   GCP_PROJECT_NAME:
