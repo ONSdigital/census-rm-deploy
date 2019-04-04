@@ -6,8 +6,7 @@ image_resource:
     repository: eu.gcr.io/census-ci/gcloud-kubectl
 
 params:
-  IAC_SERVICE_VERSION:
-  CASE_SERVICE_VERSION:
+  PUBSUB_SERVICE_VERSION:
   ENVIRONMENT:
   SERVICE_ACCOUNT_JSON:
   KUBERNETES_CLUSTER:
@@ -29,12 +28,16 @@ run:
       $SERVICE_ACCOUNT_JSON
       EOL
 
+      # Install envsubst
+      apt-get -qqy update && apt-get install -qqy gettext
+
       # Use gcloud service account to configure kubectl
       gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
       gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
 
       # Apply deployment config
-      kubectl apply -f ${KUBERNETES_FILE_PATH}/${KUBERNETES_FILE_PREFIX}-deployment.yml --record
+      #kubectl apply -f ${KUBERNETES_FILE_PATH}/${KUBERNETES_FILE_PREFIX}-deployment.yml --record
+      envsubst < ${KUBERNETES_FILE_PATH}/${KUBERNETES_FILE_PREFIX}-deployment.yml | kubectl apply -f - $1 --record
 
       # Wait for rollout to finish
       kubectl rollout status deploy ${KUBERNETES_DEPLOYMENT_NAME} --watch=true --timeout=${WAIT_UNTIL_AVAILABLE_TIMEOUT}
