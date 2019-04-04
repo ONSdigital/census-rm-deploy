@@ -29,6 +29,9 @@ run:
       $SERVICE_ACCOUNT_JSON
       EOL
 
+      # Install envsubst
+      apt-get -qqy update && apt-get install -qqy gettext
+
       # Use gcloud service account to configure kubectl
       gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
       gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
