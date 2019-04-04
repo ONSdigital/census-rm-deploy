@@ -4,6 +4,7 @@ resources:
   type: git
   source:
     uri: git@github.com:ONSdigital/census-rm-deploy.git
+    branch: label-services
     private_key: ((github-private-key))
 
 - name: census-rm-kubernetes-microservices-repo
@@ -135,6 +136,8 @@ jobs:
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
     params:
+      ACTION_SERVICE_VERSION: latest
+      ENVIRONMENT: ci
       SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
       GCP_PROJECT_NAME: ((gcp-project-name))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
@@ -159,6 +162,8 @@ jobs:
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
     params:
+      ACTION_EXPORTER_SERVICE_VERSION: latest
+      ENVIRONMENT: ci
       SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
       GCP_PROJECT_NAME: ((gcp-project-name))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
@@ -183,6 +188,8 @@ jobs:
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
     params:
+      CASE_SERVICE_VERSION: latest
+      ENVIRONMENT: ci
       SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
       GCP_PROJECT_NAME: ((gcp-project-name))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
@@ -207,6 +214,8 @@ jobs:
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
     params:
+      COLLECTIONEXERCISE_SERVICE_VERSION: latest
+      ENVIRONMENT: ci
       SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
       GCP_PROJECT_NAME: ((gcp-project-name))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
@@ -231,6 +240,8 @@ jobs:
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
     params:
+      COLLECTIONINSTRUMENT_SERVICE_VERSION: latest
+      ENVIRONMENT: latest
       SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
       GCP_PROJECT_NAME: ((gcp-project-name))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
@@ -255,6 +266,8 @@ jobs:
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
     params:
+      IAC_SERVICE_VERSION: latest
+      ENVIRONMENT: ci
       SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
       GCP_PROJECT_NAME: ((gcp-project-name))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
@@ -279,6 +292,8 @@ jobs:
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
     params:
+      SAMPLE_SERVICE_VERSION: latest
+      ENVIRONMENT: ci
       SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
       GCP_PROJECT_NAME: ((gcp-project-name))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
@@ -303,6 +318,8 @@ jobs:
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
     params:
+      SURVEY_SERVICE_VERSION: latest
+      ENVIRONMENT: ci
       SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
       GCP_PROJECT_NAME: ((gcp-project-name))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
@@ -327,6 +344,8 @@ jobs:
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
     params:
+      PARTY_SERVICE_VERSION: latest
+      ENVIRONMENT: ci
       SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
       GCP_PROJECT_NAME: ((gcp-project-name))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
@@ -351,6 +370,8 @@ jobs:
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
     params:
+      PUBSUB_SERVICE_VERSION: latest
+      ENVIRONMENT: ci
       SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
       GCP_PROJECT_NAME: ((gcp-project-name))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
