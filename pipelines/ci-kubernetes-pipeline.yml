@@ -62,6 +62,13 @@ resources:
     username: _json_key
     password: ((gcp-service-account-json))
 
+- name: case-processor-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-rm-ci/rm/census-rm-case-processor
+    username: _json_key
+    password: ((gcp-service-account-json))
+
 - name: collectionexercisesvc-docker-latest
   type: docker-image
   source:
@@ -190,6 +197,30 @@ jobs:
       KUBERNETES_SELECTOR: app=casesvc
       KUBERNETES_FILE_PATH: kubernetes-repo/microservices
       KUBERNETES_FILE_PREFIX: case
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
+
+- name: case-processor-apply-config
+  serial: true
+  serial_groups: [case-processor]
+  plan:
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+  - get: case-processor-docker-latest
+    trigger: true
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-deployment
+    file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: case-processor
+      KUBERNETES_SELECTOR: app=case-processor
+      KUBERNETES_FILE_PATH: kubernetes-repo/microservices
+      KUBERNETES_FILE_PREFIX: case-processor
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
@@ -449,6 +480,27 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {docker-image-resource: casesvc-docker-latest}
 
+- name: case-processor-deploy-latest
+  serial: true
+  serial_groups: [case-processor]
+  plan:
+  - get: case-processor-docker-latest
+    trigger: true
+    passed: [case-processor-apply-config]
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: patch-to-pull-latest-image
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: case-processor
+      KUBERNETES_SELECTOR: app=case-processor
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {docker-image-resource: case-processor-docker-latest}
+
 - name: collectionexercisesvc-deploy-latest
   serial: true
   serial_groups: [collectionexercisesvc]
@@ -620,7 +672,7 @@ jobs:
 
 - name: "Acceptance Tests"
   serial: true
-  serial_groups: [actionsvc, actionexportersvc, casesvc, collectionexercisesvc, collectioninstrumentsvc, iacsvc, samplesvc, surveysvc, partysvc-stub, pubsubsvc]
+  serial_groups: [actionsvc, actionexportersvc, casesvc, case-processor, collectionexercisesvc, collectioninstrumentsvc, iacsvc, samplesvc, surveysvc, partysvc-stub, pubsubsvc]
   plan:
   - get: acceptance-tests-repo
   - get: acceptance-tests-docker-image
@@ -632,7 +684,7 @@ jobs:
     passed: [actionexportersvc-apply-config]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
-    passed: [actionsvc-apply-config, collectionexercisesvc-apply-config, collectioninstrumentsvc-apply-config, iacsvc-apply-config, samplesvc-stub-apply-config, surveysvc-apply-config, partysvc-stub-apply-config, pubsubsvc-apply-config]
+    passed: [actionsvc-apply-config, casesvc-apply-config, case-processor-apply-config, collectionexercisesvc-apply-config, collectioninstrumentsvc-apply-config, iacsvc-apply-config, samplesvc-stub-apply-config, surveysvc-apply-config, partysvc-stub-apply-config, pubsubsvc-apply-config]
   - get: actionsvc-docker-latest
     trigger: true
     passed: [actionsvc-deploy-latest]
@@ -646,6 +698,11 @@ jobs:
   - get: casesvc-docker-latest
     trigger: true
     passed: [casesvc-deploy-latest]
+    params:
+      skip_download: true
+  - get: case-processor-docker-latest
+    trigger: true
+    passed: [case-processor-deploy-latest]
     params:
       skip_download: true
   - get: collectionexercisesvc-docker-latest
