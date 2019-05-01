@@ -48,6 +48,13 @@ resources:
     username: _json_key
     password: ((gcp-service-account-json))
 
+- name: action-scheduler-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-rm-ci/rm/census-rm-action-scheduler
+    username: _json_key
+    password: ((gcp-service-account-json))
+
 - name: actionexportersvc-docker-latest
   type: docker-image
   source:
@@ -149,6 +156,30 @@ jobs:
       KUBERNETES_SELECTOR: app=actionsvc
       KUBERNETES_FILE_PATH: kubernetes-repo/microservices
       KUBERNETES_FILE_PREFIX: action
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
+
+- name: action-scheduler-apply-config
+  serial: true
+  serial_groups: [action-scheduler]
+  plan:
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+  - get: action-scheduler-docker-latest
+    trigger: true
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: action-scheduler
+      KUBERNETES_SELECTOR: app=action-scheduler
+      KUBERNETES_FILE_PATH: kubernetes-repo/microservices
+      KUBERNETES_FILE_PREFIX: action-scheduler
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
@@ -438,6 +469,27 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {docker-image-resource: actionsvc-docker-latest}
 
+- name: action-scheduler-deploy-latest
+  serial: true
+  serial_groups: [action-scheduler]
+  plan:
+  - get: action-scheduler-docker-latest
+    trigger: true
+    passed: [action-scheduler-apply-config]
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: patch-to-pull-latest-image
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: action-scheduler
+      KUBERNETES_SELECTOR: app=action-scheduler
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {docker-image-resource: action-scheduler-docker-latest}
+
 - name: actionexportersvc-deploy-latest
   serial: true
   serial_groups: [actionexportersvc]
@@ -672,7 +724,7 @@ jobs:
 
 - name: "Acceptance Tests"
   serial: true
-  serial_groups: [actionsvc, actionexportersvc, casesvc, case-processor, collectionexercisesvc, collectioninstrumentsvc, iacsvc, samplesvc, surveysvc, partysvc-stub, pubsubsvc]
+  serial_groups: [actionsvc, action-scheduler, actionexportersvc, casesvc, case-processor, collectionexercisesvc, collectioninstrumentsvc, iacsvc, samplesvc, surveysvc, partysvc-stub, pubsubsvc]
   plan:
   - get: acceptance-tests-repo
   - get: acceptance-tests-docker-image
@@ -684,10 +736,15 @@ jobs:
     passed: [actionexportersvc-apply-config]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
-    passed: [actionsvc-apply-config, casesvc-apply-config, case-processor-apply-config, collectionexercisesvc-apply-config, collectioninstrumentsvc-apply-config, iacsvc-apply-config, samplesvc-stub-apply-config, surveysvc-apply-config, partysvc-stub-apply-config, pubsubsvc-apply-config]
+    passed: [actionsvc-apply-config, action-scheduler-apply-config, casesvc-apply-config, case-processor-apply-config, collectionexercisesvc-apply-config, collectioninstrumentsvc-apply-config, iacsvc-apply-config, samplesvc-stub-apply-config, surveysvc-apply-config, partysvc-stub-apply-config, pubsubsvc-apply-config]
   - get: actionsvc-docker-latest
     trigger: true
     passed: [actionsvc-deploy-latest]
+    params:
+      skip_download: true
+  - get: action-scheduler-docker-latest
+    trigger: true
+    passed: [action-scheduler-deploy-latest]
     params:
       skip_download: true
   - get: actionexportersvc-docker-latest
