@@ -6,6 +6,19 @@ resources:
     uri: git@github.com:ONSdigital/census-rm-deploy.git
     private_key: ((github-private-key))
 
+- name: census-rm-kubernetes-repo
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-kubernetes.git
+    private_key: ((github-private-key))
+
+- name: census-rm-terraform
+  type: git
+  source:
+    branch: quiet-apply
+    uri: git@github.com:ONSdigital/census-rm-terraform.git
+    private_key: ((github-private-key))
+
 - name: census-rm-kubernetes-microservices-repo
   type: git
   source:
@@ -125,13 +138,64 @@ resources:
     username: _json_key
     password: ((gcp-service-account-json))
 
+
 jobs:
+
+
+- name: deploy-infrastructure
+  serial: true
+  serial_groups: [actionsvc, actionexportersvc, casesvc, case-processor, collectionexercisesvc, collectioninstrumentsvc, iacsvc, samplesvc, surveysvc, partysvc-stub, pubsubsvc]
+  max_in_flight: 1
+  plan:
+  - get: census-rm-terraform
+    trigger: true
+  - get: census-rm-kubernetes-repo
+  - task: "Build & Deploy Infrastructure"
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: google/cloud-sdk
+      params:
+        AUTO_APPLY: true
+        DEV_PUBSUB: true
+        DEV_SCALE_DOWN: true
+        ENV: ((gcp-environment-name))
+        GOOGLE_APPLICATION_CREDENTIALS: /root/gcloud-service-key.json
+        KEEP_TMP_K8S: true
+        SERVICE_ACCOUNT_JSON: ((gcp-admin-account-json))
+      inputs:
+        - name: census-rm-terraform
+        - name: census-rm-kubernetes-repo
+      run:
+        path: bash
+        args:
+          - -exc
+          - |
+            apt-get install -y unzip
+            git clone https://github.com/kamatama41/tfenv.git ~/.tfenv && \
+            ln -s /root/.tfenv/bin/* /usr/local/bin
+            cat >$GOOGLE_APPLICATION_CREDENTIALS <<EOL
+            $SERVICE_ACCOUNT_JSON
+            EOL
+            gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
+            cp -R census-rm-kubernetes-repo/ census-rm-terraform/tmp_rm_kube
+            cd census-rm-terraform
+            tfenv install
+            ./apply.sh
+
 
 # Kubernetes Config
 - name: actionsvc-apply-config
   serial: true
   serial_groups: [actionsvc]
   plan:
+  - get: census-rm-terraform
+    trigger: true
+    passed: [deploy-infrastructure]
+    params:
+      skip_download: true
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
   - get: actionsvc-docker-latest
@@ -156,6 +220,11 @@ jobs:
   serial: true
   serial_groups: [actionexportersvc]
   plan:
+  - get: census-rm-terraform
+    trigger: true
+    passed: [deploy-infrastructure]
+    params:
+      skip_download: true
   - get: census-rm-kubernetes-handlers-repo
     trigger: true
   - get: actionexportersvc-docker-latest
@@ -180,6 +249,11 @@ jobs:
   serial: true
   serial_groups: [casesvc]
   plan:
+  - get: census-rm-terraform
+    trigger: true
+    passed: [deploy-infrastructure]
+    params:
+      skip_download: true
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
   - get: casesvc-docker-latest
@@ -204,6 +278,11 @@ jobs:
   serial: true
   serial_groups: [case-processor]
   plan:
+  - get: census-rm-terraform
+    trigger: true
+    passed: [deploy-infrastructure]
+    params:
+      skip_download: true
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
   - get: case-processor-docker-latest
@@ -228,6 +307,11 @@ jobs:
   serial: true
   serial_groups: [collectionexercisesvc]
   plan:
+  - get: census-rm-terraform
+    trigger: true
+    passed: [deploy-infrastructure]
+    params:
+      skip_download: true
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
   - get: collectionexercisesvc-docker-latest
@@ -252,6 +336,11 @@ jobs:
   serial: true
   serial_groups: [collectioninstrumentsvc]
   plan:
+  - get: census-rm-terraform
+    trigger: true
+    passed: [deploy-infrastructure]
+    params:
+      skip_download: true
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
   - get: collectioninstrumentsvc-docker-latest
@@ -276,6 +365,11 @@ jobs:
   serial: true
   serial_groups: [iacsvc]
   plan:
+  - get: census-rm-terraform
+    trigger: true
+    passed: [deploy-infrastructure]
+    params:
+      skip_download: true
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
   - get: iacsvc-docker-latest
@@ -300,6 +394,11 @@ jobs:
   serial: true
   serial_groups: [samplesvc]
   plan:
+  - get: census-rm-terraform
+    trigger: true
+    passed: [deploy-infrastructure]
+    params:
+      skip_download: true
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
   - get: samplesvc-stub-docker-latest
@@ -324,6 +423,11 @@ jobs:
   serial: true
   serial_groups: [surveysvc]
   plan:
+  - get: census-rm-terraform
+    trigger: true
+    passed: [deploy-infrastructure]
+    params:
+      skip_download: true
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
   - get: surveysvc-docker-latest
@@ -348,6 +452,11 @@ jobs:
   serial: true
   serial_groups: [partysvc-stub]
   plan:
+  - get: census-rm-terraform
+    trigger: true
+    passed: [deploy-infrastructure]
+    params:
+      skip_download: true
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
   - get: partysvc-stub-docker-latest
@@ -372,6 +481,11 @@ jobs:
   serial: true
   serial_groups: [pubsubsvc]
   plan:
+  - get: census-rm-terraform
+    trigger: true
+    passed: [deploy-infrastructure]
+    params:
+      skip_download: true
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
   - get: pubsubsvc-docker-latest
@@ -396,6 +510,11 @@ jobs:
   serial: true
   serial_groups: [ops]
   plan:
+  - get: census-rm-terraform
+    trigger: true
+    passed: [deploy-infrastructure]
+    params:
+      skip_download: true
   - get: census-rm-kubernetes-ops-repo
     trigger: true
   - get: ops-docker-latest
