@@ -55,6 +55,13 @@ resources:
     username: _json_key
     password: ((gcp-service-account-json))
 
+- name: case-api-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-rm-ci/rm/census-rm-case-api
+    username: _json_key
+    password: ((gcp-service-account-json))
+
 - name: case-processor-docker-latest
   type: docker-image
   source:
@@ -133,6 +140,30 @@ jobs:
       KUBERNETES_FILE_PREFIX: actionexporter
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-handlers-repo}
+
+- name: case-api-apply-config
+  serial: true
+  serial_groups: [case-api]
+  plan:
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+  - get: case-api-docker-latest
+    trigger: true
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-deployment
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: case-api
+      KUBERNETES_SELECTOR: app=case-api
+      KUBERNETES_FILE_PATH: kubernetes-repo/microservices
+      KUBERNETES_FILE_PREFIX: case-api
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
 - name: case-processor-apply-config
   serial: true
@@ -273,6 +304,27 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {docker-image-resource: actionexportersvc-docker-latest}
 
+- name: case-api-deploy-latest
+  serial: true
+  serial_groups: [case-api]
+  plan:
+  - get: case-api-docker-latest
+    trigger: true
+    passed: [case-api-apply-config]
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: patch-to-pull-latest-image
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: case-api
+      KUBERNETES_SELECTOR: app=case-api
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {docker-image-resource: case-api-docker-latest}
+
 - name: case-processor-deploy-latest
   serial: true
   serial_groups: [case-processor]
@@ -360,7 +412,7 @@ jobs:
 
 - name: "Acceptance Tests"
   serial: true
-  serial_groups: [action-scheduler, actionexportersvc, case-processor, iacsvc, pubsubsvc]
+  serial_groups: [action-scheduler, actionexportersvc, case-api, case-processor, iacsvc, pubsubsvc]
   plan:
   - get: acceptance-tests-repo
   - get: acceptance-tests-docker-image
@@ -372,7 +424,8 @@ jobs:
     passed: [actionexportersvc-apply-config]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
-    passed: [action-scheduler-apply-config, case-processor-apply-config, iacsvc-apply-config, pubsubsvc-apply-config]
+    passed: [action-scheduler-apply-config, case-api-apply-config, case-processor-apply-config, iacsvc-apply-config,
+             pubsubsvc-apply-config]
   - get: action-scheduler-docker-latest
     trigger: true
     passed: [action-scheduler-deploy-latest]
@@ -381,6 +434,11 @@ jobs:
   - get: actionexportersvc-docker-latest
     trigger: true
     passed: [actionexportersvc-deploy-latest]
+    params:
+      skip_download: true
+  - get: case-api-docker-latest
+    trigger: true
+    passed: [case-api-deploy-latest]
     params:
       skip_download: true
   - get: case-processor-docker-latest
