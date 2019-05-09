@@ -15,7 +15,7 @@ resources:
 - name: census-rm-terraform
   type: git
   source:
-    branch: quiet-apply
+    branch: ((terraform-branch))
     uri: git@github.com:ONSdigital/census-rm-terraform.git
     private_key: ((github-private-key))
 
@@ -122,7 +122,7 @@ jobs:
         ENV: ((gcp-environment-name))
         GOOGLE_APPLICATION_CREDENTIALS: /root/gcloud-service-key.json
         KEEP_TMP_K8S: true
-        SERVICE_ACCOUNT_JSON: ((gcp-admin-account-json))
+        ADMIN_SERVICE_ACCOUNT_JSON: ((gcp-admin-account-json))
       inputs:
         - name: census-rm-terraform
         - name: census-rm-kubernetes-repo
@@ -134,7 +134,7 @@ jobs:
             git clone https://github.com/kamatama41/tfenv.git ~/.tfenv && \
             ln -s /root/.tfenv/bin/* /usr/local/bin
             cat >$GOOGLE_APPLICATION_CREDENTIALS <<EOL
-            $SERVICE_ACCOUNT_JSON
+            $ADMIN_SERVICE_ACCOUNT_JSON
             EOL
             gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
             cp -R census-rm-kubernetes-repo/ census-rm-terraform/tmp_rm_kube
