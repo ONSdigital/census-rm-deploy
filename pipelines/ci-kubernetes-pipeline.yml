@@ -102,7 +102,7 @@ jobs:
 
 - name: deploy-infrastructure
   serial: true
-  serial_groups: [action-scheduler, actionexportersvc, case-processor, iacsvc, pubsubsvc]
+  serial_groups: [action-scheduler, actionexportersvc, case-processor, iacsvc, ops, pubsubsvc]
   max_in_flight: 1
   plan:
   - get: census-rm-terraform
@@ -119,6 +119,7 @@ jobs:
         AUTO_APPLY: true
         DEV_PUBSUB: true
         DEV_SCALE_DOWN: true
+        DISABLE_CI_BINDING: true
         ENV: ((gcp-environment-name))
         GOOGLE_APPLICATION_CREDENTIALS: /root/gcloud-service-key.json
         KEEP_TMP_K8S: true
@@ -131,6 +132,7 @@ jobs:
         args:
           - -exc
           - |
+            apt-get install -y unzip
             git clone https://github.com/kamatama41/tfenv.git ~/.tfenv && \
             ln -s /root/.tfenv/bin/* /usr/local/bin
             cat >$GOOGLE_APPLICATION_CREDENTIALS <<EOL
@@ -151,8 +153,6 @@ jobs:
   - get: census-rm-terraform
     trigger: true
     passed: [deploy-infrastructure]
-    params:
-      skip_download: true
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
   - get: action-scheduler-docker-latest
@@ -180,8 +180,6 @@ jobs:
   - get: census-rm-terraform
     trigger: true
     passed: [deploy-infrastructure]
-    params:
-      skip_download: true
   - get: census-rm-kubernetes-handlers-repo
     trigger: true
   - get: actionexportersvc-docker-latest
@@ -209,8 +207,6 @@ jobs:
   - get: census-rm-terraform
     trigger: true
     passed: [deploy-infrastructure]
-    params:
-      skip_download: true
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
   - get: case-processor-docker-latest
@@ -238,8 +234,6 @@ jobs:
   - get: census-rm-terraform
     trigger: true
     passed: [deploy-infrastructure]
-    params:
-      skip_download: true
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
   - get: iacsvc-docker-latest
@@ -267,8 +261,6 @@ jobs:
   - get: census-rm-terraform
     trigger: true
     passed: [deploy-infrastructure]
-    params:
-      skip_download: true
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
   - get: pubsubsvc-docker-latest
@@ -296,8 +288,6 @@ jobs:
   - get: census-rm-terraform
     trigger: true
     passed: [deploy-infrastructure]
-    params:
-      skip_download: true
   - get: census-rm-kubernetes-ops-repo
     trigger: true
   - get: ops-docker-latest
@@ -323,6 +313,9 @@ jobs:
   serial: true
   serial_groups: [action-scheduler]
   plan:
+  - get: census-rm-terraform
+    trigger: true
+    passed: [deploy-infrastructure]
   - get: action-scheduler-docker-latest
     trigger: true
     passed: [action-scheduler-apply-config]
@@ -344,6 +337,9 @@ jobs:
   serial: true
   serial_groups: [actionexportersvc]
   plan:
+  - get: census-rm-terraform
+    trigger: true
+    passed: [deploy-infrastructure]
   - get: actionexportersvc-docker-latest
     trigger: true
     passed: [actionexportersvc-apply-config]
@@ -365,6 +361,9 @@ jobs:
   serial: true
   serial_groups: [case-processor]
   plan:
+  - get: census-rm-terraform
+    trigger: true
+    passed: [deploy-infrastructure]
   - get: case-processor-docker-latest
     trigger: true
     passed: [case-processor-apply-config]
@@ -386,6 +385,9 @@ jobs:
   serial: true
   serial_groups: [iacsvc]
   plan:
+  - get: census-rm-terraform
+    trigger: true
+    passed: [deploy-infrastructure]
   - get: iacsvc-docker-latest
     trigger: true
     passed: [iacsvc-apply-config]
@@ -407,6 +409,9 @@ jobs:
   serial: true
   serial_groups: [pubsubsvc]
   plan:
+  - get: census-rm-terraform
+    trigger: true
+    passed: [deploy-infrastructure]
   - get: pubsubsvc-docker-latest
     trigger: true
     passed: [pubsubsvc-apply-config]
@@ -428,6 +433,9 @@ jobs:
   serial: true
   serial_groups: [ops]
   plan:
+  - get: census-rm-terraform
+    trigger: true
+    passed: [deploy-infrastructure]
   - get: ops-docker-latest
     trigger: true
     passed: [ops-apply-config]
