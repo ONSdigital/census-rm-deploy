@@ -220,11 +220,13 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-ops-repo}
 
-# Patch to trigger Kubernetes image pull on new latest tag builds
+# Patch to trigger Kubernetes to pull the latest docker image
 - name: action-scheduler-deploy-latest
   serial: true
   serial_groups: [action-scheduler]
   plan:
+  - get: census-rm-kubernetes-microservices-repo
+    passed: [action-scheduler-apply-config]
   - get: action-scheduler-docker-latest
     passed: [action-scheduler-apply-config]
     params:
@@ -245,6 +247,8 @@ jobs:
   serial: true
   serial_groups: [actionexportersvc]
   plan:
+  - get: census-rm-kubernetes-handlers-repo
+    passed: [actionexportersvc-apply-config]
   - get: actionexportersvc-docker-latest
     passed: [actionexportersvc-apply-config]
     params:
@@ -265,6 +269,8 @@ jobs:
   serial: true
   serial_groups: [case-processor]
   plan:
+  - get: census-rm-kubernetes-microservices-repo
+    passed: [case-processor-apply-config]
   - get: case-processor-docker-latest
     passed: [case-processor-apply-config]
     params:
@@ -285,8 +291,9 @@ jobs:
   serial: true
   serial_groups: [iacsvc]
   plan:
+  - get: census-rm-kubernetes-microservices-repo
+    passed: [iacsvc-apply-config]
   - get: iacsvc-docker-latest
-    
     passed: [iacsvc-apply-config]
     params:
       skip_download: true
@@ -306,6 +313,8 @@ jobs:
   serial: true
   serial_groups: [pubsubsvc]
   plan:
+  - get: census-rm-kubernetes-microservices-repo
+    passed: [pubsubsvc-apply-config]
   - get: pubsubsvc-docker-latest
     passed: [pubsubsvc-apply-config]
     params:
@@ -326,6 +335,8 @@ jobs:
   serial: true
   serial_groups: [ops]
   plan:
+  - get: census-rm-kubernetes-ops-repo
+    passed: [ops-apply-config]
   - get: ops-docker-latest
     passed: [ops-apply-config]
     params:
@@ -352,9 +363,9 @@ jobs:
     params:
       skip_download: true
   - get: census-rm-kubernetes-handlers-repo
-    passed: [actionexportersvc-apply-config]
+    passed: [actionexportersvc-deploy-latest]
   - get: census-rm-kubernetes-microservices-repo
-    passed: [action-scheduler-apply-config, case-processor-apply-config, iacsvc-apply-config, pubsubsvc-apply-config]
+    passed: [action-scheduler-deploy-latest, case-processor-deploy-latest, iacsvc-deploy-latest, pubsubsvc-deploy-latest]
   - get: action-scheduler-docker-latest
     passed: [action-scheduler-deploy-latest]
     params:
