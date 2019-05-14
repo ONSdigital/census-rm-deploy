@@ -118,6 +118,7 @@ jobs:
       params:
         AUTO_APPLY: true
         DEV_PUBSUB: true
+        DEV_SCALE_DOWN: true
         DISABLE_CI_BINDING: true
         ENV: ((gcp-environment-name))
         GOOGLE_APPLICATION_CREDENTIALS: /root/gcloud-service-key.json
