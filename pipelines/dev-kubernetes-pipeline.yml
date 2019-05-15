@@ -118,6 +118,7 @@ jobs:
       params:
         AUTO_APPLY: true
         DEV_PUBSUB: true
+        DEV_SCALE_DOWN: true
         DISABLE_CI_BINDING: true
         ENV: ((gcp-environment-name))
         GOOGLE_APPLICATION_CREDENTIALS: /root/gcloud-service-key.json
@@ -131,7 +132,7 @@ jobs:
         args:
           - -exc
           - |
-            apt-get install -y unzip procps  # NB: procps is used by Helm
+            apt-get install -y unzip procps
             git clone https://github.com/kamatama41/tfenv.git ~/.tfenv && \
             ln -s /root/.tfenv/bin/* /usr/local/bin
             cat >$GOOGLE_APPLICATION_CREDENTIALS <<EOL
