@@ -109,7 +109,7 @@ jobs:
 
 - name: deploy-infrastructure
   serial: true
-  serial_groups: [action-scheduler, actionexportersvc, case-processor, iacsvc, ops, pubsubsvc]
+  serial_groups: [action-scheduler, actionexportersvc, case-api, case-processor, iacsvc, ops, pubsubsvc]
   max_in_flight: 1
   plan:
   - get: census-rm-terraform
