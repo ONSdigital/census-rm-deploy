@@ -15,11 +15,16 @@ This pipeline has three sections:
 Create a secrets YAML file containing the required configuration:
 
 | Variable                 | Format                                                                              | Description                                                                              |
-| ------------------------ | ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| ------------------------ | ----------------------------------------------------------------------------------- | -----------------------------------------------------------------------------------------|
 | kubernetes-cluster-name  | String                                                                              | The name of the kubernetes cluster                                                       |
+| acceptance-tests-image   | String                                                                              | The name of the acceptance tests image to run                                            |
 | github-private-key       | \| <br>-----BEGIN PRIVATE KEY----- <br>\<private key> <br>-----END PRIVATE KEY----- | A private SSH key for Github with permissions to clone private repositories              |
 | gcp-service-account-json | \| <br>\<GCP service account key json>                                              | JSON representation of a GCloud service account access key with required IAM permissions |
 | gcp-project-name         | String                                                                              | The name of the GCP project the targeted cluster belongs to                              |
+| gcp-admin-account-json   | \| <br>\<GCP Concourse admin account key json                                       | CI or dev only - JSON representation of a GCloud account access key with IAM permissions |
+| gcp-environment-name     | String                                                                              | CI or dev only - The name of the GCP project suffix the targeted cluster belongs to      |
+| terraform-branch         | String                                                                              | CI or dev only - The name of the terraform branch                                        |
+
 
 Then run the fly command:
 ```bash
