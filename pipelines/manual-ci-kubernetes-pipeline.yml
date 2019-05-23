@@ -447,4 +447,5 @@ jobs:
       SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
       GCP_PROJECT_NAME: ((gcp-project-name))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      ACCEPTANCE_TESTS_IMAGE: ((acceptance-tests-image))
     input_mapping: {acceptance-tests-repo: acceptance-tests-repo}
