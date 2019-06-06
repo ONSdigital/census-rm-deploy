@@ -90,6 +90,13 @@ resources:
     username: _json_key
     password: ((gcp-service-account-json))
 
+- name: qid-batch-runner-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-rm-ci/rm/census-rm-qid-batch-runner
+    username: _json_key
+    password: ((gcp-service-account-json))
+
 jobs:
 
 # Kubernetes Config
@@ -439,6 +446,10 @@ jobs:
       skip_download: true
   - get: pubsubsvc-docker-latest
     passed: [pubsubsvc-deploy-latest]
+    params:
+      skip_download: true
+  - get: qid-batch-runner-docker-latest
+    trigger: true
     params:
       skip_download: true
   - task: "Run Acceptance Tests (in K8s)"
