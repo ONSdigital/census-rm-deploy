@@ -19,6 +19,12 @@ resources:
     uri: git@github.com:ONSdigital/census-rm-terraform.git
     private_key: ((github-private-key))
 
+- name: batch-runner-repo
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-qid-batch-runner.git
+    private_key: ((github-private-key))
+
 - name: census-rm-kubernetes-microservices-repo
   type: git
   source:
@@ -550,6 +556,7 @@ jobs:
     trigger: true
     passed: [action-scheduler-deploy-latest, actionexportersvc-deploy-latest, case-api-deploy-latest, case-processor-deploy-latest, iacsvc-deploy-latest, pubsubsvc-deploy-latest]
   - get: acceptance-tests-repo
+  - get: batch-runner-repo
   - get: acceptance-tests-docker-image
     trigger: true
     params:

@@ -13,6 +13,12 @@ resources:
     private_key: ((github-private-key))
     paths: [microservices/*]
 
+- name: batch-runner-repo
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-qid-batch-runner.git
+    private_key: ((github-private-key))
+
 - name: census-rm-kubernetes-handlers-repo
   type: git
   source:
@@ -417,6 +423,7 @@ jobs:
   serial_groups: [action-scheduler, actionexportersvc, case-api, case-processor, iacsvc, pubsubsvc]
   plan:
   - get: acceptance-tests-repo
+  - get: batch-runner-repo
   - get: acceptance-tests-docker-image
     params:
       skip_download: true
