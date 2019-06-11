@@ -456,7 +456,6 @@ jobs:
     params:
       skip_download: true
   - get: qid-batch-runner-docker-latest
-    trigger: true
     params:
       skip_download: true
   - task: "Run Acceptance Tests (in K8s)"
