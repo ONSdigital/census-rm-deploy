@@ -1,0 +1,1012 @@
+---
+resources:
+- name: census-rm-deploy
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-deploy.git
+    private_key: ((github-private-key))
+
+- name: census-rm-kubernetes-repo
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-kubernetes.git
+    private_key: ((github-private-key))
+
+- name: census-rm-terraform
+  type: git
+  source:
+    branch: ((terraform-branch))
+    uri: git@github.com:ONSdigital/census-rm-terraform.git
+    private_key: ((github-private-key))
+
+- name: batch-runner-repo
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-qid-batch-runner.git
+    private_key: ((github-private-key))
+
+- name: census-rm-kubernetes-microservices-repo
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-kubernetes.git
+    private_key: ((github-private-key))
+    paths: [microservices/*]
+
+- name: census-rm-kubernetes-handlers-repo
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-kubernetes.git
+    private_key: ((github-private-key))
+    paths: [handlers/*]
+
+- name: census-rm-kubernetes-ops-repo
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-kubernetes.git
+    private_key: ((github-private-key))
+    paths: [optional/ops-*]
+
+- name: acceptance-tests-repo
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-acceptance-tests.git
+    private_key: ((github-private-key))
+    paths: [kubernetes.env, tasks/*]
+
+- name: acceptance-tests-docker-image
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-rm-ci/rm/census-rm-acceptance-tests
+    username: _json_key
+    password: ((ci-gcp-service-account-json))
+
+- name: action-scheduler-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-rm-ci/rm/census-rm-action-scheduler
+    username: _json_key
+    password: ((ci-gcp-service-account-json))
+
+- name: actionexportersvc-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-rm-ci/rm/census-rm-actionexportersvc
+    username: _json_key
+    password: ((ci-gcp-service-account-json))
+
+- name: case-api-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-rm-ci/rm/census-rm-case-api
+    username: _json_key
+    password: ((ci-gcp-service-account-json))
+
+- name: case-processor-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-rm-ci/rm/census-rm-case-processor
+    username: _json_key
+    password: ((ci-gcp-service-account-json))
+
+- name: iacsvc-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-rm-ci/rm/census-rm-iacsvc
+    username: _json_key
+    password: ((ci-gcp-service-account-json))
+
+- name: pubsubsvc-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-rm-ci/rm/census-rm-pubsub
+    username: _json_key
+    password: ((ci-gcp-service-account-json))
+
+- name: ops-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-rm-ci/rm/census-rm-ops
+    username: _json_key
+    password: ((ci-gcp-service-account-json))
+
+- name: qid-batch-runner-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-rm-ci/rm/census-rm-qid-batch-runner
+    username: _json_key
+    password: ((ci-gcp-service-account-json))
+
+jobs:
+
+
+- name: ci-deploy-infrastructure
+  serial: true
+  serial_groups: [ci-action-scheduler, ci-actionexportersvc, ci-case-api, ci-case-processor, ci-iacsvc, ci-ops, ci-pubsubsvc]
+  max_in_flight: 1
+  plan:
+  - get: census-rm-terraform
+    trigger: true
+  - get: census-rm-kubernetes-repo
+  - task: "Build & Deploy Infrastructure"
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: google/cloud-sdk
+      params:
+        AUTO_APPLY: true
+        DEV_PUBSUB: true
+        DISABLE_CI_BINDING: true
+        ENV: ((ci-gcp-environment-name))
+        GOOGLE_APPLICATION_CREDENTIALS: /root/gcloud-service-key.json
+        KEEP_TMP_K8S: true
+        ADMIN_SERVICE_ACCOUNT_JSON: ((ci-gcp-admin-account-json))
+      inputs:
+        - name: census-rm-terraform
+        - name: census-rm-kubernetes-repo
+      run:
+        path: bash
+        args:
+          - -exc
+          - |
+            apt-get install -y unzip procps  # NB: procps is used by Helm
+            git clone https://github.com/kamatama41/tfenv.git ~/.tfenv && \
+            ln -s /root/.tfenv/bin/* /usr/local/bin
+            cat >$GOOGLE_APPLICATION_CREDENTIALS <<EOL
+            $ADMIN_SERVICE_ACCOUNT_JSON
+            EOL
+            gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
+            cp -R census-rm-kubernetes-repo/ census-rm-terraform/tmp_rm_kube
+            cd census-rm-terraform
+            tfenv install
+            curl -L https://git.io/get_helm.sh | bash && \
+            helm init --client-only && \
+            helm plugin install https://github.com/rimusz/helm-tiller
+            WFH_IP="35.246.106.81/32" ./apply.sh
+
+
+# Kubernetes Config
+- name: ci-action-scheduler-apply-config
+  serial: true
+  serial_groups: [ci-action-scheduler]
+  plan:
+  - get: census-rm-terraform
+    trigger: true
+    passed: [ci-deploy-infrastructure]
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+  - get: action-scheduler-docker-latest
+    trigger: true
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((ci-gcp-service-account-json))
+      GCP_PROJECT_NAME: ((ci-gcp-project-name))
+      KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: action-scheduler
+      KUBERNETES_SELECTOR: app=action-scheduler
+      KUBERNETES_FILE_PATH: kubernetes-repo/microservices
+      KUBERNETES_FILE_PREFIX: action-scheduler
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
+
+- name: ci-actionexportersvc-apply-config
+  serial: true
+  serial_groups: [ci-actionexportersvc]
+  plan:
+  - get: census-rm-terraform
+    trigger: true
+    passed: [ci-deploy-infrastructure]
+  - get: census-rm-kubernetes-handlers-repo
+    trigger: true
+  - get: actionexportersvc-docker-latest
+    trigger: true
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((ci-gcp-service-account-json))
+      GCP_PROJECT_NAME: ((ci-gcp-project-name))
+      KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: actionexportersvc
+      KUBERNETES_SELECTOR: app=actionexportersvc
+      KUBERNETES_FILE_PATH: kubernetes-repo/handlers
+      KUBERNETES_FILE_PREFIX: actionexporter
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-handlers-repo}
+
+- name: ci-case-api-apply-config
+  serial: true
+  serial_groups: [ci-case-api]
+  plan:
+  - get: census-rm-terraform
+    trigger: true
+    passed: [ci-deploy-infrastructure]
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+  - get: case-api-docker-latest
+    trigger: true
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((ci-gcp-service-account-json))
+      GCP_PROJECT_NAME: ((ci-gcp-project-name))
+      KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: case-api
+      KUBERNETES_SELECTOR: app=case-api
+      KUBERNETES_FILE_PATH: kubernetes-repo/microservices
+      KUBERNETES_FILE_PREFIX: case-api
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
+
+- name: ci-case-processor-apply-config
+  serial: true
+  serial_groups: [ci-case-processor]
+  plan:
+  - get: census-rm-terraform
+    trigger: true
+    passed: [ci-deploy-infrastructure]
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+  - get: case-processor-docker-latest
+    trigger: true
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-deployment
+    file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((ci-gcp-service-account-json))
+      GCP_PROJECT_NAME: ((ci-gcp-project-name))
+      KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: case-processor
+      KUBERNETES_SELECTOR: app=case-processor
+      KUBERNETES_FILE_PATH: kubernetes-repo/microservices
+      KUBERNETES_FILE_PREFIX: case-processor
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
+
+- name: ci-iacsvc-apply-config
+  serial: true
+  serial_groups: [ci-iacsvc]
+  plan:
+  - get: census-rm-terraform
+    trigger: true
+    passed: [ci-deploy-infrastructure]
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+  - get: iacsvc-docker-latest
+    trigger: true
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((ci-gcp-service-account-json))
+      GCP_PROJECT_NAME: ((ci-gcp-project-name))
+      KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: iacsvc
+      KUBERNETES_SELECTOR: app=iacsvc
+      KUBERNETES_FILE_PATH: kubernetes-repo/microservices
+      KUBERNETES_FILE_PREFIX: iac
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
+
+- name: ci-pubsubsvc-apply-config
+  serial: true
+  serial_groups: [ci-pubsubsvc]
+  plan:
+  - get: census-rm-terraform
+    trigger: true
+    passed: [ci-deploy-infrastructure]
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+  - get: pubsubsvc-docker-latest
+    trigger: true
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-deployment
+    file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((ci-gcp-service-account-json))
+      GCP_PROJECT_NAME: ((ci-gcp-project-name))
+      KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: pubsubsvc
+      KUBERNETES_SELECTOR: app=pubsubsvc
+      KUBERNETES_FILE_PATH: kubernetes-repo/microservices
+      KUBERNETES_FILE_PREFIX: pubsub
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
+
+- name: ci-ops-apply-config
+  serial: true
+  serial_groups: [ci-ops]
+  plan:
+  - get: census-rm-terraform
+    trigger: true
+    passed: [ci-deploy-infrastructure]
+  - get: census-rm-kubernetes-ops-repo
+    trigger: true
+  - get: ops-docker-latest
+    trigger: true
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-deployment
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((ci-gcp-service-account-json))
+      GCP_PROJECT_NAME: ((ci-gcp-project-name))
+      KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: ops
+      KUBERNETES_SELECTOR: app=ops
+      KUBERNETES_FILE_PATH: kubernetes-repo/optional
+      KUBERNETES_FILE_PREFIX: ops
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-ops-repo}
+
+# Patch to trigger Kubernetes image pull on new latest tag builds
+- name: ci-action-scheduler-deploy-latest
+  serial: true
+  serial_groups: [ci-action-scheduler]
+  plan:
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+    passed: [ci-action-scheduler-apply-config]
+  - get: census-rm-terraform
+    trigger: true
+    passed: [ci-action-scheduler-apply-config]
+  - get: action-scheduler-docker-latest
+    trigger: true
+    passed: [ci-action-scheduler-apply-config]
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: patch-to-pull-latest-image
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((ci-gcp-service-account-json))
+      GCP_PROJECT_NAME: ((ci-gcp-project-name))
+      KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: action-scheduler
+      KUBERNETES_SELECTOR: app=action-scheduler
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {docker-image-resource: action-scheduler-docker-latest}
+
+- name: ci-actionexportersvc-deploy-latest
+  serial: true
+  serial_groups: [ci-actionexportersvc]
+  plan:
+  - get: census-rm-kubernetes-handlers-repo
+    trigger: true
+    passed: [ci-actionexportersvc-apply-config]
+  - get: census-rm-terraform
+    trigger: true
+    passed: [ci-actionexportersvc-apply-config]
+  - get: actionexportersvc-docker-latest
+    trigger: true
+    passed: [ci-actionexportersvc-apply-config]
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: patch-to-pull-latest-image
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((ci-gcp-service-account-json))
+      GCP_PROJECT_NAME: ((ci-gcp-project-name))
+      KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: actionexportersvc
+      KUBERNETES_SELECTOR: app=actionexportersvc
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {docker-image-resource: actionexportersvc-docker-latest}
+
+- name: ci-case-api-deploy-latest
+  serial: true
+  serial_groups: [ci-case-api]
+  plan:
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+    passed: [ci-case-api-apply-config]
+  - get: census-rm-terraform
+    trigger: true
+    passed: [ci-case-api-apply-config]
+  - get: case-api-docker-latest
+    trigger: true
+    passed: [ci-case-api-apply-config]
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: patch-to-pull-latest-image
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((ci-gcp-service-account-json))
+      GCP_PROJECT_NAME: ((ci-gcp-project-name))
+      KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: case-api
+      KUBERNETES_SELECTOR: app=case-api
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {docker-image-resource: case-api-docker-latest}
+
+- name: ci-case-processor-deploy-latest
+  serial: true
+  serial_groups: [ci-case-processor]
+  plan:
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+    passed: [ci-case-processor-apply-config]
+  - get: census-rm-terraform
+    trigger: true
+    passed: [ci-case-processor-apply-config]
+  - get: case-processor-docker-latest
+    trigger: true
+    passed: [ci-case-processor-apply-config]
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: patch-to-pull-latest-image
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((ci-gcp-service-account-json))
+      GCP_PROJECT_NAME: ((ci-gcp-project-name))
+      KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: case-processor
+      KUBERNETES_SELECTOR: app=case-processor
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {docker-image-resource: case-processor-docker-latest}
+
+- name: ci-iacsvc-deploy-latest
+  serial: true
+  serial_groups: [ci-iacsvc]
+  plan:
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+    passed: [ci-iacsvc-apply-config]
+  - get: census-rm-terraform
+    trigger: true
+    passed: [ci-iacsvc-apply-config]
+  - get: iacsvc-docker-latest
+    trigger: true
+    passed: [ci-iacsvc-apply-config]
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: patch-to-pull-latest-image
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((ci-gcp-service-account-json))
+      GCP_PROJECT_NAME: ((ci-gcp-project-name))
+      KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: iacsvc
+      KUBERNETES_SELECTOR: app=iacsvc
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {docker-image-resource: iacsvc-docker-latest}
+
+- name: ci-pubsubsvc-deploy-latest
+  serial: true
+  serial_groups: [ci-pubsubsvc]
+  plan:
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+    passed: [ci-pubsubsvc-apply-config]
+  - get: census-rm-terraform
+    trigger: true
+    passed: [ci-pubsubsvc-apply-config]
+  - get: pubsubsvc-docker-latest
+    trigger: true
+    passed: [ci-pubsubsvc-apply-config]
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: patch-to-pull-latest-image
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((ci-gcp-service-account-json))
+      GCP_PROJECT_NAME: ((ci-gcp-project-name))
+      KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: pubsubsvc
+      KUBERNETES_SELECTOR: app=pubsubsvc
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {docker-image-resource: pubsubsvc-docker-latest}
+
+- name: ci-ops-deploy-latest
+  serial: true
+  serial_groups: [ci-ops]
+  plan:
+  - get: census-rm-kubernetes-ops-repo
+    trigger: true
+    passed: [ci-ops-apply-config]
+  - get: census-rm-terraform
+    trigger: true
+    passed: [ci-ops-apply-config]
+  - get: ops-docker-latest
+    trigger: true
+    passed: [ci-ops-apply-config]
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: patch-to-pull-latest-image
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((ci-gcp-service-account-json))
+      GCP_PROJECT_NAME: ((ci-gcp-project-name))
+      KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: ops
+      KUBERNETES_SELECTOR: app=ops
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {docker-image-resource: ops-docker-latest}
+
+
+- name: "CI Acceptance Tests"
+  serial: true
+  serial_groups: [ci-action-scheduler, ci-actionexportersvc, ci-case-api, ci-case-processor, ci-iacsvc, ci-pubsubsvc]
+  plan:
+  - get: census-rm-terraform
+    trigger: true
+    passed: [ci-action-scheduler-deploy-latest, 
+             ci-actionexportersvc-deploy-latest, 
+             ci-case-api-deploy-latest, 
+             ci-case-processor-deploy-latest, 
+             ci-iacsvc-deploy-latest, 
+             ci-pubsubsvc-deploy-latest]
+  - get: acceptance-tests-repo
+  - get: batch-runner-repo
+  - get: acceptance-tests-docker-image
+    trigger: true
+    params:
+      skip_download: true
+  - get: census-rm-kubernetes-handlers-repo
+    trigger: true
+    passed: [ci-actionexportersvc-deploy-latest]
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+    passed: [ci-action-scheduler-deploy-latest, 
+             ci-case-api-deploy-latest, 
+             ci-case-processor-deploy-latest, 
+             ci-iacsvc-deploy-latest, 
+             ci-pubsubsvc-deploy-latest]
+  - get: action-scheduler-docker-latest
+    trigger: true
+    passed: [ci-action-scheduler-deploy-latest]
+    params:
+      skip_download: true
+  - get: actionexportersvc-docker-latest
+    trigger: true
+    passed: [ci-actionexportersvc-deploy-latest]
+    params:
+      skip_download: true
+  - get: case-api-docker-latest
+    trigger: true
+    passed: [ci-case-api-deploy-latest]
+    params:
+      skip_download: true
+  - get: case-processor-docker-latest
+    trigger: true
+    passed: [ci-case-processor-deploy-latest]
+    params:
+      skip_download: true
+  - get: iacsvc-docker-latest
+    trigger: true
+    passed: [ci-iacsvc-deploy-latest]
+    params:
+      skip_download: true
+  - get: pubsubsvc-docker-latest
+    trigger: true
+    passed: [ci-pubsubsvc-deploy-latest]
+    params:
+      skip_download: true
+  - get: qid-batch-runner-docker-latest
+    trigger: true
+    params:
+      skip_download: true
+  - task: "Run Acceptance Tests (in K8s)"
+    file: acceptance-tests-repo/tasks/kubectl-run-acceptance-tests.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((ci-gcp-service-account-json))
+      GCP_PROJECT_NAME: ((ci-gcp-project-name))
+      KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
+      ACCEPTANCE_TESTS_IMAGE: ((acceptance-tests-image))
+    input_mapping: {acceptance-tests-repo: acceptance-tests-repo}
+
+
+# WL Kubernetes Config
+- name: wl-action-scheduler-apply-config
+  serial: true
+  serial_groups: [wl-action-scheduler]
+  plan:
+  - get: census-rm-terraform
+    trigger: true
+    passed: ["CI Acceptance Tests"]
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+    passed: ["CI Acceptance Tests"]
+  - get: action-scheduler-docker-latest
+    trigger: true
+    passed: ["CI Acceptance Tests"]
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((wl-gcp-service-account-json))
+      GCP_PROJECT_NAME: ((wl-gcp-project-name))
+      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: action-scheduler
+      KUBERNETES_SELECTOR: app=action-scheduler
+      KUBERNETES_FILE_PATH: kubernetes-repo/microservices
+      KUBERNETES_FILE_PREFIX: action-scheduler
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
+
+- name: wl-actionexportersvc-apply-config
+  serial: true
+  serial_groups: [wl-actionexportersvc]
+  plan:
+  - get: census-rm-terraform
+    trigger: true
+    passed: ["CI Acceptance Tests"]
+  - get: census-rm-kubernetes-handlers-repo
+    trigger: true
+    passed: ["CI Acceptance Tests"]
+  - get: actionexportersvc-docker-latest
+    trigger: true
+    passed: ["CI Acceptance Tests"]
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((wl-gcp-service-account-json))
+      GCP_PROJECT_NAME: ((wl-gcp-project-name))
+      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: actionexportersvc
+      KUBERNETES_SELECTOR: app=actionexportersvc
+      KUBERNETES_FILE_PATH: kubernetes-repo/handlers
+      KUBERNETES_FILE_PREFIX: actionexporter
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-handlers-repo}
+
+- name: wl-case-api-apply-config
+  serial: true
+  serial_groups: [wl-case-api]
+  plan:
+  - get: census-rm-terraform
+    trigger: true
+    passed: ["CI Acceptance Tests"]
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+    passed: ["CI Acceptance Tests"]
+  - get: case-api-docker-latest
+    trigger: true
+    passed: ["CI Acceptance Tests"]
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((wl-gcp-service-account-json))
+      GCP_PROJECT_NAME: ((wl-gcp-project-name))
+      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: case-api
+      KUBERNETES_SELECTOR: app=case-api
+      KUBERNETES_FILE_PATH: kubernetes-repo/microservices
+      KUBERNETES_FILE_PREFIX: case-api
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
+
+- name: wl-case-processor-apply-config
+  serial: true
+  serial_groups: [wl-case-processor]
+  plan:
+  - get: census-rm-terraform
+    trigger: true
+    passed: ["CI Acceptance Tests"]
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+    passed: ["CI Acceptance Tests"]
+  - get: case-processor-docker-latest
+    trigger: true
+    passed: ["CI Acceptance Tests"]
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-deployment
+    file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((wl-gcp-service-account-json))
+      GCP_PROJECT_NAME: ((wl-gcp-project-name))
+      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: case-processor
+      KUBERNETES_SELECTOR: app=case-processor
+      KUBERNETES_FILE_PATH: kubernetes-repo/microservices
+      KUBERNETES_FILE_PREFIX: case-processor
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
+
+- name: wl-iacsvc-apply-config
+  serial: true
+  serial_groups: [wl-iacsvc]
+  plan:
+  - get: census-rm-terraform
+    trigger: true
+    passed: ["CI Acceptance Tests"]
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+    passed: ["CI Acceptance Tests"]
+  - get: iacsvc-docker-latest
+    trigger: true
+    passed: ["CI Acceptance Tests"]
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((wl-gcp-service-account-json))
+      GCP_PROJECT_NAME: ((wl-gcp-project-name))
+      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: iacsvc
+      KUBERNETES_SELECTOR: app=iacsvc
+      KUBERNETES_FILE_PATH: kubernetes-repo/microservices
+      KUBERNETES_FILE_PREFIX: iac
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
+
+- name: wl-pubsubsvc-apply-config
+  serial: true
+  serial_groups: [wl-pubsubsvc]
+  plan:
+  - get: census-rm-terraform
+    trigger: true
+    passed: ["CI Acceptance Tests"]
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+    passed: ["CI Acceptance Tests"]
+  - get: pubsubsvc-docker-latest
+    trigger: true
+    passed: ["CI Acceptance Tests"]
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-deployment
+    file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((wl-gcp-service-account-json))
+      GCP_PROJECT_NAME: ((wl-gcp-project-name))
+      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: pubsubsvc
+      KUBERNETES_SELECTOR: app=pubsubsvc
+      KUBERNETES_FILE_PATH: kubernetes-repo/microservices
+      KUBERNETES_FILE_PREFIX: pubsub
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
+
+- name: wl-ops-apply-config
+  serial: true
+  serial_groups: [wl-ops]
+  plan:
+  - get: census-rm-terraform
+    trigger: true
+    passed: ["CI Acceptance Tests"]
+  - get: census-rm-kubernetes-ops-repo
+    trigger: true
+  - get: ops-docker-latest
+    trigger: true
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-deployment
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((wl-gcp-service-account-json))
+      GCP_PROJECT_NAME: ((wl-gcp-project-name))
+      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: ops
+      KUBERNETES_SELECTOR: app=ops
+      KUBERNETES_FILE_PATH: kubernetes-repo/optional
+      KUBERNETES_FILE_PREFIX: ops
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-ops-repo}
+
+# Patch to trigger Kubernetes image pull on new latest tag builds
+- name: wl-action-scheduler-deploy-latest
+  serial: true
+  serial_groups: [wl-action-scheduler]
+  plan:
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+    passed: [wl-action-scheduler-apply-config]
+  - get: census-rm-terraform
+    trigger: true
+    passed: [wl-action-scheduler-apply-config]
+  - get: action-scheduler-docker-latest
+    trigger: true
+    passed: [wl-action-scheduler-apply-config]
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: patch-to-pull-latest-image
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((wl-gcp-service-account-json))
+      GCP_PROJECT_NAME: ((wl-gcp-project-name))
+      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: action-scheduler
+      KUBERNETES_SELECTOR: app=action-scheduler
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {docker-image-resource: action-scheduler-docker-latest}
+
+- name: wl-actionexportersvc-deploy-latest
+  serial: true
+  serial_groups: [wl-actionexportersvc]
+  plan:
+  - get: census-rm-kubernetes-handlers-repo
+    trigger: true
+    passed: [wl-actionexportersvc-apply-config]
+  - get: census-rm-terraform
+    trigger: true
+    passed: [wl-actionexportersvc-apply-config]
+  - get: actionexportersvc-docker-latest
+    trigger: true
+    passed: [wl-actionexportersvc-apply-config]
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: patch-to-pull-latest-image
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((wl-gcp-service-account-json))
+      GCP_PROJECT_NAME: ((wl-gcp-project-name))
+      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: actionexportersvc
+      KUBERNETES_SELECTOR: app=actionexportersvc
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {docker-image-resource: actionexportersvc-docker-latest}
+
+- name: wl-case-api-deploy-latest
+  serial: true
+  serial_groups: [wl-case-api]
+  plan:
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+    passed: [wl-case-api-apply-config]
+  - get: census-rm-terraform
+    trigger: true
+    passed: [wl-case-api-apply-config]
+  - get: case-api-docker-latest
+    trigger: true
+    passed: [wl-case-api-apply-config]
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: patch-to-pull-latest-image
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((wl-gcp-service-account-json))
+      GCP_PROJECT_NAME: ((wl-gcp-project-name))
+      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: case-api
+      KUBERNETES_SELECTOR: app=case-api
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {docker-image-resource: case-api-docker-latest}
+
+- name: wl-case-processor-deploy-latest
+  serial: true
+  serial_groups: [wl-case-processor]
+  plan:
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+    passed: [wl-case-processor-apply-config]
+  - get: census-rm-terraform
+    trigger: true
+    passed: [wl-case-processor-apply-config]
+  - get: case-processor-docker-latest
+    trigger: true
+    passed: [wl-case-processor-apply-config]
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: patch-to-pull-latest-image
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((wl-gcp-service-account-json))
+      GCP_PROJECT_NAME: ((wl-gcp-project-name))
+      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: case-processor
+      KUBERNETES_SELECTOR: app=case-processor
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {docker-image-resource: case-processor-docker-latest}
+
+- name: wl-iacsvc-deploy-latest
+  serial: true
+  serial_groups: [wl-iacsvc]
+  plan:
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+    passed: [wl-iacsvc-apply-config]
+  - get: census-rm-terraform
+    trigger: true
+    passed: [wl-iacsvc-apply-config]
+  - get: iacsvc-docker-latest
+    trigger: true
+    passed: [wl-iacsvc-apply-config]
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: patch-to-pull-latest-image
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((wl-gcp-service-account-json))
+      GCP_PROJECT_NAME: ((wl-gcp-project-name))
+      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: iacsvc
+      KUBERNETES_SELECTOR: app=iacsvc
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {docker-image-resource: iacsvc-docker-latest}
+
+- name: wl-pubsubsvc-deploy-latest
+  serial: true
+  serial_groups: [wl-pubsubsvc]
+  plan:
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+    passed: [wl-pubsubsvc-apply-config]
+  - get: census-rm-terraform
+    trigger: true
+    passed: [wl-pubsubsvc-apply-config]
+  - get: pubsubsvc-docker-latest
+    trigger: true
+    passed: [wl-pubsubsvc-apply-config]
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: patch-to-pull-latest-image
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((wl-gcp-service-account-json))
+      GCP_PROJECT_NAME: ((wl-gcp-project-name))
+      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: pubsubsvc
+      KUBERNETES_SELECTOR: app=pubsubsvc
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {docker-image-resource: pubsubsvc-docker-latest}
+
+- name: wl-ops-deploy-latest
+  serial: true
+  serial_groups: [wl-ops]
+  plan:
+  - get: census-rm-kubernetes-ops-repo
+    trigger: true
+    passed: [wl-ops-apply-config]
+  - get: census-rm-terraform
+    trigger: true
+    passed: [wl-ops-apply-config]
+  - get: ops-docker-latest
+    trigger: true
+    passed: [wl-ops-apply-config]
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: patch-to-pull-latest-image
+    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((wl-gcp-service-account-json))
+      GCP_PROJECT_NAME: ((wl-gcp-project-name))
+      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: ops
+      KUBERNETES_SELECTOR: app=ops
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {docker-image-resource: ops-docker-latest}
