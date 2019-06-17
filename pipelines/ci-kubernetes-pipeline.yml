@@ -136,6 +136,7 @@ jobs:
           repository: google/cloud-sdk
       params:
         AUTO_APPLY: true
+        DEV_DUMMY_PGP: true
         DEV_PUBSUB: true
         DISABLE_CI_BINDING: true
         ENV: ((gcp-environment-name))
