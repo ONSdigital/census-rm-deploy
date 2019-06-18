@@ -5,6 +5,7 @@ resources:
   source:
     uri: git@github.com:ONSdigital/census-rm-deploy.git
     private_key: ((github-private-key))
+    branch: ci-wl-pipeline
 
 - name: census-rm-kubernetes-repo
   type: git
@@ -119,9 +120,10 @@ resources:
 jobs:
 
 
+# CI
 - name: ci-deploy-infrastructure
   serial: true
-  serial_groups: [ci-action-scheduler, ci-actionexportersvc, ci-case-api, ci-case-processor, ci-iacsvc, ci-ops, ci-pubsubsvc]
+  serial_groups: [ci-action-scheduler, ci-actionexportersvc, ci-case-api, ci-case-processor, ci-iacsvc, ci-ops-tool, ci-pubsubsvc]
   max_in_flight: 1
   plan:
   - get: census-rm-terraform
@@ -167,8 +169,7 @@ jobs:
             WFH_IP="35.246.106.81/32" ./apply.sh
 
 
-# Kubernetes Config
-- name: ci-action-scheduler-apply-config
+- name: ci-action-scheduler
   serial: true
   serial_groups: [ci-action-scheduler]
   plan:
@@ -195,7 +196,7 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
-- name: ci-actionexportersvc-apply-config
+- name: ci-actionexportersvc
   serial: true
   serial_groups: [ci-actionexportersvc]
   plan:
@@ -222,7 +223,7 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-handlers-repo}
 
-- name: ci-case-api-apply-config
+- name: ci-case-api
   serial: true
   serial_groups: [ci-case-api]
   plan:
@@ -249,7 +250,7 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
-- name: ci-case-processor-apply-config
+- name: ci-case-processor
   serial: true
   serial_groups: [ci-case-processor]
   plan:
@@ -276,7 +277,7 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
-- name: ci-iacsvc-apply-config
+- name: ci-iacsvc
   serial: true
   serial_groups: [ci-iacsvc]
   plan:
@@ -303,7 +304,7 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
-- name: ci-pubsubsvc-apply-config
+- name: ci-pubsubsvc
   serial: true
   serial_groups: [ci-pubsubsvc]
   plan:
@@ -330,9 +331,9 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
-- name: ci-ops-apply-config
+- name: ci-ops-tool
   serial: true
-  serial_groups: [ci-ops]
+  serial_groups: [ci-ops-tool]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -357,209 +358,18 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-ops-repo}
 
-# Patch to trigger Kubernetes image pull on new latest tag builds
-- name: ci-action-scheduler-deploy-latest
-  serial: true
-  serial_groups: [ci-action-scheduler]
-  plan:
-  - get: census-rm-kubernetes-microservices-repo
-    trigger: true
-    passed: [ci-action-scheduler-apply-config]
-  - get: census-rm-terraform
-    trigger: true
-    passed: [ci-action-scheduler-apply-config]
-  - get: action-scheduler-docker-latest
-    trigger: true
-    passed: [ci-action-scheduler-apply-config]
-    params:
-      skip_download: true
-  - get: census-rm-deploy
-  - task: patch-to-pull-latest-image
-    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
-    params:
-      SERVICE_ACCOUNT_JSON: ((ci-gcp-service-account-json))
-      GCP_PROJECT_NAME: ((ci-gcp-project-name))
-      KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
-      KUBERNETES_DEPLOYMENT_NAME: action-scheduler
-      KUBERNETES_SELECTOR: app=action-scheduler
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {docker-image-resource: action-scheduler-docker-latest}
-
-- name: ci-actionexportersvc-deploy-latest
-  serial: true
-  serial_groups: [ci-actionexportersvc]
-  plan:
-  - get: census-rm-kubernetes-handlers-repo
-    trigger: true
-    passed: [ci-actionexportersvc-apply-config]
-  - get: census-rm-terraform
-    trigger: true
-    passed: [ci-actionexportersvc-apply-config]
-  - get: actionexportersvc-docker-latest
-    trigger: true
-    passed: [ci-actionexportersvc-apply-config]
-    params:
-      skip_download: true
-  - get: census-rm-deploy
-  - task: patch-to-pull-latest-image
-    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
-    params:
-      SERVICE_ACCOUNT_JSON: ((ci-gcp-service-account-json))
-      GCP_PROJECT_NAME: ((ci-gcp-project-name))
-      KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
-      KUBERNETES_DEPLOYMENT_NAME: actionexportersvc
-      KUBERNETES_SELECTOR: app=actionexportersvc
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {docker-image-resource: actionexportersvc-docker-latest}
-
-- name: ci-case-api-deploy-latest
-  serial: true
-  serial_groups: [ci-case-api]
-  plan:
-  - get: census-rm-kubernetes-microservices-repo
-    trigger: true
-    passed: [ci-case-api-apply-config]
-  - get: census-rm-terraform
-    trigger: true
-    passed: [ci-case-api-apply-config]
-  - get: case-api-docker-latest
-    trigger: true
-    passed: [ci-case-api-apply-config]
-    params:
-      skip_download: true
-  - get: census-rm-deploy
-  - task: patch-to-pull-latest-image
-    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
-    params:
-      SERVICE_ACCOUNT_JSON: ((ci-gcp-service-account-json))
-      GCP_PROJECT_NAME: ((ci-gcp-project-name))
-      KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
-      KUBERNETES_DEPLOYMENT_NAME: case-api
-      KUBERNETES_SELECTOR: app=case-api
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {docker-image-resource: case-api-docker-latest}
-
-- name: ci-case-processor-deploy-latest
-  serial: true
-  serial_groups: [ci-case-processor]
-  plan:
-  - get: census-rm-kubernetes-microservices-repo
-    trigger: true
-    passed: [ci-case-processor-apply-config]
-  - get: census-rm-terraform
-    trigger: true
-    passed: [ci-case-processor-apply-config]
-  - get: case-processor-docker-latest
-    trigger: true
-    passed: [ci-case-processor-apply-config]
-    params:
-      skip_download: true
-  - get: census-rm-deploy
-  - task: patch-to-pull-latest-image
-    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
-    params:
-      SERVICE_ACCOUNT_JSON: ((ci-gcp-service-account-json))
-      GCP_PROJECT_NAME: ((ci-gcp-project-name))
-      KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
-      KUBERNETES_DEPLOYMENT_NAME: case-processor
-      KUBERNETES_SELECTOR: app=case-processor
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {docker-image-resource: case-processor-docker-latest}
-
-- name: ci-iacsvc-deploy-latest
-  serial: true
-  serial_groups: [ci-iacsvc]
-  plan:
-  - get: census-rm-kubernetes-microservices-repo
-    trigger: true
-    passed: [ci-iacsvc-apply-config]
-  - get: census-rm-terraform
-    trigger: true
-    passed: [ci-iacsvc-apply-config]
-  - get: iacsvc-docker-latest
-    trigger: true
-    passed: [ci-iacsvc-apply-config]
-    params:
-      skip_download: true
-  - get: census-rm-deploy
-  - task: patch-to-pull-latest-image
-    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
-    params:
-      SERVICE_ACCOUNT_JSON: ((ci-gcp-service-account-json))
-      GCP_PROJECT_NAME: ((ci-gcp-project-name))
-      KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
-      KUBERNETES_DEPLOYMENT_NAME: iacsvc
-      KUBERNETES_SELECTOR: app=iacsvc
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {docker-image-resource: iacsvc-docker-latest}
-
-- name: ci-pubsubsvc-deploy-latest
-  serial: true
-  serial_groups: [ci-pubsubsvc]
-  plan:
-  - get: census-rm-kubernetes-microservices-repo
-    trigger: true
-    passed: [ci-pubsubsvc-apply-config]
-  - get: census-rm-terraform
-    trigger: true
-    passed: [ci-pubsubsvc-apply-config]
-  - get: pubsubsvc-docker-latest
-    trigger: true
-    passed: [ci-pubsubsvc-apply-config]
-    params:
-      skip_download: true
-  - get: census-rm-deploy
-  - task: patch-to-pull-latest-image
-    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
-    params:
-      SERVICE_ACCOUNT_JSON: ((ci-gcp-service-account-json))
-      GCP_PROJECT_NAME: ((ci-gcp-project-name))
-      KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
-      KUBERNETES_DEPLOYMENT_NAME: pubsubsvc
-      KUBERNETES_SELECTOR: app=pubsubsvc
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {docker-image-resource: pubsubsvc-docker-latest}
-
-- name: ci-ops-deploy-latest
-  serial: true
-  serial_groups: [ci-ops]
-  plan:
-  - get: census-rm-kubernetes-ops-repo
-    trigger: true
-    passed: [ci-ops-apply-config]
-  - get: census-rm-terraform
-    trigger: true
-    passed: [ci-ops-apply-config]
-  - get: ops-docker-latest
-    trigger: true
-    passed: [ci-ops-apply-config]
-    params:
-      skip_download: true
-  - get: census-rm-deploy
-  - task: patch-to-pull-latest-image
-    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
-    params:
-      SERVICE_ACCOUNT_JSON: ((ci-gcp-service-account-json))
-      GCP_PROJECT_NAME: ((ci-gcp-project-name))
-      KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
-      KUBERNETES_DEPLOYMENT_NAME: ops
-      KUBERNETES_SELECTOR: app=ops
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {docker-image-resource: ops-docker-latest}
-
-
 - name: "CI Acceptance Tests"
   serial: true
   serial_groups: [ci-action-scheduler, ci-actionexportersvc, ci-case-api, ci-case-processor, ci-iacsvc, ci-pubsubsvc]
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: [ci-action-scheduler-deploy-latest, 
-             ci-actionexportersvc-deploy-latest, 
-             ci-case-api-deploy-latest, 
-             ci-case-processor-deploy-latest, 
-             ci-iacsvc-deploy-latest, 
-             ci-pubsubsvc-deploy-latest]
+    passed: [ci-action-scheduler, 
+             ci-actionexportersvc, 
+             ci-case-api, 
+             ci-case-processor, 
+             ci-iacsvc, 
+             ci-pubsubsvc]
   - get: acceptance-tests-repo
   - get: batch-runner-repo
   - get: acceptance-tests-docker-image
@@ -568,42 +378,42 @@ jobs:
       skip_download: true
   - get: census-rm-kubernetes-handlers-repo
     trigger: true
-    passed: [ci-actionexportersvc-deploy-latest]
+    passed: [ci-actionexportersvc]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
-    passed: [ci-action-scheduler-deploy-latest, 
-             ci-case-api-deploy-latest, 
-             ci-case-processor-deploy-latest, 
-             ci-iacsvc-deploy-latest, 
-             ci-pubsubsvc-deploy-latest]
+    passed: [ci-action-scheduler, 
+             ci-case-api, 
+             ci-case-processor, 
+             ci-iacsvc, 
+             ci-pubsubsvc]
   - get: action-scheduler-docker-latest
     trigger: true
-    passed: [ci-action-scheduler-deploy-latest]
+    passed: [ci-action-scheduler]
     params:
       skip_download: true
   - get: actionexportersvc-docker-latest
     trigger: true
-    passed: [ci-actionexportersvc-deploy-latest]
+    passed: [ci-actionexportersvc]
     params:
       skip_download: true
   - get: case-api-docker-latest
     trigger: true
-    passed: [ci-case-api-deploy-latest]
+    passed: [ci-case-api]
     params:
       skip_download: true
   - get: case-processor-docker-latest
     trigger: true
-    passed: [ci-case-processor-deploy-latest]
+    passed: [ci-case-processor]
     params:
       skip_download: true
   - get: iacsvc-docker-latest
     trigger: true
-    passed: [ci-iacsvc-deploy-latest]
+    passed: [ci-iacsvc]
     params:
       skip_download: true
   - get: pubsubsvc-docker-latest
     trigger: true
-    passed: [ci-pubsubsvc-deploy-latest]
+    passed: [ci-pubsubsvc]
     params:
       skip_download: true
   - get: qid-batch-runner-docker-latest
@@ -620,8 +430,8 @@ jobs:
     input_mapping: {acceptance-tests-repo: acceptance-tests-repo}
 
 
-# WL Kubernetes Config
-- name: wl-action-scheduler-apply-config
+# WL 
+- name: wl-action-scheduler
   serial: true
   serial_groups: [wl-action-scheduler]
   plan:
@@ -650,7 +460,7 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
-- name: wl-actionexportersvc-apply-config
+- name: wl-actionexportersvc
   serial: true
   serial_groups: [wl-actionexportersvc]
   plan:
@@ -679,7 +489,7 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-handlers-repo}
 
-- name: wl-case-api-apply-config
+- name: wl-case-api
   serial: true
   serial_groups: [wl-case-api]
   plan:
@@ -708,7 +518,7 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
-- name: wl-case-processor-apply-config
+- name: wl-case-processor
   serial: true
   serial_groups: [wl-case-processor]
   plan:
@@ -737,7 +547,7 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
-- name: wl-iacsvc-apply-config
+- name: wl-iacsvc
   serial: true
   serial_groups: [wl-iacsvc]
   plan:
@@ -766,7 +576,7 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
-- name: wl-pubsubsvc-apply-config
+- name: wl-pubsubsvc
   serial: true
   serial_groups: [wl-pubsubsvc]
   plan:
@@ -795,7 +605,7 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
-- name: wl-ops-apply-config
+- name: wl-ops
   serial: true
   serial_groups: [wl-ops]
   plan:
@@ -821,193 +631,3 @@ jobs:
       KUBERNETES_FILE_PREFIX: ops
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-ops-repo}
-
-# Patch to trigger Kubernetes image pull on new latest tag builds
-- name: wl-action-scheduler-deploy-latest
-  serial: true
-  serial_groups: [wl-action-scheduler]
-  plan:
-  - get: census-rm-kubernetes-microservices-repo
-    trigger: true
-    passed: [wl-action-scheduler-apply-config]
-  - get: census-rm-terraform
-    trigger: true
-    passed: [wl-action-scheduler-apply-config]
-  - get: action-scheduler-docker-latest
-    trigger: true
-    passed: [wl-action-scheduler-apply-config]
-    params:
-      skip_download: true
-  - get: census-rm-deploy
-  - task: patch-to-pull-latest-image
-    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
-    params:
-      SERVICE_ACCOUNT_JSON: ((wl-gcp-service-account-json))
-      GCP_PROJECT_NAME: ((wl-gcp-project-name))
-      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
-      KUBERNETES_DEPLOYMENT_NAME: action-scheduler
-      KUBERNETES_SELECTOR: app=action-scheduler
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {docker-image-resource: action-scheduler-docker-latest}
-
-- name: wl-actionexportersvc-deploy-latest
-  serial: true
-  serial_groups: [wl-actionexportersvc]
-  plan:
-  - get: census-rm-kubernetes-handlers-repo
-    trigger: true
-    passed: [wl-actionexportersvc-apply-config]
-  - get: census-rm-terraform
-    trigger: true
-    passed: [wl-actionexportersvc-apply-config]
-  - get: actionexportersvc-docker-latest
-    trigger: true
-    passed: [wl-actionexportersvc-apply-config]
-    params:
-      skip_download: true
-  - get: census-rm-deploy
-  - task: patch-to-pull-latest-image
-    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
-    params:
-      SERVICE_ACCOUNT_JSON: ((wl-gcp-service-account-json))
-      GCP_PROJECT_NAME: ((wl-gcp-project-name))
-      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
-      KUBERNETES_DEPLOYMENT_NAME: actionexportersvc
-      KUBERNETES_SELECTOR: app=actionexportersvc
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {docker-image-resource: actionexportersvc-docker-latest}
-
-- name: wl-case-api-deploy-latest
-  serial: true
-  serial_groups: [wl-case-api]
-  plan:
-  - get: census-rm-kubernetes-microservices-repo
-    trigger: true
-    passed: [wl-case-api-apply-config]
-  - get: census-rm-terraform
-    trigger: true
-    passed: [wl-case-api-apply-config]
-  - get: case-api-docker-latest
-    trigger: true
-    passed: [wl-case-api-apply-config]
-    params:
-      skip_download: true
-  - get: census-rm-deploy
-  - task: patch-to-pull-latest-image
-    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
-    params:
-      SERVICE_ACCOUNT_JSON: ((wl-gcp-service-account-json))
-      GCP_PROJECT_NAME: ((wl-gcp-project-name))
-      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
-      KUBERNETES_DEPLOYMENT_NAME: case-api
-      KUBERNETES_SELECTOR: app=case-api
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {docker-image-resource: case-api-docker-latest}
-
-- name: wl-case-processor-deploy-latest
-  serial: true
-  serial_groups: [wl-case-processor]
-  plan:
-  - get: census-rm-kubernetes-microservices-repo
-    trigger: true
-    passed: [wl-case-processor-apply-config]
-  - get: census-rm-terraform
-    trigger: true
-    passed: [wl-case-processor-apply-config]
-  - get: case-processor-docker-latest
-    trigger: true
-    passed: [wl-case-processor-apply-config]
-    params:
-      skip_download: true
-  - get: census-rm-deploy
-  - task: patch-to-pull-latest-image
-    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
-    params:
-      SERVICE_ACCOUNT_JSON: ((wl-gcp-service-account-json))
-      GCP_PROJECT_NAME: ((wl-gcp-project-name))
-      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
-      KUBERNETES_DEPLOYMENT_NAME: case-processor
-      KUBERNETES_SELECTOR: app=case-processor
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {docker-image-resource: case-processor-docker-latest}
-
-- name: wl-iacsvc-deploy-latest
-  serial: true
-  serial_groups: [wl-iacsvc]
-  plan:
-  - get: census-rm-kubernetes-microservices-repo
-    trigger: true
-    passed: [wl-iacsvc-apply-config]
-  - get: census-rm-terraform
-    trigger: true
-    passed: [wl-iacsvc-apply-config]
-  - get: iacsvc-docker-latest
-    trigger: true
-    passed: [wl-iacsvc-apply-config]
-    params:
-      skip_download: true
-  - get: census-rm-deploy
-  - task: patch-to-pull-latest-image
-    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
-    params:
-      SERVICE_ACCOUNT_JSON: ((wl-gcp-service-account-json))
-      GCP_PROJECT_NAME: ((wl-gcp-project-name))
-      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
-      KUBERNETES_DEPLOYMENT_NAME: iacsvc
-      KUBERNETES_SELECTOR: app=iacsvc
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {docker-image-resource: iacsvc-docker-latest}
-
-- name: wl-pubsubsvc-deploy-latest
-  serial: true
-  serial_groups: [wl-pubsubsvc]
-  plan:
-  - get: census-rm-kubernetes-microservices-repo
-    trigger: true
-    passed: [wl-pubsubsvc-apply-config]
-  - get: census-rm-terraform
-    trigger: true
-    passed: [wl-pubsubsvc-apply-config]
-  - get: pubsubsvc-docker-latest
-    trigger: true
-    passed: [wl-pubsubsvc-apply-config]
-    params:
-      skip_download: true
-  - get: census-rm-deploy
-  - task: patch-to-pull-latest-image
-    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
-    params:
-      SERVICE_ACCOUNT_JSON: ((wl-gcp-service-account-json))
-      GCP_PROJECT_NAME: ((wl-gcp-project-name))
-      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
-      KUBERNETES_DEPLOYMENT_NAME: pubsubsvc
-      KUBERNETES_SELECTOR: app=pubsubsvc
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {docker-image-resource: pubsubsvc-docker-latest}
-
-- name: wl-ops-deploy-latest
-  serial: true
-  serial_groups: [wl-ops]
-  plan:
-  - get: census-rm-kubernetes-ops-repo
-    trigger: true
-    passed: [wl-ops-apply-config]
-  - get: census-rm-terraform
-    trigger: true
-    passed: [wl-ops-apply-config]
-  - get: ops-docker-latest
-    trigger: true
-    passed: [wl-ops-apply-config]
-    params:
-      skip_download: true
-  - get: census-rm-deploy
-  - task: patch-to-pull-latest-image
-    file: census-rm-deploy/tasks/kubectl-patch-to-latest.yml
-    params:
-      SERVICE_ACCOUNT_JSON: ((wl-gcp-service-account-json))
-      GCP_PROJECT_NAME: ((wl-gcp-project-name))
-      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
-      KUBERNETES_DEPLOYMENT_NAME: ops
-      KUBERNETES_SELECTOR: app=ops
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {docker-image-resource: ops-docker-latest}
