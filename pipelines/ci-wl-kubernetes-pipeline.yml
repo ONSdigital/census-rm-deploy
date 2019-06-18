@@ -605,9 +605,9 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
-- name: wl-ops
+- name: wl-ops-tool
   serial: true
-  serial_groups: [wl-ops]
+  serial_groups: [wl-ops-tool]
   plan:
   - get: census-rm-terraform
     trigger: true
