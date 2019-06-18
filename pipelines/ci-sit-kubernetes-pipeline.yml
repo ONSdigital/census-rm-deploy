@@ -120,7 +120,7 @@ jobs:
 
 
 # CI
-- name: ci-deploy-infrastructure
+- name: "CI Deploy Infrastructure"
   serial: true
   serial_groups: [ci-action-scheduler, ci-actionexportersvc, ci-case-api, ci-case-processor, ci-iacsvc, ci-ops-tool, ci-pubsubsvc]
   max_in_flight: 1
@@ -168,13 +168,13 @@ jobs:
             WFH_IP="35.246.106.81/32" ./apply.sh
 
 
-- name: ci-action-scheduler
+- name: "CI Deploy Action-Scheduler"
   serial: true
   serial_groups: [ci-action-scheduler]
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: [ci-deploy-infrastructure]
+    passed: ["CI Deploy Infrastructure"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
   - get: action-scheduler-docker-latest
@@ -195,13 +195,13 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
-- name: ci-actionexportersvc
+- name: "CI Deploy Actionexporter"
   serial: true
   serial_groups: [ci-actionexportersvc]
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: [ci-deploy-infrastructure]
+    passed: ["CI Deploy Infrastructure"]
   - get: census-rm-kubernetes-handlers-repo
     trigger: true
   - get: actionexportersvc-docker-latest
@@ -222,13 +222,13 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-handlers-repo}
 
-- name: ci-case-api
+- name: "CI Deploy Case-API"
   serial: true
   serial_groups: [ci-case-api]
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: [ci-deploy-infrastructure]
+    passed: ["CI Deploy Infrastructure"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
   - get: case-api-docker-latest
@@ -249,13 +249,13 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
-- name: ci-case-processor
+- name: "CI Deploy Case-Processor"
   serial: true
   serial_groups: [ci-case-processor]
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: [ci-deploy-infrastructure]
+    passed: ["CI Deploy Infrastructure"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
   - get: case-processor-docker-latest
@@ -276,13 +276,13 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
-- name: ci-iacsvc
+- name: "CI Deploy IAC Service"
   serial: true
   serial_groups: [ci-iacsvc]
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: [ci-deploy-infrastructure]
+    passed: ["CI Deploy Infrastructure"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
   - get: iacsvc-docker-latest
@@ -303,13 +303,13 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
-- name: ci-pubsubsvc
+- name: "CI Deploy PubSub Service"
   serial: true
   serial_groups: [ci-pubsubsvc]
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: [ci-deploy-infrastructure]
+    passed: ["CI Deploy Infrastructure"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
   - get: pubsubsvc-docker-latest
@@ -330,13 +330,13 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
-- name: ci-ops-tool
+- name: "CI Deploy Ops Tool"
   serial: true
   serial_groups: [ci-ops-tool]
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: [ci-deploy-infrastructure]
+    passed: ["CI Deploy Infrastructure"]
   - get: census-rm-kubernetes-ops-repo
     trigger: true
   - get: ops-docker-latest
@@ -363,12 +363,12 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: [ci-action-scheduler, 
-             ci-actionexportersvc, 
-             ci-case-api, 
-             ci-case-processor, 
-             ci-iacsvc, 
-             ci-pubsubsvc]
+    passed: ["CI Deploy Action-Scheduler", 
+             "CI Deploy Actionexporter", 
+             "CI Deploy Case-API", 
+             "CI Deploy Case-Processor", 
+             "CI Deploy IAC Service", 
+             "CI Deploy PubSub Service"]
   - get: acceptance-tests-repo
   - get: batch-runner-repo
   - get: acceptance-tests-docker-image
@@ -377,42 +377,42 @@ jobs:
       skip_download: true
   - get: census-rm-kubernetes-handlers-repo
     trigger: true
-    passed: [ci-actionexportersvc]
+    passed: ["CI Deploy Actionexporter"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
-    passed: [ci-action-scheduler, 
-             ci-case-api, 
-             ci-case-processor, 
-             ci-iacsvc, 
-             ci-pubsubsvc]
+    passed: ["CI Deploy Action-Scheduler", 
+             "CI Deploy Case-API", 
+             "CI Deploy Case-Processor", 
+             "CI Deploy IAC Service", 
+             "CI Deploy PubSub Service"]
   - get: action-scheduler-docker-latest
     trigger: true
-    passed: [ci-action-scheduler]
+    passed: ["CI Deploy Action-Scheduler"]
     params:
       skip_download: true
   - get: actionexportersvc-docker-latest
     trigger: true
-    passed: [ci-actionexportersvc]
+    passed: ["CI Deploy Actionexporter"]
     params:
       skip_download: true
   - get: case-api-docker-latest
     trigger: true
-    passed: [ci-case-api]
+    passed: ["CI Deploy Case-API"]
     params:
       skip_download: true
   - get: case-processor-docker-latest
     trigger: true
-    passed: [ci-case-processor]
+    passed: ["CI Deploy Case-Processor"]
     params:
       skip_download: true
   - get: iacsvc-docker-latest
     trigger: true
-    passed: [ci-iacsvc]
+    passed: ["CI Deploy IAC Service"]
     params:
       skip_download: true
   - get: pubsubsvc-docker-latest
     trigger: true
-    passed: [ci-pubsubsvc]
+    passed: ["CI Deploy PubSub Service"]
     params:
       skip_download: true
   - get: qid-batch-runner-docker-latest
@@ -429,10 +429,10 @@ jobs:
     input_mapping: {acceptance-tests-repo: acceptance-tests-repo}
 
 
-# WL 
-- name: wl-action-scheduler
+# SIT 
+- name: "SIT Deploy Action-Scheduler"
   serial: true
-  serial_groups: [wl-action-scheduler]
+  serial_groups: [sit-action-scheduler]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -449,9 +449,9 @@ jobs:
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
     params:
-      SERVICE_ACCOUNT_JSON: ((wl-gcp-service-account-json))
-      GCP_PROJECT_NAME: ((wl-gcp-project-name))
-      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
+      SERVICE_ACCOUNT_JSON: ((sit-gcp-service-account-json))
+      GCP_PROJECT_NAME: ((sit-gcp-project-name))
+      KUBERNETES_CLUSTER: ((sit-kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: action-scheduler
       KUBERNETES_SELECTOR: app=action-scheduler
       KUBERNETES_FILE_PATH: kubernetes-repo/microservices
@@ -459,9 +459,9 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
-- name: wl-actionexportersvc
+- name: "SIT Deploy Actionexporter"
   serial: true
-  serial_groups: [wl-actionexportersvc]
+  serial_groups: [sit-actionexportersvc]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -478,9 +478,9 @@ jobs:
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
     params:
-      SERVICE_ACCOUNT_JSON: ((wl-gcp-service-account-json))
-      GCP_PROJECT_NAME: ((wl-gcp-project-name))
-      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
+      SERVICE_ACCOUNT_JSON: ((sit-gcp-service-account-json))
+      GCP_PROJECT_NAME: ((sit-gcp-project-name))
+      KUBERNETES_CLUSTER: ((sit-kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: actionexportersvc
       KUBERNETES_SELECTOR: app=actionexportersvc
       KUBERNETES_FILE_PATH: kubernetes-repo/handlers
@@ -488,9 +488,9 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-handlers-repo}
 
-- name: wl-case-api
+- name: "SIT Deploy Case-API"
   serial: true
-  serial_groups: [wl-case-api]
+  serial_groups: [sit-case-api]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -507,9 +507,9 @@ jobs:
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
     params:
-      SERVICE_ACCOUNT_JSON: ((wl-gcp-service-account-json))
-      GCP_PROJECT_NAME: ((wl-gcp-project-name))
-      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
+      SERVICE_ACCOUNT_JSON: ((sit-gcp-service-account-json))
+      GCP_PROJECT_NAME: ((sit-gcp-project-name))
+      KUBERNETES_CLUSTER: ((sit-kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: case-api
       KUBERNETES_SELECTOR: app=case-api
       KUBERNETES_FILE_PATH: kubernetes-repo/microservices
@@ -517,9 +517,9 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
-- name: wl-case-processor
+- name: "SIT Deploy Case-Processor"
   serial: true
-  serial_groups: [wl-case-processor]
+  serial_groups: [sit-case-processor]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -536,9 +536,9 @@ jobs:
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
     params:
-      SERVICE_ACCOUNT_JSON: ((wl-gcp-service-account-json))
-      GCP_PROJECT_NAME: ((wl-gcp-project-name))
-      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
+      SERVICE_ACCOUNT_JSON: ((sit-gcp-service-account-json))
+      GCP_PROJECT_NAME: ((sit-gcp-project-name))
+      KUBERNETES_CLUSTER: ((sit-kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: case-processor
       KUBERNETES_SELECTOR: app=case-processor
       KUBERNETES_FILE_PATH: kubernetes-repo/microservices
@@ -546,9 +546,9 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
-- name: wl-iacsvc
+- name: "SIT Deploy IAC Service"
   serial: true
-  serial_groups: [wl-iacsvc]
+  serial_groups: [sit-iacsvc]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -565,9 +565,9 @@ jobs:
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
     params:
-      SERVICE_ACCOUNT_JSON: ((wl-gcp-service-account-json))
-      GCP_PROJECT_NAME: ((wl-gcp-project-name))
-      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
+      SERVICE_ACCOUNT_JSON: ((sit-gcp-service-account-json))
+      GCP_PROJECT_NAME: ((sit-gcp-project-name))
+      KUBERNETES_CLUSTER: ((sit-kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: iacsvc
       KUBERNETES_SELECTOR: app=iacsvc
       KUBERNETES_FILE_PATH: kubernetes-repo/microservices
@@ -575,9 +575,9 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
-- name: wl-pubsubsvc
+- name: "SIT Deploy PubSub Service"
   serial: true
-  serial_groups: [wl-pubsubsvc]
+  serial_groups: [sit-pubsubsvc]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -594,9 +594,9 @@ jobs:
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
     params:
-      SERVICE_ACCOUNT_JSON: ((wl-gcp-service-account-json))
-      GCP_PROJECT_NAME: ((wl-gcp-project-name))
-      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
+      SERVICE_ACCOUNT_JSON: ((sit-gcp-service-account-json))
+      GCP_PROJECT_NAME: ((sit-gcp-project-name))
+      KUBERNETES_CLUSTER: ((sit-kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: pubsubsvc
       KUBERNETES_SELECTOR: app=pubsubsvc
       KUBERNETES_FILE_PATH: kubernetes-repo/microservices
@@ -604,9 +604,9 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
-- name: wl-ops-tool
+- name: "SIT Deploy Ops Tool"
   serial: true
-  serial_groups: [wl-ops-tool]
+  serial_groups: [sit-ops-tool]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -621,9 +621,9 @@ jobs:
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
     params:
-      SERVICE_ACCOUNT_JSON: ((wl-gcp-service-account-json))
-      GCP_PROJECT_NAME: ((wl-gcp-project-name))
-      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
+      SERVICE_ACCOUNT_JSON: ((sit-gcp-service-account-json))
+      GCP_PROJECT_NAME: ((sit-gcp-project-name))
+      KUBERNETES_CLUSTER: ((sit-kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: ops
       KUBERNETES_SELECTOR: app=ops
       KUBERNETES_FILE_PATH: kubernetes-repo/optional
