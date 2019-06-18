@@ -10,7 +10,7 @@ The deploys/tests can be triggered by:
 
 * Changes to our k8s manifests in [`census-rm-kubernetes`](https://github.com/ONSdigital/census-rm-kubernetes).
 
-* New builds for the `latest` tag for the RM service docker images. On being triggered by a new image build it runs the config apply to ensure the config is in line with master, then runs `kubectl patch` for the nesity built images deployment giving them a timestamp and image digest label. This causes kubernetes to re-pull the latest image and bring up new pods while we are using `imagePullPolicy: Always`.
+* New builds for the `latest` tag for the RM service docker images. On being triggered by a new image build it applies the config to ensure it is in line with master, then runs `kubectl patch` for the newly built image deployments giving them a timestamp and image digest label. This causes kubernetes to re-pull the latest image and bring up new pods while we are using `imagePullPolicy: Always`.
 
 #### How to fly
 Create a secrets YAML file containing the required configuration:
