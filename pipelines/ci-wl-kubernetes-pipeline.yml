@@ -138,6 +138,7 @@ jobs:
         AUTO_APPLY: true
         DEV_PUBSUB: true
         DISABLE_CI_BINDING: true
+        DEV_DUMMY_PGP: true
         ENV: ((ci-gcp-environment-name))
         GOOGLE_APPLICATION_CREDENTIALS: /root/gcloud-service-key.json
         KEEP_TMP_K8S: true
