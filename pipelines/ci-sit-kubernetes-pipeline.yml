@@ -165,7 +165,7 @@ jobs:
             curl -L https://git.io/get_helm.sh | bash && \
             helm init --client-only && \
             helm plugin install https://github.com/rimusz/helm-tiller
-            WFH_IP="35.246.106.81/32" ./apply.sh
+            ./apply.sh
 
 
 - name: "CI Deploy Action-Scheduler"
