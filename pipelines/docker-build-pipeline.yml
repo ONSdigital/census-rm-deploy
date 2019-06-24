@@ -8,11 +8,54 @@ resource_types:
 
 resources:
 
+  - name: actionexporter-master
+    type: git
+    source:
+      uri: git@github.com:ONSdigital/census-rm-actionexporter-service.git
+      private_key: ((github-private-key))
+
   - name: action-scheduler-master
     type: git
     source:
       uri: git@github.com:ONSdigital/census-rm-action-scheduler.git
       private_key: ((github-private-key))
+
+  - name: case-api-master
+    type: git
+    source:
+      uri: git@github.com:ONSdigital/census-rm-case-api.git
+      private_key: ((github-private-key))
+
+  - name: case-processor-master
+    type: git
+    source:
+      uri: git@github.com:ONSdigital/census-rm-case-processor.git
+      private_key: ((github-private-key))
+
+  - name: ops-master
+    type: git
+    source:
+      uri: git@github.com:ONSdigital/census-rm-ops.git
+      private_key: ((github-private-key))
+
+  - name: qid-batch-runner-master
+    type: git
+    source:
+      uri: git@github.com:ONSdigital/census-rm-qid-batch-runner.git
+      private_key: ((github-private-key))
+
+  - name: sample-loader-master
+    type: git
+    source:
+      uri: git@github.com:ONSdigital/census-rm-sample-loader.git
+      private_key: ((github-private-key))
+
+  - name: acceptance-tests-master
+    type: git
+    source:
+      uri: git@github.com:ONSdigital/census-rm-acceptance-tests.git
+      private_key: ((github-private-key))
+
 
   # - name: action-scheduler-release
   #   type: github-release-latest
@@ -21,6 +64,13 @@ resources:
   #     repository: census-rm-action-scheduler
   #     access_token: ((github-access-token))
 
+  - name: actionexporter-image-latest
+    type: docker-image
+    source:
+      repository: ((docker_registry))/census-rm-actionexporter
+      username: _json_key
+      password: ((gcp-service-account-json))
+
   - name: action-scheduler-image-latest
     type: docker-image
     source:
@@ -28,13 +78,89 @@ resources:
       username: _json_key
       password: ((gcp-service-account-json))
 
+  - name: case-api-image-latest
+    type: docker-image
+    source:
+      repository: ((docker_registry))/census-rm-case-api
+      username: _json_key
+      password: ((gcp-service-account-json))
+
+  - name: case-processor-image-latest
+    type: docker-image
+    source:
+      repository: ((docker_registry))/census-rm-case-processor
+      username: _json_key
+      password: ((gcp-service-account-json))
+  
+  - name: ops-image-latest
+    type: docker-image
+    source:
+      repository: ((docker_registry))/census-rm-ops
+      username: _json_key
+      password: ((gcp-service-account-json))
+
+  - name: qid-batch-runner-image-latest
+    type: docker-image
+    source:
+      repository: ((docker_registry))/census-rm-qid-batch-runner
+      username: _json_key
+      password: ((gcp-service-account-json))
+
+  - name: sample-loader-image-latest
+    type: docker-image
+    source:
+      repository: ((docker_registry))/census-rm-sample-loader
+      username: _json_key
+      password: ((gcp-service-account-json))
+
+  - name: acceptance-tests-image-latest
+    type: docker-image
+    source:
+      repository: ((docker_registry))/census-rm-acceptance-tests
+      username: _json_key
+      password: ((gcp-service-account-json))
+
 jobs:
 
-  - name: build-action-scheduler
+  - name: build-actionexporter-master
+    plan:
+    - get: actionexporter-master
+      trigger: true
+    - task: Build Action Exporter Image (master)
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: adoptopenjdk/maven-openjdk8
+        inputs:
+          - name: actionexporter-master
+        outputs:
+          - name: build
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              mkdir -p build/target
+              cd actionexporter-master
+              mvn package -DskipITs -Ddockerfile.skip
+              cp target/census-rm-*.jar ../build/target
+              cp Dockerfile ../build
+    - put: actionexporter-image-latest
+      params:
+        build: build
+        tag_file: actionexporter-master/.git/ref
+        tag_as_latest: true
+      get_params:
+        skip_download: true
+
+
+  - name: build-action-scheduler-master
     plan:
     - get: action-scheduler-master
       trigger: true
-    - task: Build Action Scheduler Image
+    - task: Build Action Scheduler Image (master)
       config:
         platform: linux
         image_resource:
@@ -53,14 +179,128 @@ jobs:
               mkdir -p build/target
               cd action-scheduler-master
               mvn package -DskipITs -Ddockerfile.skip
-              cp target/census-rm-action-scheduler*.jar ../build/target
+              cp target/census-rm-*.jar ../build/target
               cp Dockerfile ../build
               cp healthcheck.sh ../build
-
     - put: action-scheduler-image-latest
       params:
         build: build
         tag_file: action-scheduler-master/.git/ref
+        tag_as_latest: true
+      get_params:
+        skip_download: true
+
+  - name: build-case-api-master
+    plan:
+    - get: case-api-master
+      trigger: true
+    - task: Build Case API Image (master)
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: adoptopenjdk/maven-openjdk11
+        inputs:
+          - name: case-api-master
+        outputs:
+          - name: build
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              mkdir -p build/target
+              cd case-api-master
+              mvn package -DskipITs -Ddockerfile.skip
+              cp target/census-rm-*.jar ../build/target
+              cp Dockerfile ../build
+    - put: case-api-image-latest
+      params:
+        build: build
+        tag_file: case-api-master/.git/ref
+        tag_as_latest: true
+      get_params:
+        skip_download: true
+
+  - name: build-case-processor-master
+    plan:
+    - get: case-processor-master
+      trigger: true
+    - task: Build Case Processor Image (master)
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: adoptopenjdk/maven-openjdk11
+        inputs:
+          - name: case-processor-master
+        outputs:
+          - name: build
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              mkdir -p build/target
+              cd case-processor-master
+              mvn package -DskipITs -Ddockerfile.skip
+              cp target/census-rm-*.jar ../build/target
+              cp Dockerfile ../build
+              cp healthcheck.sh ../build
+    - put: case-processor-image-latest
+      params:
+        build: build
+        tag_file: case-processor-master/.git/ref
+        tag_as_latest: true
+      get_params:
+        skip_download: true
+
+  - name: build-ops-master
+    plan:
+    - get: ops-master
+      trigger: true
+    - put: ops-image-latest
+      params:
+        build: ops-master
+        tag_file: ops-master/.git/ref
+        tag_as_latest: true
+      get_params:
+        skip_download: true
+
+  - name: build-batch-runner-master
+    plan:
+    - get: qid-batch-runner-master
+      trigger: true
+    - put: qid-batch-runner-image-latest
+      params:
+        build: qid-batch-runner-master
+        tag_file: qid-batch-runner-master/.git/ref
+        tag_as_latest: true
+      get_params:
+        skip_download: true
+
+  - name: build-sample-runner-master
+    plan:
+    - get: sample-loader-master
+      trigger: true
+    - put: sample-loader-image-latest
+      params:
+        build: sample-loader-master
+        tag_file: sample-loader-master/.git/ref
+        tag_as_latest: true
+      get_params:
+        skip_download: true
+
+  - name: build-acceptance-tests-master
+    plan:
+    - get: acceptance-tests-master
+      trigger: true
+    - put: acceptance-tests-image-latest
+      params:
+        build: acceptance-tests-master
+        tag_file: acceptance-tests-master/.git/ref
         tag_as_latest: true
       get_params:
         skip_download: true
