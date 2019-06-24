@@ -1,0 +1,66 @@
+resource_types:
+
+  - name: github-release-latest
+    type: docker-image
+    source:
+      repository: concourse/github-release-resource
+      tag: 1.1.0
+
+resources:
+
+  - name: action-scheduler-master
+    type: git
+    source:
+      uri: git@github.com:ONSdigital/census-rm-action-scheduler.git
+      private_key: ((github-private-key))
+
+  # - name: action-scheduler-release
+  #   type: github-release-latest
+  #   source:
+  #     owner: ONSdigital
+  #     repository: census-rm-action-scheduler
+  #     access_token: ((github-access-token))
+
+  - name: action-scheduler-image-latest
+    type: docker-image
+    source:
+      repository: ((docker_registry))/census-rm-action-scheduler
+      username: _json_key
+      password: ((gcp-service-account-json))
+
+jobs:
+
+  - name: build-action-scheduler
+    plan:
+    - get: action-scheduler-master
+      trigger: true
+    - task: Build Action Scheduler Image
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: adoptopenjdk/maven-openjdk11
+        inputs:
+          - name: action-scheduler-master
+        outputs:
+          - name: build
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              mkdir -p build/target
+              cd action-scheduler-master
+              mvn package -DskipITs -Ddockerfile.skip
+              cp target/census-rm-action-scheduler*.jar ../build/target
+              cp Dockerfile ../build
+              cp healthcheck.sh ../build
+
+    - put: action-scheduler-image-latest
+      params:
+        build: build
+        tag_file: action-scheduler-master/.git/ref
+        tag_as_latest: true
+      get_params:
+        skip_download: true
