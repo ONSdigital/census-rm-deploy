@@ -14,48 +14,19 @@ resources:
       uri: git@github.com:ONSdigital/census-rm-actionexporter-service.git
       private_key: ((github-private-key))
 
+  - name: actionexporter-release
+    type: github-release-latest
+    source:
+      owner: ONSdigital
+      repository: census-rm-actionexporter-service
+      access_token: ((github-access-token))
+      order_by: time
+
   - name: action-scheduler-master
     type: git
     source:
       uri: git@github.com:ONSdigital/census-rm-action-scheduler.git
       private_key: ((github-private-key))
-
-  - name: case-api-master
-    type: git
-    source:
-      uri: git@github.com:ONSdigital/census-rm-case-api.git
-      private_key: ((github-private-key))
-
-  - name: case-processor-master
-    type: git
-    source:
-      uri: git@github.com:ONSdigital/census-rm-case-processor.git
-      private_key: ((github-private-key))
-
-  - name: ops-master
-    type: git
-    source:
-      uri: git@github.com:ONSdigital/census-rm-ops.git
-      private_key: ((github-private-key))
-
-  - name: qid-batch-runner-master
-    type: git
-    source:
-      uri: git@github.com:ONSdigital/census-rm-qid-batch-runner.git
-      private_key: ((github-private-key))
-
-  - name: sample-loader-master
-    type: git
-    source:
-      uri: git@github.com:ONSdigital/census-rm-sample-loader.git
-      private_key: ((github-private-key))
-
-  - name: acceptance-tests-master
-    type: git
-    source:
-      uri: git@github.com:ONSdigital/census-rm-acceptance-tests.git
-      private_key: ((github-private-key))
-
 
   - name: action-scheduler-release
     type: github-release-latest
@@ -65,62 +36,187 @@ resources:
       access_token: ((github-access-token))
       order_by: time
 
+  - name: case-api-master
+    type: git
+    source:
+      uri: git@github.com:ONSdigital/census-rm-case-api.git
+      private_key: ((github-private-key))
 
-  - name: actionexporter-docker-image
+  - name: case-api-release
+    type: github-release-latest
+    source:
+      owner: ONSdigital
+      repository: census-rm-case-api
+      access_token: ((github-access-token))
+      order_by: time
+
+  - name: case-processor-master
+    type: git
+    source:
+      uri: git@github.com:ONSdigital/census-rm-case-processor.git
+      private_key: ((github-private-key))
+
+  - name: case-processor-release
+    type: github-release-latest
+    source:
+      owner: ONSdigital
+      repository: census-rm-case-processor
+      access_token: ((github-access-token))
+      order_by: time
+
+  - name: ops-master
+    type: git
+    source:
+      uri: git@github.com:ONSdigital/census-rm-ops.git
+      private_key: ((github-private-key))
+
+  - name: ops-release
+    type: github-release-latest
+    source:
+      owner: ONSdigital
+      repository: census-rm-ops
+      access_token: ((github-access-token))
+      order_by: time
+
+  - name: qid-batch-runner-master
+    type: git
+    source:
+      uri: git@github.com:ONSdigital/census-rm-qid-batch-runner.git
+      private_key: ((github-private-key))
+
+  - name: qid-batch-runner-release
+    type: github-release-latest
+    source:
+      owner: ONSdigital
+      repository: census-rm-qid-batch-runner
+      access_token: ((github-access-token))
+      order_by: time
+
+  - name: sample-loader-master
+    type: git
+    source:
+      uri: git@github.com:ONSdigital/census-rm-sample-loader.git
+      private_key: ((github-private-key))
+
+  - name: sample-loader-release
+    type: github-release-latest
+    source:
+      owner: ONSdigital
+      repository: census-rm-sample-loader
+      access_token: ((github-access-token))
+      order_by: time
+
+  - name: acceptance-tests-master
+    type: git
+    source:
+      uri: git@github.com:ONSdigital/census-rm-acceptance-tests.git
+      private_key: ((github-private-key))
+
+
+  - name: actionexporter-docker-image-ci
     type: docker-image
     source:
-      repository: ((docker_registry))/census-rm-actionexporter
+      repository: ((docker-registry-ci))/rm/census-rm-actionexporter
       username: _json_key
-      password: ((gcp-service-account-json))
+      password: ((gcp-service-account-json-ci))
 
-  - name: action-scheduler-docker-image
+  - name: actionexporter-docker-image-gcr
     type: docker-image
     source:
-      repository: ((docker_registry))/census-rm-action-scheduler
+      repository: ((docker-registry-gcr))/rm/census-rm-actionexporter
       username: _json_key
-      password: ((gcp-service-account-json))
+      password: ((gcp-service-account-json-gcr))
 
-  - name: case-api-docker-image
+  - name: action-scheduler-docker-image-ci
     type: docker-image
     source:
-      repository: ((docker_registry))/census-rm-case-api
+      repository: ((docker-registry-ci))/rm/census-rm-action-scheduler
       username: _json_key
-      password: ((gcp-service-account-json))
+      password: ((gcp-service-account-json-ci))
 
-  - name: case-processor-docker-image
+  - name: action-scheduler-docker-image-gcr
     type: docker-image
     source:
-      repository: ((docker_registry))/census-rm-case-processor
+      repository: ((docker-registry-gcr))/rm/census-rm-action-scheduler
       username: _json_key
-      password: ((gcp-service-account-json))
+      password: ((gcp-service-account-json-gcr))
+
+  - name: case-api-docker-image-ci
+    type: docker-image
+    source:
+      repository: ((docker-registry-ci))/rm/census-rm-case-api
+      username: _json_key
+      password: ((gcp-service-account-json-ci))
+
+  - name: case-api-docker-image-gcr
+    type: docker-image
+    source:
+      repository: ((docker-registry-gcr))/rm/census-rm-case-api
+      username: _json_key
+      password: ((gcp-service-account-json-gcr))
+
+  - name: case-processor-docker-image-ci
+    type: docker-image
+    source:
+      repository: ((docker-registry-ci))/rm/census-rm-case-processor
+      username: _json_key
+      password: ((gcp-service-account-json-ci))
   
-  - name: ops-docker-image
+  - name: case-processor-docker-image-gcr
     type: docker-image
     source:
-      repository: ((docker_registry))/census-rm-ops
+      repository: ((docker-registry-gcr))/rm/census-rm-case-processor
       username: _json_key
-      password: ((gcp-service-account-json))
+      password: ((gcp-service-account-json-gcr))
 
-  - name: qid-batch-runner-docker-image
+  - name: ops-docker-image-ci
     type: docker-image
     source:
-      repository: ((docker_registry))/census-rm-qid-batch-runner
+      repository: ((docker-registry-ci))/rm/census-rm-ops
       username: _json_key
-      password: ((gcp-service-account-json))
+      password: ((gcp-service-account-json-ci))
 
-  - name: sample-loader-docker-image
+  - name: ops-docker-image-gcr
     type: docker-image
     source:
-      repository: ((docker_registry))/census-rm-sample-loader
+      repository: ((docker-registry-gcr))/rm/census-rm-ops
       username: _json_key
-      password: ((gcp-service-account-json))
+      password: ((gcp-service-account-json-gcr))
 
-  - name: acceptance-tests-docker-image
+  - name: qid-batch-runner-docker-image-ci
     type: docker-image
     source:
-      repository: ((docker_registry))/census-rm-acceptance-tests
+      repository: ((docker-registry-ci))/rm/census-rm-qid-batch-runner
       username: _json_key
-      password: ((gcp-service-account-json))
+      password: ((gcp-service-account-json-ci))
+
+  - name: qid-batch-runner-docker-image-gcr
+    type: docker-image
+    source:
+      repository: ((docker-registry-gcr))/rm/census-rm-qid-batch-runner
+      username: _json_key
+      password: ((gcp-service-account-json-gcr))
+
+  - name: sample-loader-docker-image-ci
+    type: docker-image
+    source:
+      repository: ((docker-registry-ci))/rm/census-rm-sample-loader
+      username: _json_key
+      password: ((gcp-service-account-json-ci))
+
+  - name: sample-loader-docker-image-gcr
+    type: docker-image
+    source:
+      repository: ((docker-registry-gcr))/rm/census-rm-sample-loader
+      username: _json_key
+      password: ((gcp-service-account-json-gcr))
+
+  - name: acceptance-tests-docker-image-ci
+    type: docker-image
+    source:
+      repository: ((docker-registry-ci))/rm/census-rm-acceptance-tests
+      username: _json_key
+      password: ((gcp-service-account-json-ci))
 
 jobs:
 
@@ -149,14 +245,68 @@ jobs:
               mvn package -DskipITs -Ddockerfile.skip
               cp target/census-rm-*.jar ../build/target
               cp Dockerfile ../build
-    - put: actionexporter-docker-image
+    - put: actionexporter-docker-image-ci
       params:
         build: build
         tag_file: actionexporter-master/.git/ref
         tag_as_latest: true
       get_params:
+        save: true
+    - put: actionexporter-docker-image-gcr
+      params:
+        build: build
+        cache_from: 
+          - actionexporter-docker-image-ci
+        tag_file: actionexporter-master/.git/ref
+        tag_as_latest: true
+      get_params:
         skip_download: true
 
+  - name: build-actionexporter-release
+    plan:
+    - get: actionexporter-release
+      trigger: true
+    - task: Build Action Exporter Image (release)
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: adoptopenjdk/maven-openjdk8
+        inputs:
+          - name: actionexporter-release
+        outputs:
+          - name: build
+          - name: extracted-actionexporter
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              mkdir -p build/target
+              cd actionexporter-release
+              tar -xzf source.tar.gz -C ../extracted-actionexporter --strip-components=1
+              cd ../extracted-actionexporter
+              mvn package -DskipITs -Ddockerfile.skip
+              cp target/census-rm-*.jar ../build/target
+              cp Dockerfile ../build
+              cp healthcheck.sh ../build
+    - put: actionexporter-docker-image-ci
+      params:
+        build: build
+        tag_file: actionexporter-release/tag
+        tag_as_latest: false
+      get_params:
+        save: true
+    - put: actionexporter-docker-image-gcr
+      params:
+        build: build
+        cache_from:
+          - actionexporter-docker-image-ci
+        tag_file: actionexporter-release/tag
+        tag_as_latest: false
+      get_params:
+        skip_download: true
 
   - name: build-action-scheduler-master
     plan:
@@ -184,9 +334,18 @@ jobs:
               cp target/census-rm-*.jar ../build/target
               cp Dockerfile ../build
               cp healthcheck.sh ../build
-    - put: action-scheduler-docker-image
+    - put: action-scheduler-docker-image-ci
       params:
         build: build
+        tag_file: action-scheduler-master/.git/ref
+        tag_as_latest: true
+      get_params:
+        save: true
+    - put: action-scheduler-docker-image-gcr
+      params:
+        build: build
+        cache_from:
+          - action-scheduler-docker-image-ci
         tag_file: action-scheduler-master/.git/ref
         tag_as_latest: true
       get_params:
@@ -217,17 +376,26 @@ jobs:
             - |
               mkdir -p build/target
               cd action-scheduler-release
-              echo "`cat commit_sha` `cat tag` `cat version`" > ../build/additional_tags
               tar -xzf source.tar.gz -C ../extracted-action-scheduler --strip-components=1
               cd ../extracted-action-scheduler
               mvn package -DskipITs -Ddockerfile.skip
               cp target/census-rm-*.jar ../build/target
               cp Dockerfile ../build
               cp healthcheck.sh ../build
-    - put: action-scheduler-docker-image
+    - put: action-scheduler-docker-image-ci
       params:
         build: build
-        additional_tags: build/additional_tags
+        tag_file: action-scheduler-release/tag
+        tag_as_latest: false
+      get_params:
+        save: true
+    - put: action-scheduler-docker-image-gcr
+      params:
+        build: build
+        cache_from:
+          - action-scheduler-docker-image-ci
+        tag_file: action-scheduler-release/tag
+        tag_as_latest: false
       get_params:
         skip_download: true
 
@@ -256,11 +424,67 @@ jobs:
               mvn package -DskipITs -Ddockerfile.skip
               cp target/census-rm-*.jar ../build/target
               cp Dockerfile ../build
-    - put: case-api-docker-image
+    - put: case-api-docker-image-ci
       params:
         build: build
         tag_file: case-api-master/.git/ref
         tag_as_latest: true
+      get_params:
+        save: true
+    - put: case-api-docker-image-gcr
+      params:
+        build: build
+        cache_from:
+          - case-api-docker-image-ci
+        tag_file: case-api-master/.git/ref
+        tag_as_latest: true
+      get_params:
+        skip_download: true
+
+  - name: build-case-api-release
+    plan:
+    - get: case-api-release
+      params:
+        include_source_tarball: true
+      trigger: true
+    - task: Build Case API Image (release)
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: adoptopenjdk/maven-openjdk11
+        inputs:
+          - name: case-api-release
+        outputs:
+          - name: build
+          - name: extracted-case-api
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              mkdir -p build/target
+              cd case-api-release
+              tar -xzf source.tar.gz -C ../extracted-case-api --strip-components=1
+              cd ../extracted-case-api
+              mvn package -DskipITs -Ddockerfile.skip
+              cp target/census-rm-*.jar ../build/target
+              cp Dockerfile ../build
+    - put: case-api-docker-image-ci
+      params:
+        build: build
+        tag_file: case-api-release/tag
+        tag_as_latest: false
+      get_params:
+        save: true
+    - put: case-api-docker-image-gcr
+      params:
+        build: build
+        cache_from:
+          - case-api-docker-image-ci
+        tag_file: case-api-release/tag
+        tag_as_latest: false
       get_params:
         skip_download: true
 
@@ -290,11 +514,67 @@ jobs:
               cp target/census-rm-*.jar ../build/target
               cp Dockerfile ../build
               cp healthcheck.sh ../build
-    - put: case-processor-docker-image
+    - put: case-processor-docker-image-ci
       params:
         build: build
         tag_file: case-processor-master/.git/ref
         tag_as_latest: true
+      get_params:
+        save: true
+    - put: case-processor-docker-image-gcr
+      params:
+        build: build
+        cache_from:
+          - case-processor-docker-image-ci
+        tag_file: case-processor-master/.git/ref
+        tag_as_latest: true
+      get_params:
+        skip_download: true
+
+  - name: build-case-processor-release
+    plan:
+    - get: case-processor-release
+      params:
+        include_source_tarball: true
+      trigger: true
+    - task: Build Case Processor Image (release)
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: adoptopenjdk/maven-openjdk11
+        inputs:
+          - name: case-processor-release
+        outputs:
+          - name: build
+          - name: extracted-case-processor
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              mkdir -p build/target
+              cd case-processor-release
+              tar -xzf source.tar.gz -C ../extracted-case-processor --strip-components=1
+              cd ../extracted-case-processor
+              mvn package -DskipITs -Ddockerfile.skip
+              cp target/census-rm-*.jar ../build/target
+              cp Dockerfile ../build
+    - put: case-processor-docker-image-ci
+      params:
+        build: build
+        tag_file: case-processor-release/tag
+        tag_as_latest: false
+      get_params:
+        save: true
+    - put: case-processor-docker-image-gcr
+      params:
+        build: build
+        cache_from:
+          - case-processor-docker-image-ci
+        tag_file: case-processor-release/tag
+        tag_as_latest: false
       get_params:
         skip_download: true
 
@@ -302,11 +582,61 @@ jobs:
     plan:
     - get: ops-master
       trigger: true
-    - put: ops-docker-image
+    - put: ops-docker-image-ci
       params:
         build: ops-master
         tag_file: ops-master/.git/ref
         tag_as_latest: true
+      get_params:
+        save: true
+    - put: ops-docker-image-gcr
+      params:
+        build: ops-master
+        cache_from:
+          - ops-docker-image-ci
+        tag_file: ops-master/.git/ref
+        tag_as_latest: true
+      get_params:
+        skip_download: true
+
+  - name: build-ops-release
+    plan:
+    - get: ops-release
+      params:
+        include_source_tarball: true
+      trigger: true
+    - task: Build Ops Image (release)
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: alpine
+        inputs:
+          - name: ops-release
+        outputs:
+          - name: extracted-ops
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              cd case-processor-release
+              tar -xzf source.tar.gz -C ../extracted-ops --strip-components=1
+    - put: ops-docker-image-ci
+      params:
+        build: extracted-ops
+        tag_file: ops-release/tag
+        tag_as_latest: false
+      get_params:
+        save: true
+    - put: ops-docker-image-gcr
+      params:
+        build: extracted-ops
+        cache_from:
+          - ops-docker-image-ci
+        tag_file: ops-release/tag
+        tag_as_latest: false
       get_params:
         skip_download: true
 
@@ -314,11 +644,61 @@ jobs:
     plan:
     - get: qid-batch-runner-master
       trigger: true
-    - put: qid-batch-runner-docker-image
+    - put: qid-batch-runner-docker-image-ci
       params:
         build: qid-batch-runner-master
         tag_file: qid-batch-runner-master/.git/ref
         tag_as_latest: true
+      get_params:
+        save: true
+    - put: qid-batch-runner-docker-image-gcr
+      params:
+        build: qid-batch-runner-master
+        cache_from:
+          - qid-batch-runner-docker-image-ci
+        tag_file: qid-batch-runner-master/.git/ref
+        tag_as_latest: true
+      get_params:
+        skip_download: true
+
+  - name: build-batch-runner-release
+    plan:
+    - get: qid-batch-runner-release
+      params:
+        include_source_tarball: true
+      trigger: true
+    - task: Build Batch Runner Image (release)
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: alpine
+        inputs:
+          - name: qid-batch-runner-release
+        outputs:
+          - name: extracted-batch-runner
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              cd qid-batch-runner-release
+              tar -xzf source.tar.gz -C ../extracted-batch-runner --strip-components=1
+    - put: qid-batch-runner-docker-image-ci
+      params:
+        build: extracted-batch-runner
+        tag_file: qid-batch-runner-release/tag
+        tag_as_latest: false
+      get_params:
+        save: true
+    - put: qid-batch-runner-docker-image-gcr
+      params:
+        build: extracted-batch-runner
+        cache_from:
+          - qid-batch-runner-docker-image-ci
+        tag_file: qid-batch-runner-release/tag
+        tag_as_latest: false
       get_params:
         skip_download: true
 
@@ -326,11 +706,61 @@ jobs:
     plan:
     - get: sample-loader-master
       trigger: true
-    - put: sample-loader-docker-image
+    - put: sample-loader-docker-image-ci
       params:
         build: sample-loader-master
         tag_file: sample-loader-master/.git/ref
         tag_as_latest: true
+      get_params:
+        save: true
+    - put: sample-loader-docker-image-gcr
+      params:
+        build: sample-loader-master
+        cache_from:
+          - sample-loader-docker-image-ci
+        tag_file: sample-loader-master/.git/ref
+        tag_as_latest: true
+      get_params:
+        skip_download: true
+
+  - name: build-sample-loader-release
+    plan:
+    - get: sample-loader-release
+      params:
+        include_source_tarball: true
+      trigger: true
+    - task: Build Sample Loader Image (release)
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: alpine
+        inputs:
+          - name: sample-loader-release
+        outputs:
+          - name: extracted-sample-loader
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              cd sample-loader-release
+              tar -xzf source.tar.gz -C ../extracted-sample-loader --strip-components=1
+    - put: sample-loader-docker-image-ci
+      params:
+        build: extracted-sample-loader
+        tag_file: sample-loader-release/tag
+        tag_as_latest: false
+      get_params:
+        save: true
+    - put: sample-loader-docker-image-gcr
+      params:
+        build: extracted-sample-loader
+        cache_from:
+          - sample-loader-docker-image-ci
+        tag_file: sample-loader-release/tag
+        tag_as_latest: false
       get_params:
         skip_download: true
 
@@ -338,7 +768,7 @@ jobs:
     plan:
     - get: acceptance-tests-master
       trigger: true
-    - put: acceptance-tests-docker-image
+    - put: acceptance-tests-docker-image-ci
       params:
         build: acceptance-tests-master
         tag_file: acceptance-tests-master/.git/ref
