@@ -218,6 +218,13 @@ resources:
       username: _json_key
       password: ((gcp-service-account-json-ci))
 
+  - name: acceptance-tests-docker-image-gcr
+    type: docker-image
+    source:
+      repository: ((docker-registry-gcr))/rm/census-rm-acceptance-tests
+      username: _json_key
+      password: ((gcp-service-account-json-gcr))
+
 jobs:
 
   - name: build-actionexporter-master
@@ -771,6 +778,15 @@ jobs:
     - put: acceptance-tests-docker-image-ci
       params:
         build: acceptance-tests-master
+        tag_file: acceptance-tests-master/.git/ref
+        tag_as_latest: true
+      get_params:
+        save: true
+    - put: acceptance-tests-docker-image-gcr
+      params:
+        build: acceptance-tests-master
+        cache_from:
+          - acceptance-tests-docker-image-ci
         tag_file: acceptance-tests-master/.git/ref
         tag_as_latest: true
       get_params:
