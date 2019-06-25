@@ -57,63 +57,65 @@ resources:
       private_key: ((github-private-key))
 
 
-  # - name: action-scheduler-release
-  #   type: github-release-latest
-  #   source:
-  #     owner: ONSdigital
-  #     repository: census-rm-action-scheduler
-  #     access_token: ((github-access-token))
+  - name: action-scheduler-release
+    type: github-release-latest
+    source:
+      owner: ONSdigital
+      repository: census-rm-action-scheduler
+      access_token: ((github-access-token))
+      order_by: time
 
-  - name: actionexporter-image-latest
+
+  - name: actionexporter-docker-image
     type: docker-image
     source:
       repository: ((docker_registry))/census-rm-actionexporter
       username: _json_key
       password: ((gcp-service-account-json))
 
-  - name: action-scheduler-image-latest
+  - name: action-scheduler-docker-image
     type: docker-image
     source:
       repository: ((docker_registry))/census-rm-action-scheduler
       username: _json_key
       password: ((gcp-service-account-json))
 
-  - name: case-api-image-latest
+  - name: case-api-docker-image
     type: docker-image
     source:
       repository: ((docker_registry))/census-rm-case-api
       username: _json_key
       password: ((gcp-service-account-json))
 
-  - name: case-processor-image-latest
+  - name: case-processor-docker-image
     type: docker-image
     source:
       repository: ((docker_registry))/census-rm-case-processor
       username: _json_key
       password: ((gcp-service-account-json))
   
-  - name: ops-image-latest
+  - name: ops-docker-image
     type: docker-image
     source:
       repository: ((docker_registry))/census-rm-ops
       username: _json_key
       password: ((gcp-service-account-json))
 
-  - name: qid-batch-runner-image-latest
+  - name: qid-batch-runner-docker-image
     type: docker-image
     source:
       repository: ((docker_registry))/census-rm-qid-batch-runner
       username: _json_key
       password: ((gcp-service-account-json))
 
-  - name: sample-loader-image-latest
+  - name: sample-loader-docker-image
     type: docker-image
     source:
       repository: ((docker_registry))/census-rm-sample-loader
       username: _json_key
       password: ((gcp-service-account-json))
 
-  - name: acceptance-tests-image-latest
+  - name: acceptance-tests-docker-image
     type: docker-image
     source:
       repository: ((docker_registry))/census-rm-acceptance-tests
@@ -147,7 +149,7 @@ jobs:
               mvn package -DskipITs -Ddockerfile.skip
               cp target/census-rm-*.jar ../build/target
               cp Dockerfile ../build
-    - put: actionexporter-image-latest
+    - put: actionexporter-docker-image
       params:
         build: build
         tag_file: actionexporter-master/.git/ref
@@ -182,11 +184,50 @@ jobs:
               cp target/census-rm-*.jar ../build/target
               cp Dockerfile ../build
               cp healthcheck.sh ../build
-    - put: action-scheduler-image-latest
+    - put: action-scheduler-docker-image
       params:
         build: build
         tag_file: action-scheduler-master/.git/ref
         tag_as_latest: true
+      get_params:
+        skip_download: true
+
+  - name: build-action-scheduler-release
+    plan:
+    - get: action-scheduler-release
+      params:
+        include_source_tarball: true
+      trigger: true
+    - task: Build Action Scheduler Image (release)
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: adoptopenjdk/maven-openjdk11
+        inputs:
+          - name: action-scheduler-release
+        outputs:
+          - name: build
+          - name: extracted-action-scheduler
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              mkdir -p build/target
+              cd action-scheduler-release
+              echo "`cat commit_sha` `cat tag` `cat version`" > ../build/additional_tags
+              tar -xzf source.tar.gz -C ../extracted-action-scheduler --strip-components=1
+              cd ../extracted-action-scheduler
+              mvn package -DskipITs -Ddockerfile.skip
+              cp target/census-rm-*.jar ../build/target
+              cp Dockerfile ../build
+              cp healthcheck.sh ../build
+    - put: action-scheduler-docker-image
+      params:
+        build: build
+        additional_tags: build/additional_tags
       get_params:
         skip_download: true
 
@@ -215,7 +256,7 @@ jobs:
               mvn package -DskipITs -Ddockerfile.skip
               cp target/census-rm-*.jar ../build/target
               cp Dockerfile ../build
-    - put: case-api-image-latest
+    - put: case-api-docker-image
       params:
         build: build
         tag_file: case-api-master/.git/ref
@@ -249,7 +290,7 @@ jobs:
               cp target/census-rm-*.jar ../build/target
               cp Dockerfile ../build
               cp healthcheck.sh ../build
-    - put: case-processor-image-latest
+    - put: case-processor-docker-image
       params:
         build: build
         tag_file: case-processor-master/.git/ref
@@ -261,7 +302,7 @@ jobs:
     plan:
     - get: ops-master
       trigger: true
-    - put: ops-image-latest
+    - put: ops-docker-image
       params:
         build: ops-master
         tag_file: ops-master/.git/ref
@@ -273,7 +314,7 @@ jobs:
     plan:
     - get: qid-batch-runner-master
       trigger: true
-    - put: qid-batch-runner-image-latest
+    - put: qid-batch-runner-docker-image
       params:
         build: qid-batch-runner-master
         tag_file: qid-batch-runner-master/.git/ref
@@ -285,7 +326,7 @@ jobs:
     plan:
     - get: sample-loader-master
       trigger: true
-    - put: sample-loader-image-latest
+    - put: sample-loader-docker-image
       params:
         build: sample-loader-master
         tag_file: sample-loader-master/.git/ref
@@ -297,7 +338,7 @@ jobs:
     plan:
     - get: acceptance-tests-master
       trigger: true
-    - put: acceptance-tests-image-latest
+    - put: acceptance-tests-docker-image
       params:
         build: acceptance-tests-master
         tag_file: acceptance-tests-master/.git/ref
