@@ -118,112 +118,112 @@ resources:
     source:
       repository: ((docker-registry-ci))/rm/census-rm-actionexporter
       username: _json_key
-      password: ((gcp-service-account-json-ci))
+      password: ((gcp.service_account_json))
 
   - name: actionexporter-docker-image-gcr
     type: docker-image
     source:
       repository: ((docker-registry-gcr))/rm/census-rm-actionexporter
       username: _json_key
-      password: ((gcp-service-account-json-gcr))
+      password: ((gcp.service_account_json))
 
   - name: action-scheduler-docker-image-ci
     type: docker-image
     source:
       repository: ((docker-registry-ci))/rm/census-rm-action-scheduler
       username: _json_key
-      password: ((gcp-service-account-json-ci))
+      password: ((gcp.service_account_json))
 
   - name: action-scheduler-docker-image-gcr
     type: docker-image
     source:
       repository: ((docker-registry-gcr))/rm/census-rm-action-scheduler
       username: _json_key
-      password: ((gcp-service-account-json-gcr))
+      password: ((gcp.service_account_json))
 
   - name: case-api-docker-image-ci
     type: docker-image
     source:
       repository: ((docker-registry-ci))/rm/census-rm-case-api
       username: _json_key
-      password: ((gcp-service-account-json-ci))
+      password: ((gcp.service_account_json))
 
   - name: case-api-docker-image-gcr
     type: docker-image
     source:
       repository: ((docker-registry-gcr))/rm/census-rm-case-api
       username: _json_key
-      password: ((gcp-service-account-json-gcr))
+      password: ((gcp.service_account_json))
 
   - name: case-processor-docker-image-ci
     type: docker-image
     source:
       repository: ((docker-registry-ci))/rm/census-rm-case-processor
       username: _json_key
-      password: ((gcp-service-account-json-ci))
+      password: ((gcp.service_account_json))
   
   - name: case-processor-docker-image-gcr
     type: docker-image
     source:
       repository: ((docker-registry-gcr))/rm/census-rm-case-processor
       username: _json_key
-      password: ((gcp-service-account-json-gcr))
+      password: ((gcp.service_account_json))
 
   - name: ops-docker-image-ci
     type: docker-image
     source:
       repository: ((docker-registry-ci))/rm/census-rm-ops
       username: _json_key
-      password: ((gcp-service-account-json-ci))
+      password: ((gcp.service_account_json))
 
   - name: ops-docker-image-gcr
     type: docker-image
     source:
       repository: ((docker-registry-gcr))/rm/census-rm-ops
       username: _json_key
-      password: ((gcp-service-account-json-gcr))
+      password: ((gcp.service_account_json))
 
   - name: qid-batch-runner-docker-image-ci
     type: docker-image
     source:
       repository: ((docker-registry-ci))/rm/census-rm-qid-batch-runner
       username: _json_key
-      password: ((gcp-service-account-json-ci))
+      password: ((gcp.service_account_json))
 
   - name: qid-batch-runner-docker-image-gcr
     type: docker-image
     source:
       repository: ((docker-registry-gcr))/rm/census-rm-qid-batch-runner
       username: _json_key
-      password: ((gcp-service-account-json-gcr))
+      password: ((gcp.service_account_json))
 
   - name: sample-loader-docker-image-ci
     type: docker-image
     source:
       repository: ((docker-registry-ci))/rm/census-rm-sample-loader
       username: _json_key
-      password: ((gcp-service-account-json-ci))
+      password: ((gcp.service_account_json))
 
   - name: sample-loader-docker-image-gcr
     type: docker-image
     source:
       repository: ((docker-registry-gcr))/rm/census-rm-sample-loader
       username: _json_key
-      password: ((gcp-service-account-json-gcr))
+      password: ((gcp.service_account_json))
 
   - name: acceptance-tests-docker-image-ci
     type: docker-image
     source:
       repository: ((docker-registry-ci))/rm/census-rm-acceptance-tests
       username: _json_key
-      password: ((gcp-service-account-json-ci))
+      password: ((gcp.service_account_json))
 
   - name: acceptance-tests-docker-image-gcr
     type: docker-image
     source:
       repository: ((docker-registry-gcr))/rm/census-rm-acceptance-tests
       username: _json_key
-      password: ((gcp-service-account-json-gcr))
+      password: ((gcp.service_account_json))
 
 jobs:
 
