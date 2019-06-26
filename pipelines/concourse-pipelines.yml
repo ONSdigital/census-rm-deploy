@@ -1,0 +1,43 @@
+resource_types:
+
+  - name: concourse-pipeline
+    type: docker-image
+    source:
+      repository: concourse/concourse-pipeline-resource
+
+resources:
+
+  - name: census-rm-deploy
+    type: git
+    source:
+      uri: git@github.com:ONSdigital/census-rm-deploy.git
+      paths:
+      - "pipelines"
+      private_key: ((github-private-key))
+
+  - name: pipelines
+    type: concourse-pipeline
+    source:
+      teams:
+      - name: rm
+        username: rm
+        password: ((concourse-team-password))
+
+jobs:
+
+  - name: fly-pipelines
+    plan:
+    - get: census-rm-deploy
+      trigger: true
+    - put: pipelines
+      params:
+        pipelines:
+        - name: concourse-pipelines
+          team: rm
+          config_file: census-rm-deploy/pipelines/concourse-pipelines.yml
+        - name: CI-Whitelodge Deploy
+          team: rm
+          config_file: census-rm-deploy/pipelines/ci-sit-kubernetes-pipeline.yml
+        - name: census-rm-blacklodge
+          team: rm
+          config_file: census-rm-deploy/pipelines/manual-ci-kubernetes-pipeline.yml
