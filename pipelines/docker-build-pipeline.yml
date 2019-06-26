@@ -93,6 +93,20 @@ resources:
       access_token: ((github-access-token))
       order_by: time
 
+  - name: pubsub-master
+    type: git
+    source:
+      uri: git@github.com:ONSdigital/census-rm-pubsub.git
+      private_key: ((github-private-key))
+
+  - name: pubsub-release
+    type: github-release-latest
+    source:
+      owner: ONSdigital
+      repository: census-rm-pubsub
+      access_token: ((github-access-token))
+      order_by: time
+
   - name: qid-batch-runner-master
     type: git
     source:
@@ -209,6 +223,20 @@ resources:
     type: docker-image
     source:
       repository: ((docker-registry-gcr))/rm/census-rm-ops
+      username: _json_key
+      password: ((gcp.service_account_json))
+
+  - name: pubsub-docker-image-ci
+    type: docker-image
+    source:
+      repository: ((docker-registry-ci))/rm/census-rm-pubsub
+      username: _json_key
+      password: ((gcp.service_account_json))
+
+  - name: pubsub-docker-image-gcr
+    type: docker-image
+    source:
+      repository: ((docker-registry-gcr))/rm/census-rm-pubsub
       username: _json_key
       password: ((gcp.service_account_json))
 
@@ -714,6 +742,68 @@ jobs:
         cache_from:
           - ops-docker-image-ci
         tag_file: ops-release/tag
+        tag_as_latest: false
+      get_params:
+        skip_download: true
+
+  - name: build-pubsub-master
+    plan:
+    - get: pubsub-master
+      trigger: true
+    - put: pubsub-docker-image-ci
+      params:
+        build: pubsub-master
+        tag_file: pubsub-master/.git/ref
+        tag_as_latest: true
+      get_params:
+        save: true
+    - put: pubsub-docker-image-gcr
+      params:
+        build: pubsub-master
+        cache_from:
+          - pubsub-docker-image-ci
+        tag_file: pubsub-master/.git/ref
+        tag_as_latest: true
+      get_params:
+        skip_download: true
+
+  - name: build-pubsub-release
+    plan:
+    - get: pubsub-release
+      params:
+        include_source_tarball: true
+      trigger: true
+    - task: Build PubSub Image (release)
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: alpine
+        inputs:
+          - name: pubsub-release
+        outputs:
+          - name: extracted-pubsub
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              cd pubsub-release
+              tar -xzf source.tar.gz -C ../extracted-pubsub --strip-components=1
+    - put: pubsub-docker-image-ci
+      params:
+        build: extracted-pubsub
+        tag_file: pubsub-release/tag
+        tag_as_latest: false
+      get_params:
+        save: true
+    - put: pubsub-docker-image-gcr
+      params:
+        build: extracted-pubsub
+        cache_from:
+          - pubsub-docker-image-ci
+        tag_file: pubsub-release/tag
         tag_as_latest: false
       get_params:
         skip_download: true
