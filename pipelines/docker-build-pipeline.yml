@@ -12,7 +12,7 @@ resources:
     type: git
     source:
       uri: git@github.com:ONSdigital/census-rm-actionexporter-service.git
-      private_key: ((github-private-key))
+      private_key: ((github.service_account_private_key))
 
   - name: actionexporter-release
     type: github-release-latest
@@ -26,7 +26,7 @@ resources:
     type: git
     source:
       uri: git@github.com:ONSdigital/census-rm-action-scheduler.git
-      private_key: ((github-private-key))
+      private_key: ((github.service_account_private_key))
 
   - name: action-scheduler-release
     type: github-release-latest
@@ -40,7 +40,7 @@ resources:
     type: git
     source:
       uri: git@github.com:ONSdigital/census-rm-case-api.git
-      private_key: ((github-private-key))
+      private_key: ((github.service_account_private_key))
 
   - name: case-api-release
     type: github-release-latest
@@ -54,7 +54,7 @@ resources:
     type: git
     source:
       uri: git@github.com:ONSdigital/census-rm-case-processor.git
-      private_key: ((github-private-key))
+      private_key: ((github.service_account_private_key))
 
   - name: case-processor-release
     type: github-release-latest
@@ -69,7 +69,7 @@ resources:
     source:
       branch: rm-census
       uri: git@github.com:ONSdigital/iac-service
-      private_key: ((github-private-key))
+      private_key: ((github.service_account_private_key))
 
   # - name: iac-service-release
   #   type: github-release-latest
@@ -83,7 +83,7 @@ resources:
     type: git
     source:
       uri: git@github.com:ONSdigital/census-rm-ops.git
-      private_key: ((github-private-key))
+      private_key: ((github.service_account_private_key))
 
   - name: ops-release
     type: github-release-latest
@@ -97,7 +97,7 @@ resources:
     type: git
     source:
       uri: git@github.com:ONSdigital/census-rm-pubsub.git
-      private_key: ((github-private-key))
+      private_key: ((github.service_account_private_key))
 
   - name: pubsub-release
     type: github-release-latest
@@ -111,7 +111,7 @@ resources:
     type: git
     source:
       uri: git@github.com:ONSdigital/census-rm-qid-batch-runner.git
-      private_key: ((github-private-key))
+      private_key: ((github.service_account_private_key))
 
   - name: qid-batch-runner-release
     type: github-release-latest
@@ -125,7 +125,7 @@ resources:
     type: git
     source:
       uri: git@github.com:ONSdigital/census-rm-sample-loader.git
-      private_key: ((github-private-key))
+      private_key: ((github.service_account_private_key))
 
   - name: sample-loader-release
     type: github-release-latest
@@ -139,7 +139,7 @@ resources:
     type: git
     source:
       uri: git@github.com:ONSdigital/census-rm-acceptance-tests.git
-      private_key: ((github-private-key))
+      private_key: ((github.service_account_private_key))
 
 
   - name: actionexporter-docker-image-ci
@@ -870,7 +870,7 @@ jobs:
       get_params:
         skip_download: true
 
-  - name: build-sample-runner-master
+  - name: build-sample-loader-master
     plan:
     - get: sample-loader-master
       trigger: true
