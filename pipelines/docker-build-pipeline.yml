@@ -19,7 +19,7 @@ resources:
     source:
       owner: ONSdigital
       repository: census-rm-actionexporter-service
-      access_token: ((github-access-token))
+      access_token: ((github.access_token))
       order_by: time
 
   - name: action-scheduler-master
@@ -33,7 +33,7 @@ resources:
     source:
       owner: ONSdigital
       repository: census-rm-action-scheduler
-      access_token: ((github-access-token))
+      access_token: ((github.access_token))
       order_by: time
 
   - name: case-api-master
@@ -47,7 +47,7 @@ resources:
     source:
       owner: ONSdigital
       repository: census-rm-case-api
-      access_token: ((github-access-token))
+      access_token: ((github.access_token))
       order_by: time
 
   - name: case-processor-master
@@ -61,7 +61,7 @@ resources:
     source:
       owner: ONSdigital
       repository: census-rm-case-processor
-      access_token: ((github-access-token))
+      access_token: ((github.access_token))
       order_by: time
 
   - name: iac-service-rm-census
@@ -76,7 +76,7 @@ resources:
   #   source:
   #     owner: ONSdigital
   #     repository: iac-service
-  #     access_token: ((github-access-token))
+  #     access_token: ((github.access_token))
   #     order_by: time
 
   - name: ops-master
@@ -90,7 +90,7 @@ resources:
     source:
       owner: ONSdigital
       repository: census-rm-ops
-      access_token: ((github-access-token))
+      access_token: ((github.access_token))
       order_by: time
 
   - name: pubsub-master
@@ -104,7 +104,7 @@ resources:
     source:
       owner: ONSdigital
       repository: census-rm-pubsub
-      access_token: ((github-access-token))
+      access_token: ((github.access_token))
       order_by: time
 
   - name: qid-batch-runner-master
@@ -118,7 +118,7 @@ resources:
     source:
       owner: ONSdigital
       repository: census-rm-qid-batch-runner
-      access_token: ((github-access-token))
+      access_token: ((github.access_token))
       order_by: time
 
   - name: sample-loader-master
@@ -132,7 +132,7 @@ resources:
     source:
       owner: ONSdigital
       repository: census-rm-sample-loader
-      access_token: ((github-access-token))
+      access_token: ((github.access_token))
       order_by: time
 
   - name: acceptance-tests-master
