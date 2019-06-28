@@ -71,6 +71,7 @@ resources:
       uri: git@github.com:ONSdigital/iac-service
       private_key: ((github.service_account_private_key))
 
+  # TODO: requires new iac-service repo to start releases
   # - name: iac-service-release
   #   type: github-release-latest
   #   source:
