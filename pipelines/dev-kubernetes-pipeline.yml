@@ -88,10 +88,10 @@ resources:
     username: _json_key
     password: ((gcp.service_account_json))
 
-- name: iacsvc-docker-latest
+- name: uac-qid-service-docker-latest
   type: docker-image
   source:
-    repository: eu.gcr.io/census-rm-ci/rm/census-rm-iacsvc
+    repository: eu.gcr.io/census-rm-ci/rm/census-rm-uac-qid-service
     username: _json_key
     password: ((gcp.service_account_json))
 
@@ -121,7 +121,7 @@ jobs:
 
 - name: deploy-infrastructure
   serial: true
-  serial_groups: [action-scheduler, actionexportersvc, case-api, case-processor, iacsvc, ops, pubsubsvc]
+  serial_groups: [action-scheduler, actionexportersvc, case-api, case-processor, uac-qid-service, ops, pubsubsvc]
   max_in_flight: 1
   plan:
   - get: census-rm-terraform
@@ -278,16 +278,16 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
-- name: iacsvc
+- name: uac-qid-service
   serial: true
-  serial_groups: [iacsvc]
+  serial_groups: [uac-qid-service]
   plan:
   - get: census-rm-terraform
     trigger: true
     passed: [deploy-infrastructure]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
-  - get: iacsvc-docker-latest
+  - get: uac-qid-service-docker-latest
     trigger: true
     params:
       skip_download: true
@@ -298,10 +298,10 @@ jobs:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((gcp-project-name))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
-      KUBERNETES_DEPLOYMENT_NAME: iacsvc
-      KUBERNETES_SELECTOR: app=iacsvc
+      KUBERNETES_DEPLOYMENT_NAME: uacqidservice
+      KUBERNETES_SELECTOR: app=uacqidservice
       KUBERNETES_FILE_PATH: kubernetes-repo/microservices
-      KUBERNETES_FILE_PREFIX: iac
+      KUBERNETES_FILE_PREFIX: uac-qid-service
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
@@ -361,11 +361,11 @@ jobs:
 
 - name: "Acceptance Tests"
   serial: true
-  serial_groups: [action-scheduler, actionexportersvc, case-api, case-processor, iacsvc, pubsubsvc]
+  serial_groups: [action-scheduler, actionexportersvc, case-api, case-processor, uac-qid-service, pubsubsvc]
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: [action-scheduler, actionexportersvc, case-api, case-processor, iacsvc, pubsubsvc]
+    passed: [action-scheduler, actionexportersvc, case-api, case-processor, uac-qid-service, pubsubsvc]
   - get: acceptance-tests-repo
   - get: batch-runner-repo
   - get: acceptance-tests-docker-image
@@ -377,7 +377,7 @@ jobs:
     passed: [actionexportersvc]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
-    passed: [action-scheduler, case-api, case-processor, iacsvc, pubsubsvc]
+    passed: [action-scheduler, case-api, case-processor, uac-qid-service, pubsubsvc]
   - get: action-scheduler-docker-latest
     trigger: true
     passed: [action-scheduler]
@@ -398,9 +398,9 @@ jobs:
     passed: [case-processor]
     params:
       skip_download: true
-  - get: iacsvc-docker-latest
+  - get: uac-qid-service-docker-latest
     trigger: true
-    passed: [iacsvc]
+    passed: [uac-qid-service]
     params:
       skip_download: true
   - get: pubsubsvc-docker-latest

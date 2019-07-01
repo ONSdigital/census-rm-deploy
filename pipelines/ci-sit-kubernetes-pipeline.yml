@@ -88,10 +88,10 @@ resources:
     username: _json_key
     password: ((gcp.service_account_json))
 
-- name: iacsvc-docker-latest
+- name: uac-qid-service-docker-latest
   type: docker-image
   source:
-    repository: eu.gcr.io/census-rm-ci/rm/census-rm-iacsvc
+    repository: eu.gcr.io/census-gcr-rm/rm/census-rm-uac-qid-service
     username: _json_key
     password: ((gcp.service_account_json))
 
@@ -122,7 +122,7 @@ jobs:
 # CI
 - name: "CI Deploy Infrastructure"
   serial: true
-  serial_groups: [ci-action-scheduler, ci-actionexportersvc, ci-case-api, ci-case-processor, ci-iacsvc, ci-ops-tool, ci-pubsubsvc]
+  serial_groups: [ci-action-scheduler, ci-actionexportersvc, ci-case-api, ci-case-processor, ci-uac-qid-service, ci-ops-tool, ci-pubsubsvc]
   max_in_flight: 1
   plan:
   - get: census-rm-terraform
@@ -276,16 +276,16 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
-- name: "CI Deploy IAC Service"
+- name: "CI Deploy UAC QID Service"
   serial: true
-  serial_groups: [ci-iacsvc]
+  serial_groups: [ci-uac-qid-service]
   plan:
   - get: census-rm-terraform
     trigger: true
     passed: ["CI Deploy Infrastructure"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
-  - get: iacsvc-docker-latest
+  - get: uac-qid-service-docker-latest
     trigger: true
     params:
       skip_download: true
@@ -296,10 +296,10 @@ jobs:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((ci-gcp-project-name))
       KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
-      KUBERNETES_DEPLOYMENT_NAME: iacsvc
-      KUBERNETES_SELECTOR: app=iacsvc
+      KUBERNETES_DEPLOYMENT_NAME: uacqidservice
+      KUBERNETES_SELECTOR: app=uacqidservice
       KUBERNETES_FILE_PATH: kubernetes-repo/microservices
-      KUBERNETES_FILE_PREFIX: iac
+      KUBERNETES_FILE_PREFIX: uac-qid-service
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
@@ -359,7 +359,7 @@ jobs:
 
 - name: "CI Acceptance Tests"
   serial: true
-  serial_groups: [ci-action-scheduler, ci-actionexportersvc, ci-case-api, ci-case-processor, ci-iacsvc, ci-pubsubsvc]
+  serial_groups: [ci-action-scheduler, ci-actionexportersvc, ci-case-api, ci-case-processor, ci-uac-qid-service, ci-pubsubsvc]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -367,7 +367,7 @@ jobs:
              "CI Deploy Actionexporter", 
              "CI Deploy Case-API", 
              "CI Deploy Case-Processor", 
-             "CI Deploy IAC Service", 
+             "CI Deploy UAC QID Service", 
              "CI Deploy PubSub Service"]
   - get: acceptance-tests-repo
   - get: batch-runner-repo
@@ -383,7 +383,7 @@ jobs:
     passed: ["CI Deploy Action-Scheduler", 
              "CI Deploy Case-API", 
              "CI Deploy Case-Processor", 
-             "CI Deploy IAC Service", 
+             "CI Deploy UAC QID Service", 
              "CI Deploy PubSub Service"]
   - get: action-scheduler-docker-latest
     trigger: true
@@ -405,9 +405,9 @@ jobs:
     passed: ["CI Deploy Case-Processor"]
     params:
       skip_download: true
-  - get: iacsvc-docker-latest
+  - get: uac-qid-service-docker-latest
     trigger: true
-    passed: ["CI Deploy IAC Service"]
+    passed: ["CI Deploy UAC QID Service"]
     params:
       skip_download: true
   - get: pubsubsvc-docker-latest
@@ -546,9 +546,9 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
-- name: "SIT Deploy IAC Service"
+- name: "SIT Deploy UAC QID Service"
   serial: true
-  serial_groups: [sit-iacsvc]
+  serial_groups: [sit-uac-qid-service]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -556,7 +556,7 @@ jobs:
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
-  - get: iacsvc-docker-latest
+  - get: uac-qid-service-docker-latest
     trigger: true
     passed: ["CI Acceptance Tests"]
     params:
@@ -568,10 +568,10 @@ jobs:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((sit-gcp-project-name))
       KUBERNETES_CLUSTER: ((sit-kubernetes-cluster-name))
-      KUBERNETES_DEPLOYMENT_NAME: iacsvc
-      KUBERNETES_SELECTOR: app=iacsvc
+      KUBERNETES_DEPLOYMENT_NAME: uacqidservice
+      KUBERNETES_SELECTOR: app=uacqidservice
       KUBERNETES_FILE_PATH: kubernetes-repo/microservices
-      KUBERNETES_FILE_PREFIX: iac
+      KUBERNETES_FILE_PREFIX: uac-qid-service
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
