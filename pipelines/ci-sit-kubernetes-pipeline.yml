@@ -4,53 +4,53 @@ resources:
   type: git
   source:
     uri: git@github.com:ONSdigital/census-rm-deploy.git
-    private_key: ((github-private-key))
+    private_key: ((github.service_account_private_key))
 
 - name: census-rm-kubernetes-repo
   type: git
   source:
     uri: git@github.com:ONSdigital/census-rm-kubernetes.git
-    private_key: ((github-private-key))
+    private_key: ((github.service_account_private_key))
 
 - name: census-rm-terraform
   type: git
   source:
     branch: ((terraform-branch))
     uri: git@github.com:ONSdigital/census-rm-terraform.git
-    private_key: ((github-private-key))
+    private_key: ((github.service_account_private_key))
 
 - name: batch-runner-repo
   type: git
   source:
     uri: git@github.com:ONSdigital/census-rm-qid-batch-runner.git
-    private_key: ((github-private-key))
+    private_key: ((github.service_account_private_key))
 
 - name: census-rm-kubernetes-microservices-repo
   type: git
   source:
     uri: git@github.com:ONSdigital/census-rm-kubernetes.git
-    private_key: ((github-private-key))
+    private_key: ((github.service_account_private_key))
     paths: [microservices/*]
 
 - name: census-rm-kubernetes-handlers-repo
   type: git
   source:
     uri: git@github.com:ONSdigital/census-rm-kubernetes.git
-    private_key: ((github-private-key))
+    private_key: ((github.service_account_private_key))
     paths: [handlers/*]
 
 - name: census-rm-kubernetes-ops-repo
   type: git
   source:
     uri: git@github.com:ONSdigital/census-rm-kubernetes.git
-    private_key: ((github-private-key))
+    private_key: ((github.service_account_private_key))
     paths: [optional/ops-*]
 
 - name: acceptance-tests-repo
   type: git
   source:
     uri: git@github.com:ONSdigital/census-rm-acceptance-tests.git
-    private_key: ((github-private-key))
+    private_key: ((github.service_account_private_key))
     paths: [kubernetes.env, tasks/*]
 
 - name: acceptance-tests-docker-image
