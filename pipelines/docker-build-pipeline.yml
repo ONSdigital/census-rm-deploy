@@ -70,13 +70,13 @@ resources:
       uri: git@github.com:ONSdigital/census-rm-uac-qid-service.git
       private_key: ((github.service_account_private_key))
 
- - name: uac-qid-service-release
-    type: github-release-latest
-    source:
-      owner: ONSdigital
-      repository: census-rm-uac-qid-service
-      access_token: ((github.access_token))
-      order_by: time
+  - name: uac-qid-service-release
+      type: github-release-latest
+      source:
+        owner: ONSdigital
+        repository: census-rm-uac-qid-service
+        access_token: ((github.access_token))
+        order_by: time
 
   - name: ops-master
     type: git
