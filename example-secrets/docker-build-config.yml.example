@@ -1,0 +1,2 @@
+docker-registry-ci: eu.gcr.io/census-rm-ci
+docker-registry-gcr: eu.gcr.io/census-gcr-rm
