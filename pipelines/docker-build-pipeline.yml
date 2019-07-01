@@ -64,21 +64,19 @@ resources:
       access_token: ((github.access_token))
       order_by: time
 
-  - name: iac-service-rm-census
+  - name: uac-qid-service-master
     type: git
     source:
-      branch: rm-census
-      uri: git@github.com:ONSdigital/iac-service
+      uri: git@github.com:ONSdigital/census-rm-uac-qid-service.git
       private_key: ((github.service_account_private_key))
 
-  # TODO: requires new iac-service repo to start releases
-  # - name: iac-service-release
-  #   type: github-release-latest
-  #   source:
-  #     owner: ONSdigital
-  #     repository: iac-service
-  #     access_token: ((github.access_token))
-  #     order_by: time
+ - name: uac-qid-service-release
+    type: github-release-latest
+    source:
+      owner: ONSdigital
+      repository: census-rm-uac-qid-service
+      access_token: ((github.access_token))
+      order_by: time
 
   - name: ops-master
     type: git
@@ -199,17 +197,17 @@ resources:
       username: _json_key
       password: ((gcp.service_account_json))
 
-  - name: iac-service-docker-image-ci
+  - name: uac-qid-service-docker-image-ci
     type: docker-image
     source:
-      repository: ((docker-registry-ci))/rm/census-rm-iacsvc
+      repository: ((docker-registry-ci))/rm/census-rm-uac-qid-service
       username: _json_key
       password: ((gcp.service_account_json))
 
-  - name: iac-service-docker-image-gcr
+  - name: uac-qid-service-docker-image-gcr
     type: docker-image
     source:
-      repository: ((docker-registry-gcr))/rm/census-rm-iacsvc
+      repository: ((docker-registry-gcr))/rm/census-rm-uac-qid-service
       username: _json_key
       password: ((gcp.service_account_json))
 
@@ -643,19 +641,19 @@ jobs:
       get_params:
         skip_download: true
 
-  - name: build-iac-service-rm-census
+  - name: build-uac-qid-service-master
     plan:
-    - get: iac-service-rm-census
+    - get: uac-qid-service-rm-census
       trigger: true
-    - task: Build IAC Service Image (master)
+    - task: Build UAC QID Service Image (master)
       config:
         platform: linux
         image_resource:
           type: docker-image
           source:
-            repository: adoptopenjdk/maven-openjdk8
+            repository: adoptopenjdk/maven-openjdk11
         inputs:
-          - name: iac-service-rm-census
+          - name: uac-qid-service-service-master
         outputs:
           - name: build
         run:
@@ -664,24 +662,71 @@ jobs:
             - -exc
             - |
               mkdir -p build/target
-              cd iac-service-rm-census
+              cd uac-qid-service-service-master
               mvn package -DskipITs -Ddockerfile.skip
               cp target/*.jar ../build/target
               cp Dockerfile ../build
-    - put: iac-service-docker-image-ci
+    - put: uac-qid-service-docker-image-ci
       params:
         build: build
-        tag_file: iac-service-rm-census/.git/ref
+        tag_file: uac-qid-service-master/.git/ref
         tag_as_latest: true
       get_params:
         save: true
-    - put: iac-service-docker-image-gcr
+    - put: uac-qid-service-docker-image-gcr
       params:
         build: build
         cache_from:
-          - iac-service-docker-image-ci
-        tag_file: iac-service-rm-census/.git/ref
+          - uac-qid-service-docker-image-ci
+        tag_file: uac-qid-service-master/.git/ref
         tag_as_latest: true
+      get_params:
+        skip_download: true
+
+  - name: build-uac-qid-service-release
+    plan:
+    - get: uac-qid-service-release
+      params:
+        include_source_tarball: true
+      trigger: true
+    - task: Build UAC QID Service Image (release)
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: adoptopenjdk/maven-openjdk11
+        inputs:
+          - name: uac-qid-service-release
+        outputs:
+          - name: build
+          - name: extracted-uac-qid-service
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              mkdir -p build/target
+              cd uac-qid-service-release
+              tar -xzf source.tar.gz -C ../extracted-uac-qid-service --strip-components=1
+              cd ../extracted-uac-qid-service
+              mvn package -DskipITs -Ddockerfile.skip
+              cp target/census-rm-*.jar ../build/target
+              cp Dockerfile ../build
+    - put: uac-qid-service-docker-image-ci
+      params:
+        build: build
+        tag_file: uac-qid-service-release/tag
+        tag_as_latest: false
+      get_params:
+        save: true
+    - put: uac-qid-service-docker-image-gcr
+      params:
+        build: build
+        cache_from:
+          - uac-qid-service-docker-image-ci
+        tag_file: uac-qid-service-release/tag
+        tag_as_latest: false
       get_params:
         skip_download: true
 
