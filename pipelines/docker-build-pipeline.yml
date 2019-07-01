@@ -653,7 +653,7 @@ jobs:
           source:
             repository: adoptopenjdk/maven-openjdk11
         inputs:
-          - name: uac-qid-service-service-master
+          - name: uac-qid-service-master
         outputs:
           - name: build
         run:
@@ -662,7 +662,7 @@ jobs:
             - -exc
             - |
               mkdir -p build/target
-              cd uac-qid-service-service-master
+              cd uac-qid-service-master
               mvn package -DskipITs -Ddockerfile.skip
               cp target/*.jar ../build/target
               cp Dockerfile ../build
