@@ -4,53 +4,53 @@ resources:
   type: git
   source:
     uri: git@github.com:ONSdigital/census-rm-deploy.git
-    private_key: ((github-private-key))
+    private_key: ((github.service_account_private_key))
 
 - name: census-rm-kubernetes-repo
   type: git
   source:
     uri: git@github.com:ONSdigital/census-rm-kubernetes.git
-    private_key: ((github-private-key))
+    private_key: ((github.service_account_private_key))
 
 - name: census-rm-terraform
   type: git
   source:
     branch: ((terraform-branch))
     uri: git@github.com:ONSdigital/census-rm-terraform.git
-    private_key: ((github-private-key))
+    private_key: ((github.service_account_private_key))
 
 - name: batch-runner-repo
   type: git
   source:
     uri: git@github.com:ONSdigital/census-rm-qid-batch-runner.git
-    private_key: ((github-private-key))
+    private_key: ((github.service_account_private_key))
 
 - name: census-rm-kubernetes-microservices-repo
   type: git
   source:
     uri: git@github.com:ONSdigital/census-rm-kubernetes.git
-    private_key: ((github-private-key))
+    private_key: ((github.service_account_private_key))
     paths: [microservices/*]
 
 - name: census-rm-kubernetes-handlers-repo
   type: git
   source:
     uri: git@github.com:ONSdigital/census-rm-kubernetes.git
-    private_key: ((github-private-key))
+    private_key: ((github.service_account_private_key))
     paths: [handlers/*]
 
 - name: census-rm-kubernetes-ops-repo
   type: git
   source:
     uri: git@github.com:ONSdigital/census-rm-kubernetes.git
-    private_key: ((github-private-key))
+    private_key: ((github.service_account_private_key))
     paths: [optional/ops-*]
 
 - name: acceptance-tests-repo
   type: git
   source:
     uri: git@github.com:ONSdigital/census-rm-acceptance-tests.git
-    private_key: ((github-private-key))
+    private_key: ((github.service_account_private_key))
     paths: [kubernetes.env, tasks/*]
 
 - name: acceptance-tests-docker-image
@@ -58,63 +58,63 @@ resources:
   source:
     repository: eu.gcr.io/census-rm-ci/rm/census-rm-acceptance-tests
     username: _json_key
-    password: ((gcp-service-account-json))
+    password: ((gcp.service_account_json))
 
 - name: action-scheduler-docker-latest
   type: docker-image
   source:
     repository: eu.gcr.io/census-rm-ci/rm/census-rm-action-scheduler
     username: _json_key
-    password: ((gcp-service-account-json))
+    password: ((gcp.service_account_json))
 
 - name: actionexportersvc-docker-latest
   type: docker-image
   source:
     repository: eu.gcr.io/census-rm-ci/rm/census-rm-actionexportersvc
     username: _json_key
-    password: ((gcp-service-account-json))
+    password: ((gcp.service_account_json))
 
 - name: case-api-docker-latest
   type: docker-image
   source:
     repository: eu.gcr.io/census-rm-ci/rm/census-rm-case-api
     username: _json_key
-    password: ((gcp-service-account-json))
+    password: ((gcp.service_account_json))
 
 - name: case-processor-docker-latest
   type: docker-image
   source:
     repository: eu.gcr.io/census-rm-ci/rm/census-rm-case-processor
     username: _json_key
-    password: ((gcp-service-account-json))
+    password: ((gcp.service_account_json))
 
 - name: iacsvc-docker-latest
   type: docker-image
   source:
     repository: eu.gcr.io/census-rm-ci/rm/census-rm-iacsvc
     username: _json_key
-    password: ((gcp-service-account-json))
+    password: ((gcp.service_account_json))
 
 - name: pubsubsvc-docker-latest
   type: docker-image
   source:
     repository: eu.gcr.io/census-rm-ci/rm/census-rm-pubsub
     username: _json_key
-    password: ((gcp-service-account-json))
+    password: ((gcp.service_account_json))
 
 - name: ops-docker-latest
   type: docker-image
   source:
     repository: eu.gcr.io/census-rm-ci/rm/census-rm-ops
     username: _json_key
-    password: ((gcp-service-account-json))
+    password: ((gcp.service_account_json))
 
 - name: qid-batch-runner-docker-latest
   type: docker-image
   source:
     repository: eu.gcr.io/census-rm-ci/rm/census-rm-qid-batch-runner
     username: _json_key
-    password: ((gcp-service-account-json))
+    password: ((gcp.service_account_json))
 
 jobs:
 
@@ -187,7 +187,7 @@ jobs:
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
     params:
-      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((gcp-project-name))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: action-scheduler
@@ -214,7 +214,7 @@ jobs:
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
     params:
-      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((gcp-project-name))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: actionexportersvc
@@ -241,7 +241,7 @@ jobs:
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
     params:
-      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((gcp-project-name))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: case-api
@@ -268,7 +268,7 @@ jobs:
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
     params:
-      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((gcp-project-name))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: case-processor
@@ -295,7 +295,7 @@ jobs:
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
     params:
-      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((gcp-project-name))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: iacsvc
@@ -322,7 +322,7 @@ jobs:
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
     params:
-      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((gcp-project-name))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: pubsubsvc
@@ -349,7 +349,7 @@ jobs:
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
     params:
-      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((gcp-project-name))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: ops
@@ -415,7 +415,7 @@ jobs:
   - task: "Run Acceptance Tests (in K8s)"
     file: acceptance-tests-repo/tasks/kubectl-run-acceptance-tests.yml
     params:
-      SERVICE_ACCOUNT_JSON: ((gcp-service-account-json))
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((gcp-project-name))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       ACCEPTANCE_TESTS_IMAGE: ((acceptance-tests-image))
