@@ -33,13 +33,15 @@ jobs:
       params:
         pipelines:
 
-        - name: concourse-pipelines
+        - name: fly-pipelines
           team: rm
           config_file: census-rm-deploy/pipelines/concourse-pipelines.yml
+          unpaused: true
 
         - name: CI-Whitelodge Deploy
           team: rm
           config_file: census-rm-deploy/pipelines/ci-sit-kubernetes-pipeline.yml
+          unpaused: true
           vars:
             ci-gcp-environment-name: ci
             ci-gcp-project-name: census-rm-ci
@@ -61,7 +63,8 @@ jobs:
 
         - name: build-images
           team: rm
-          config_file: census-rm-deploy/pipelines/docker-builder-pipeline.yml
+          config_file: census-rm-deploy/pipelines/docker-build-pipeline.yml
+          unpaused: true
           vars:
             docker-registry-ci: eu.gcr.io/census-rm-ci
             docker-registry-gcr: eu.gcr.io/census-gcr-rm
