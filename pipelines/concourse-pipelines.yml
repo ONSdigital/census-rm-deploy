@@ -49,7 +49,6 @@ jobs:
             sit-gcp-environment-name: whitelodge
             sit-gcp-project-name: census-rm-whitelodge
             sit-kubernetes-cluster-name: rm-k8s-cluster
-            ci-gcp-admin-account-json:
 
         - name: census-rm-blacklodge
           team: rm

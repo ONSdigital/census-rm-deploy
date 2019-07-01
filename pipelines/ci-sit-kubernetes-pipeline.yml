@@ -143,7 +143,7 @@ jobs:
         ENV: ((ci-gcp-environment-name))
         GOOGLE_APPLICATION_CREDENTIALS: /root/gcloud-service-key.json
         KEEP_TMP_K8S: true
-        ADMIN_SERVICE_ACCOUNT_JSON: ((ci-gcp-admin-account-json))
+        ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       inputs:
         - name: census-rm-terraform
         - name: census-rm-kubernetes-repo
