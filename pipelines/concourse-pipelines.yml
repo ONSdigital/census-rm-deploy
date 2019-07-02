@@ -68,3 +68,11 @@ jobs:
           vars:
             docker-registry-ci: eu.gcr.io/census-rm-ci
             docker-registry-gcr: eu.gcr.io/census-gcr-rm
+
+        - name: release-images
+          team: rm
+          config_file: census-rm-deploy/pipelines/docker-release-pipeline.yml
+          unpaused: true
+          vars:
+            docker-registry-ci: eu.gcr.io/census-rm-ci
+            docker-registry-gcr: eu.gcr.io/census-gcr-rm
