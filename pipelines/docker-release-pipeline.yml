@@ -1,64 +1,84 @@
+resource_types:
+
+  - name: github-release-latest
+    type: docker-image
+    source:
+      repository: concourse/github-release-resource
+      tag: 1.1.0
+
 resources:
 
-  - name: actionexporter-master
-    type: git
+  - name: actionexporter-release
+    type: github-release-latest
     source:
-      uri: git@github.com:ONSdigital/census-rm-actionexporter-service.git
-      private_key: ((github.service_account_private_key))
+      owner: ONSdigital
+      repository: census-rm-actionexporter-service
+      access_token: ((github.access_token))
+      order_by: time
 
-  - name: action-scheduler-master
-    type: git
+  - name: action-scheduler-release
+    type: github-release-latest
     source:
-      uri: git@github.com:ONSdigital/census-rm-action-scheduler.git
-      private_key: ((github.service_account_private_key))
+      owner: ONSdigital
+      repository: census-rm-action-scheduler
+      access_token: ((github.access_token))
+      order_by: time
 
-  - name: case-api-master
-    type: git
+  - name: case-api-release
+    type: github-release-latest
     source:
-      uri: git@github.com:ONSdigital/census-rm-case-api.git
-      private_key: ((github.service_account_private_key))
+      owner: ONSdigital
+      repository: census-rm-case-api
+      access_token: ((github.access_token))
+      order_by: time
 
-  - name: case-processor-master
-    type: git
+  - name: case-processor-release
+    type: github-release-latest
     source:
-      uri: git@github.com:ONSdigital/census-rm-case-processor.git
-      private_key: ((github.service_account_private_key))
+      owner: ONSdigital
+      repository: census-rm-case-processor
+      access_token: ((github.access_token))
+      order_by: time
 
-  - name: uac-qid-service-master
-    type: git
+  - name: uac-qid-service-release
+    type: github-release-latest
     source:
-      uri: git@github.com:ONSdigital/census-rm-uac-qid-service.git
-      private_key: ((github.service_account_private_key))
+      owner: ONSdigital
+      repository: census-rm-uac-qid-service
+      access_token: ((github.access_token))
+      order_by: time
 
-  - name: ops-master
-    type: git
+  - name: ops-release
+    type: github-release-latest
     source:
-      uri: git@github.com:ONSdigital/census-rm-ops.git
-      private_key: ((github.service_account_private_key))
+      owner: ONSdigital
+      repository: census-rm-ops
+      access_token: ((github.access_token))
+      order_by: time
 
-  - name: pubsub-master
-    type: git
+  - name: pubsub-release
+    type: github-release-latest
     source:
-      uri: git@github.com:ONSdigital/census-rm-pubsub.git
-      private_key: ((github.service_account_private_key))
+      owner: ONSdigital
+      repository: census-rm-pubsub
+      access_token: ((github.access_token))
+      order_by: time
 
-  - name: qid-batch-runner-master
-    type: git
+  - name: qid-batch-runner-release
+    type: github-release-latest
     source:
-      uri: git@github.com:ONSdigital/census-rm-qid-batch-runner.git
-      private_key: ((github.service_account_private_key))
+      owner: ONSdigital
+      repository: census-rm-qid-batch-runner
+      access_token: ((github.access_token))
+      order_by: time
 
-  - name: sample-loader-master
-    type: git
+  - name: sample-loader-release
+    type: github-release-latest
     source:
-      uri: git@github.com:ONSdigital/census-rm-sample-loader.git
-      private_key: ((github.service_account_private_key))
-
-  - name: acceptance-tests-master
-    type: git
-    source:
-      uri: git@github.com:ONSdigital/census-rm-acceptance-tests.git
-      private_key: ((github.service_account_private_key))
+      owner: ONSdigital
+      repository: census-rm-sample-loader
+      access_token: ((github.access_token))
+      order_by: time
 
 
   - name: actionexporter-docker-image-ci
@@ -187,27 +207,14 @@ resources:
       username: _json_key
       password: ((gcp.service_account_json))
 
-  - name: acceptance-tests-docker-image-ci
-    type: docker-image
-    source:
-      repository: ((docker-registry-ci))/rm/census-rm-acceptance-tests
-      username: _json_key
-      password: ((gcp.service_account_json))
-
-  - name: acceptance-tests-docker-image-gcr
-    type: docker-image
-    source:
-      repository: ((docker-registry-gcr))/rm/census-rm-acceptance-tests
-      username: _json_key
-      password: ((gcp.service_account_json))
 
 jobs:
 
-  - name: build-actionexporter-master
+  - name: build-actionexporter-release
     plan:
-    - get: actionexporter-master
+    - get: actionexporter-release
       trigger: true
-    - task: Build Action Exporter Image (master)
+    - task: Build Action Exporter Image (release)
       config:
         platform: linux
         image_resource:
@@ -215,41 +222,47 @@ jobs:
           source:
             repository: adoptopenjdk/maven-openjdk8
         inputs:
-          - name: actionexporter-master
+          - name: actionexporter-release
         outputs:
           - name: build
+          - name: extracted-actionexporter
         run:
           path: sh
           args:
             - -exc
             - |
               mkdir -p build/target
-              cd actionexporter-master
+              cd actionexporter-release
+              tar -xzf source.tar.gz -C ../extracted-actionexporter --strip-components=1
+              cd ../extracted-actionexporter
               mvn package -DskipITs -Ddockerfile.skip
               cp target/census-rm-*.jar ../build/target
               cp Dockerfile ../build
+              cp healthcheck.sh ../build
     - put: actionexporter-docker-image-ci
       params:
         build: build
-        tag_file: actionexporter-master/.git/ref
-        tag_as_latest: true
+        tag_file: actionexporter-release/tag
+        tag_as_latest: false
       get_params:
         save: true
     - put: actionexporter-docker-image-gcr
       params:
         build: build
-        cache_from: 
+        cache_from:
           - actionexporter-docker-image-ci
-        tag_file: actionexporter-master/.git/ref
-        tag_as_latest: true
+        tag_file: actionexporter-release/tag
+        tag_as_latest: false
       get_params:
         skip_download: true
 
-  - name: build-action-scheduler-master
+  - name: build-action-scheduler-release
     plan:
-    - get: action-scheduler-master
+    - get: action-scheduler-release
+      params:
+        include_source_tarball: true
       trigger: true
-    - task: Build Action Scheduler Image (master)
+    - task: Build Action Scheduler Image (release)
       config:
         platform: linux
         image_resource:
@@ -257,16 +270,19 @@ jobs:
           source:
             repository: adoptopenjdk/maven-openjdk11
         inputs:
-          - name: action-scheduler-master
+          - name: action-scheduler-release
         outputs:
           - name: build
+          - name: extracted-action-scheduler
         run:
           path: sh
           args:
             - -exc
             - |
               mkdir -p build/target
-              cd action-scheduler-master
+              cd action-scheduler-release
+              tar -xzf source.tar.gz -C ../extracted-action-scheduler --strip-components=1
+              cd ../extracted-action-scheduler
               mvn package -DskipITs -Ddockerfile.skip
               cp target/census-rm-*.jar ../build/target
               cp Dockerfile ../build
@@ -274,8 +290,8 @@ jobs:
     - put: action-scheduler-docker-image-ci
       params:
         build: build
-        tag_file: action-scheduler-master/.git/ref
-        tag_as_latest: true
+        tag_file: action-scheduler-release/tag
+        tag_as_latest: false
       get_params:
         save: true
     - put: action-scheduler-docker-image-gcr
@@ -283,16 +299,18 @@ jobs:
         build: build
         cache_from:
           - action-scheduler-docker-image-ci
-        tag_file: action-scheduler-master/.git/ref
-        tag_as_latest: true
+        tag_file: action-scheduler-release/tag
+        tag_as_latest: false
       get_params:
         skip_download: true
 
-  - name: build-case-api-master
+  - name: build-case-api-release
     plan:
-    - get: case-api-master
+    - get: case-api-release
+      params:
+        include_source_tarball: true
       trigger: true
-    - task: Build Case API Image (master)
+    - task: Build Case API Image (release)
       config:
         platform: linux
         image_resource:
@@ -300,24 +318,27 @@ jobs:
           source:
             repository: adoptopenjdk/maven-openjdk11
         inputs:
-          - name: case-api-master
+          - name: case-api-release
         outputs:
           - name: build
+          - name: extracted-case-api
         run:
           path: sh
           args:
             - -exc
             - |
               mkdir -p build/target
-              cd case-api-master
+              cd case-api-release
+              tar -xzf source.tar.gz -C ../extracted-case-api --strip-components=1
+              cd ../extracted-case-api
               mvn package -DskipITs -Ddockerfile.skip
               cp target/census-rm-*.jar ../build/target
               cp Dockerfile ../build
     - put: case-api-docker-image-ci
       params:
         build: build
-        tag_file: case-api-master/.git/ref
-        tag_as_latest: true
+        tag_file: case-api-release/tag
+        tag_as_latest: false
       get_params:
         save: true
     - put: case-api-docker-image-gcr
@@ -325,16 +346,18 @@ jobs:
         build: build
         cache_from:
           - case-api-docker-image-ci
-        tag_file: case-api-master/.git/ref
-        tag_as_latest: true
+        tag_file: case-api-release/tag
+        tag_as_latest: false
       get_params:
         skip_download: true
 
-  - name: build-case-processor-master
+  - name: build-case-processor-release
     plan:
-    - get: case-processor-master
+    - get: case-processor-release
+      params:
+        include_source_tarball: true
       trigger: true
-    - task: Build Case Processor Image (master)
+    - task: Build Case Processor Image (release)
       config:
         platform: linux
         image_resource:
@@ -342,25 +365,27 @@ jobs:
           source:
             repository: adoptopenjdk/maven-openjdk11
         inputs:
-          - name: case-processor-master
+          - name: case-processor-release
         outputs:
           - name: build
+          - name: extracted-case-processor
         run:
           path: sh
           args:
             - -exc
             - |
               mkdir -p build/target
-              cd case-processor-master
+              cd case-processor-release
+              tar -xzf source.tar.gz -C ../extracted-case-processor --strip-components=1
+              cd ../extracted-case-processor
               mvn package -DskipITs -Ddockerfile.skip
               cp target/census-rm-*.jar ../build/target
               cp Dockerfile ../build
-              cp healthcheck.sh ../build
     - put: case-processor-docker-image-ci
       params:
         build: build
-        tag_file: case-processor-master/.git/ref
-        tag_as_latest: true
+        tag_file: case-processor-release/tag
+        tag_as_latest: false
       get_params:
         save: true
     - put: case-processor-docker-image-gcr
@@ -368,16 +393,18 @@ jobs:
         build: build
         cache_from:
           - case-processor-docker-image-ci
-        tag_file: case-processor-master/.git/ref
-        tag_as_latest: true
+        tag_file: case-processor-release/tag
+        tag_as_latest: false
       get_params:
         skip_download: true
 
-  - name: build-uac-qid-service-master
+  - name: build-uac-qid-service-release
     plan:
-    - get: uac-qid-service-master
+    - get: uac-qid-service-release
+      params:
+        include_source_tarball: true
       trigger: true
-    - task: Build UAC QID Service Image (master)
+    - task: Build UAC QID Service Image (release)
       config:
         platform: linux
         image_resource:
@@ -385,24 +412,27 @@ jobs:
           source:
             repository: adoptopenjdk/maven-openjdk11
         inputs:
-          - name: uac-qid-service-master
+          - name: uac-qid-service-release
         outputs:
           - name: build
+          - name: extracted-uac-qid-service
         run:
           path: sh
           args:
             - -exc
             - |
               mkdir -p build/target
-              cd uac-qid-service-master
+              cd uac-qid-service-release
+              tar -xzf source.tar.gz -C ../extracted-uac-qid-service --strip-components=1
+              cd ../extracted-uac-qid-service
               mvn package -DskipITs -Ddockerfile.skip
-              cp target/*.jar ../build/target
+              cp target/census-rm-*.jar ../build/target
               cp Dockerfile ../build
     - put: uac-qid-service-docker-image-ci
       params:
         build: build
-        tag_file: uac-qid-service-master/.git/ref
-        tag_as_latest: true
+        tag_file: uac-qid-service-release/tag
+        tag_as_latest: false
       get_params:
         save: true
     - put: uac-qid-service-docker-image-gcr
@@ -410,112 +440,171 @@ jobs:
         build: build
         cache_from:
           - uac-qid-service-docker-image-ci
-        tag_file: uac-qid-service-master/.git/ref
-        tag_as_latest: true
+        tag_file: uac-qid-service-release/tag
+        tag_as_latest: false
       get_params:
         skip_download: true
 
-  - name: build-ops-master
+  - name: build-ops-release
     plan:
-    - get: ops-master
+    - get: ops-release
+      params:
+        include_source_tarball: true
       trigger: true
+    - task: Build Ops Image (release)
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: alpine
+        inputs:
+          - name: ops-release
+        outputs:
+          - name: extracted-ops
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              cd case-processor-release
+              tar -xzf source.tar.gz -C ../extracted-ops --strip-components=1
     - put: ops-docker-image-ci
       params:
-        build: ops-master
-        tag_file: ops-master/.git/ref
-        tag_as_latest: true
+        build: extracted-ops
+        tag_file: ops-release/tag
+        tag_as_latest: false
       get_params:
         save: true
     - put: ops-docker-image-gcr
       params:
-        build: ops-master
+        build: extracted-ops
         cache_from:
           - ops-docker-image-ci
-        tag_file: ops-master/.git/ref
-        tag_as_latest: true
+        tag_file: ops-release/tag
+        tag_as_latest: false
       get_params:
         skip_download: true
 
-  - name: build-pubsub-master
+  - name: build-pubsub-release
     plan:
-    - get: pubsub-master
+    - get: pubsub-release
+      params:
+        include_source_tarball: true
       trigger: true
+    - task: Build PubSub Image (release)
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: alpine
+        inputs:
+          - name: pubsub-release
+        outputs:
+          - name: extracted-pubsub
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              cd pubsub-release
+              tar -xzf source.tar.gz -C ../extracted-pubsub --strip-components=1
     - put: pubsub-docker-image-ci
       params:
-        build: pubsub-master
-        tag_file: pubsub-master/.git/ref
-        tag_as_latest: true
+        build: extracted-pubsub
+        tag_file: pubsub-release/tag
+        tag_as_latest: false
       get_params:
         save: true
     - put: pubsub-docker-image-gcr
       params:
-        build: pubsub-master
+        build: extracted-pubsub
         cache_from:
           - pubsub-docker-image-ci
-        tag_file: pubsub-master/.git/ref
-        tag_as_latest: true
+        tag_file: pubsub-release/tag
+        tag_as_latest: false
       get_params:
         skip_download: true
 
-  - name: build-batch-runner-master
+  - name: build-batch-runner-release
     plan:
-    - get: qid-batch-runner-master
+    - get: qid-batch-runner-release
+      params:
+        include_source_tarball: true
       trigger: true
+    - task: Build Batch Runner Image (release)
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: alpine
+        inputs:
+          - name: qid-batch-runner-release
+        outputs:
+          - name: extracted-batch-runner
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              cd qid-batch-runner-release
+              tar -xzf source.tar.gz -C ../extracted-batch-runner --strip-components=1
     - put: qid-batch-runner-docker-image-ci
       params:
-        build: qid-batch-runner-master
-        tag_file: qid-batch-runner-master/.git/ref
-        tag_as_latest: true
+        build: extracted-batch-runner
+        tag_file: qid-batch-runner-release/tag
+        tag_as_latest: false
       get_params:
         save: true
     - put: qid-batch-runner-docker-image-gcr
       params:
-        build: qid-batch-runner-master
+        build: extracted-batch-runner
         cache_from:
           - qid-batch-runner-docker-image-ci
-        tag_file: qid-batch-runner-master/.git/ref
-        tag_as_latest: true
+        tag_file: qid-batch-runner-release/tag
+        tag_as_latest: false
       get_params:
         skip_download: true
 
-  - name: build-sample-loader-master
+  - name: build-sample-loader-release
     plan:
-    - get: sample-loader-master
+    - get: sample-loader-release
+      params:
+        include_source_tarball: true
       trigger: true
+    - task: Build Sample Loader Image (release)
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: alpine
+        inputs:
+          - name: sample-loader-release
+        outputs:
+          - name: extracted-sample-loader
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              cd sample-loader-release
+              tar -xzf source.tar.gz -C ../extracted-sample-loader --strip-components=1
     - put: sample-loader-docker-image-ci
       params:
-        build: sample-loader-master
-        tag_file: sample-loader-master/.git/ref
-        tag_as_latest: true
+        build: extracted-sample-loader
+        tag_file: sample-loader-release/tag
+        tag_as_latest: false
       get_params:
         save: true
     - put: sample-loader-docker-image-gcr
       params:
-        build: sample-loader-master
+        build: extracted-sample-loader
         cache_from:
           - sample-loader-docker-image-ci
-        tag_file: sample-loader-master/.git/ref
-        tag_as_latest: true
-      get_params:
-        skip_download: true
-
-  - name: build-acceptance-tests-master
-    plan:
-    - get: acceptance-tests-master
-      trigger: true
-    - put: acceptance-tests-docker-image-ci
-      params:
-        build: acceptance-tests-master
-        tag_file: acceptance-tests-master/.git/ref
-        tag_as_latest: true
-      get_params:
-        save: true
-    - put: acceptance-tests-docker-image-gcr
-      params:
-        build: acceptance-tests-master
-        cache_from:
-          - acceptance-tests-docker-image-ci
-        tag_file: acceptance-tests-master/.git/ref
-        tag_as_latest: true
+        tag_file: sample-loader-release/tag
+        tag_as_latest: false
       get_params:
         skip_download: true
