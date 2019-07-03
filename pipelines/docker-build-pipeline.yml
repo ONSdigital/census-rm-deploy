@@ -24,6 +24,12 @@ resources:
       uri: git@github.com:ONSdigital/census-rm-case-processor.git
       private_key: ((github.service_account_private_key))
 
+  - name: print-file-service-master
+    type: git
+    source:
+      uri: git@github.com:ONSdigital/census-rm-print-file-service
+      private_key: ((github.service_account_private_key))
+
   - name: uac-qid-service-master
     type: git
     source:
@@ -114,6 +120,20 @@ resources:
     type: docker-image
     source:
       repository: ((docker-registry-gcr))/rm/census-rm-case-processor
+      username: _json_key
+      password: ((gcp.service_account_json))
+
+  - name: print-file-service-docker-image-ci
+    type: docker-image
+    source:
+      repository: ((docker-registry-ci))/rm/census-rm-print-file-service
+      username: _json_key
+      password: ((gcp.service_account_json))
+
+  - name: print-file-service-docker-image-gcr
+    type: docker-image
+    source:
+      repository: ((docker-registry-gcr))/rm/census-rm-print-file-service
       username: _json_key
       password: ((gcp.service_account_json))
 
@@ -369,6 +389,27 @@ jobs:
         cache_from:
           - case-processor-docker-image-ci
         tag_file: case-processor-master/.git/ref
+        tag_as_latest: true
+      get_params:
+        skip_download: true
+
+  - name: build-print-file-service-master
+    plan:
+    - get: print-file-service-master
+      trigger: true
+    - put: print-file-service-docker-image-ci
+      params:
+        build: print-file-service-master
+        tag_file: print-file-service-master/.git/ref
+        tag_as_latest: true
+      get_params:
+        save: true
+    - put: print-file-service-docker-image-gcr
+      params:
+        build: print-file-service-master
+        cache_from:
+          - print-file-service-docker-image-ci
+        tag_file: print-file-service-master/.git/ref
         tag_as_latest: true
       get_params:
         skip_download: true
