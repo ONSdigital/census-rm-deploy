@@ -40,6 +40,14 @@ resources:
       access_token: ((github.access_token))
       order_by: time
 
+  - name: print-file-service-release
+    type: github-release-latest
+    source:
+      owner: ONSdigital
+      repository: census-rm-print-file-service
+      access_token: ((github.access_token))
+      order_by: time
+
   - name: uac-qid-service-release
     type: github-release-latest
     source:
@@ -134,6 +142,20 @@ resources:
     type: docker-image
     source:
       repository: ((docker-registry-gcr))/rm/census-rm-case-processor
+      username: _json_key
+      password: ((gcp.service_account_json))
+
+  - name: print-file-service-docker-image-ci
+    type: docker-image
+    source:
+      repository: ((docker-registry-ci))/rm/census-rm-print-file-service
+      username: _json_key
+      password: ((gcp.service_account_json))
+
+  - name: print-file-service-docker-image-gcr
+    type: docker-image
+    source:
+      repository: ((docker-registry-gcr))/rm/census-rm-print-file-service
       username: _json_key
       password: ((gcp.service_account_json))
 
@@ -394,6 +416,47 @@ jobs:
         cache_from:
           - case-processor-docker-image-ci
         tag_file: case-processor-release/tag
+        tag_as_latest: false
+      get_params:
+        skip_download: true
+
+  - name: build-print-file-service-release
+    plan:
+    - get: print-file-service-release
+      params:
+        include_source_tarball: true
+      trigger: true
+    - task: Build Print File Service Image (release)
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: alpine
+        inputs:
+          - name: print-file-service-release
+        outputs:
+          - name: extracted-print-file-service
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              cd print-file-service-release
+              tar -xzf source.tar.gz -C ../extracted-print-file-service --strip-components=1
+    - put: print-file-service-docker-image-ci
+      params:
+        build: extracted-print-file-service
+        tag_file: print-file-service-release/tag
+        tag_as_latest: false
+      get_params:
+        save: true
+    - put: print-file-service-docker-image-gcr
+      params:
+        build: extracted-print-file-service
+        cache_from:
+          - print-file-service-docker-image-ci
+        tag_file: print-file-service-release/tag
         tag_as_latest: false
       get_params:
         skip_download: true
