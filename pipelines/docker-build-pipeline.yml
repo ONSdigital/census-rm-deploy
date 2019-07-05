@@ -1,11 +1,5 @@
 resources:
 
-  - name: actionexporter-master
-    type: git
-    source:
-      uri: git@github.com:ONSdigital/census-rm-actionexporter-service.git
-      private_key: ((github.service_account_private_key))
-
   - name: action-scheduler-master
     type: git
     source:
@@ -66,20 +60,6 @@ resources:
       uri: git@github.com:ONSdigital/census-rm-acceptance-tests.git
       private_key: ((github.service_account_private_key))
 
-
-  - name: actionexporter-docker-image-ci
-    type: docker-image
-    source:
-      repository: ((docker-registry-ci))/rm/census-rm-actionexporter
-      username: _json_key
-      password: ((gcp.service_account_json))
-
-  - name: actionexporter-docker-image-gcr
-    type: docker-image
-    source:
-      repository: ((docker-registry-gcr))/rm/census-rm-actionexporter
-      username: _json_key
-      password: ((gcp.service_account_json))
 
   - name: action-scheduler-docker-image-ci
     type: docker-image
@@ -222,48 +202,6 @@ resources:
       password: ((gcp.service_account_json))
 
 jobs:
-
-  - name: build-actionexporter-master
-    plan:
-    - get: actionexporter-master
-      trigger: true
-    - task: Build Action Exporter Image (master)
-      config:
-        platform: linux
-        image_resource:
-          type: docker-image
-          source:
-            repository: adoptopenjdk/maven-openjdk8
-        inputs:
-          - name: actionexporter-master
-        outputs:
-          - name: build
-        run:
-          path: sh
-          args:
-            - -exc
-            - |
-              mkdir -p build/target
-              cd actionexporter-master
-              mvn package -DskipITs -Ddockerfile.skip
-              cp target/census-rm-*.jar ../build/target
-              cp Dockerfile ../build
-    - put: actionexporter-docker-image-ci
-      params:
-        build: build
-        tag_file: actionexporter-master/.git/ref
-        tag_as_latest: true
-      get_params:
-        save: true
-    - put: actionexporter-docker-image-gcr
-      params:
-        build: build
-        cache_from: 
-          - actionexporter-docker-image-ci
-        tag_file: actionexporter-master/.git/ref
-        tag_as_latest: true
-      get_params:
-        skip_download: true
 
   - name: build-action-scheduler-master
     plan:
