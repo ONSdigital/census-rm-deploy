@@ -18,6 +18,7 @@ resources:
   - name: pipelines
     type: concourse-pipeline
     source:
+      target: http://concourse-web:8080/
       teams:
       - name: rm
         username: rm
