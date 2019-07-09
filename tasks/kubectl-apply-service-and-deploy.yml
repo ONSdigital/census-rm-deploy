@@ -6,13 +6,13 @@ image_resource:
     repository: eu.gcr.io/census-gcr/gcloud-kubectl
 
 params:
-  SERVICE_ACCOUNT_JSON:
-  KUBERNETES_CLUSTER:
   GCP_PROJECT_NAME:
+  KUBERNETES_CLUSTER:
   KUBERNETES_DEPLOYMENT_NAME:
-  KUBERNETES_SELECTOR:
   KUBERNETES_FILE_PATH:
   KUBERNETES_FILE_PREFIX:
+  KUBERNETES_SELECTOR:
+  SERVICE_ACCOUNT_JSON:
   WAIT_UNTIL_AVAILABLE_TIMEOUT:
 
 inputs:
@@ -35,6 +35,9 @@ run:
 
       # Apply deployment config
       kubectl apply -f ${KUBERNETES_FILE_PATH}/${KUBERNETES_FILE_PREFIX}-deployment.yml --record
+
+      # Patch deployment to use docker image specified in pipeline rather than deployment script
+      kubectl patch deployment ${KUBERNETES_DEPLOYMENT_NAME} --type='json' -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/image", "value": "$(cat docker-image-resource/repository)"}]' --record
 
       # Patch deployment with timestamp/image digest to force pod recreation
       kubectl patch deployment ${KUBERNETES_DEPLOYMENT_NAME} -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat docker-image-resource/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}" --record

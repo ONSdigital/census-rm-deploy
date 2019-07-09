@@ -36,63 +36,63 @@ resources:
 - name: acceptance-tests-docker-image
   type: docker-image
   source:
-    repository: eu.gcr.io/census-rm-ci/rm/census-rm-acceptance-tests
+    repository: eu.gcr.io/census-gcr-rm/rm/census-rm-acceptance-tests
     username: _json_key
     password: ((gcp.service_account_json))
 
 - name: action-scheduler-docker-latest
   type: docker-image
   source:
-    repository: eu.gcr.io/census-rm-ci/rm/census-rm-action-scheduler
+    repository: eu.gcr.io/census-gcr-rm/rm/census-rm-action-scheduler
     username: _json_key
     password: ((gcp.service_account_json))
 
 - name: case-api-docker-latest
   type: docker-image
   source:
-    repository: eu.gcr.io/census-rm-ci/rm/census-rm-case-api
+    repository: eu.gcr.io/census-gcr-rm/rm/census-rm-case-api
     username: _json_key
     password: ((gcp.service_account_json))
 
 - name: case-processor-docker-latest
   type: docker-image
   source:
-    repository: eu.gcr.io/census-rm-ci/rm/census-rm-case-processor
+    repository: eu.gcr.io/census-gcr-rm/rm/census-rm-case-processor
     username: _json_key
     password: ((gcp.service_account_json))
 
 - name: uac-qid-service-docker-latest
   type: docker-image
   source:
-    repository: eu.gcr.io/census-rm-ci/rm/census-rm-uac-qid-service
+    repository: eu.gcr.io/census-gcr-rm/rm/census-rm-uac-qid-service
     username: _json_key
     password: ((gcp.service_account_json))
 
 - name: pubsubsvc-docker-latest
   type: docker-image
   source:
-    repository: eu.gcr.io/census-rm-ci/rm/census-rm-pubsub
+    repository: eu.gcr.io/census-gcr-rm/rm/census-rm-pubsub
     username: _json_key
     password: ((gcp.service_account_json))
 
 - name: ops-docker-latest
   type: docker-image
   source:
-    repository: eu.gcr.io/census-rm-ci/rm/census-rm-ops
+    repository: eu.gcr.io/census-gcr-rm/rm/census-rm-ops
     username: _json_key
     password: ((gcp.service_account_json))
 
 - name: qid-batch-runner-docker-latest
   type: docker-image
   source:
-    repository: eu.gcr.io/census-rm-ci/rm/census-rm-qid-batch-runner
+    repository: eu.gcr.io/census-gcr-rm/rm/census-rm-qid-batch-runner
     username: _json_key
     password: ((gcp.service_account_json))
 
 - name: print-file-service-docker-latest
   type: docker-image
   source:
-    repository: eu.gcr.io/census-rm-ci/rm/census-rm-print-file-service
+    repository: eu.gcr.io/census-gcr-rm/rm/census-rm-print-file-service
     username: _json_key
     password: ((gcp.service_account_json))
 
