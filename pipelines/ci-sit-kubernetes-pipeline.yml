@@ -3,6 +3,7 @@ resources:
 - name: census-rm-deploy
   type: git
   source:
+    branch: fix-mapping
     uri: git@github.com:ONSdigital/census-rm-deploy.git
     private_key: ((github.service_account_private_key))
 
@@ -217,7 +218,9 @@ jobs:
       KUBERNETES_FILE_PATH: kubernetes-repo/microservices
       KUBERNETES_FILE_PREFIX: case-api
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
+    input_mapping: {
+      docker-image-resource: case-processor-docker-latest,
+      kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
 - name: "CI Deploy Case-Processor"
   serial: true
@@ -244,7 +247,9 @@ jobs:
       KUBERNETES_FILE_PATH: kubernetes-repo/microservices
       KUBERNETES_FILE_PREFIX: case-processor
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
+    input_mapping: {
+      docker-image-resource: case-processor-docker-latest,
+      kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
 - name: "CI Deploy UAC QID Service"
   serial: true
@@ -271,7 +276,9 @@ jobs:
       KUBERNETES_FILE_PATH: kubernetes-repo/microservices
       KUBERNETES_FILE_PREFIX: uac-qid-service
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
+    input_mapping: {
+      docker-image-resource: uac-qid-service-docker-latest,
+      kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
 - name: "CI Deploy PubSub Service"
   serial: true
@@ -298,7 +305,9 @@ jobs:
       KUBERNETES_FILE_PATH: kubernetes-repo/microservices
       KUBERNETES_FILE_PREFIX: pubsub
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
+    input_mapping: {
+      docker-image-resource: pubsubsvc-docker-latest,
+      kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
 - name: "CI Deploy Ops Tool"
   serial: true
@@ -325,7 +334,9 @@ jobs:
       KUBERNETES_FILE_PATH: kubernetes-repo/optional
       KUBERNETES_FILE_PREFIX: ops
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {kubernetes-repo: census-rm-kubernetes-ops-repo}
+    input_mapping: {
+      docker-image-resource: ops-docker-latest,
+      kubernetes-repo: census-rm-kubernetes-ops-repo}
 
 - name: "CI Deploy Print File Service"
   serial: true
@@ -352,7 +363,9 @@ jobs:
       KUBERNETES_FILE_PATH: kubernetes-repo/microservices
       KUBERNETES_FILE_PREFIX: print-file-service
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
+    input_mapping: {
+      docker-image-resource: print-file-service-docker-latest,
+      kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
 - name: "CI Acceptance Tests"
   serial: true
@@ -452,7 +465,9 @@ jobs:
       KUBERNETES_FILE_PATH: kubernetes-repo/microservices
       KUBERNETES_FILE_PREFIX: action-scheduler
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
+    input_mapping: {
+      docker-image-resource: action-scheduler-docker-latest,
+      kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
 - name: "SIT Deploy Print File Service"
   serial: true
@@ -481,7 +496,9 @@ jobs:
       KUBERNETES_FILE_PATH: kubernetes-repo/microservices
       KUBERNETES_FILE_PREFIX: print-file-service
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
+    input_mapping: {
+      docker-image-resource: print-file-service-docker-latest,
+      kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
 - name: "SIT Deploy Case-API"
   serial: true
@@ -510,7 +527,9 @@ jobs:
       KUBERNETES_FILE_PATH: kubernetes-repo/microservices
       KUBERNETES_FILE_PREFIX: case-api
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
+    input_mapping: {
+      docker-image-resource: case-api-docker-latest,
+      kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
 - name: "SIT Deploy Case-Processor"
   serial: true
@@ -539,7 +558,9 @@ jobs:
       KUBERNETES_FILE_PATH: kubernetes-repo/microservices
       KUBERNETES_FILE_PREFIX: case-processor
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
+    input_mapping: {
+      docker-image-resource: case-processor-docker-latest,
+      kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
 - name: "SIT Deploy UAC QID Service"
   serial: true
@@ -568,7 +589,9 @@ jobs:
       KUBERNETES_FILE_PATH: kubernetes-repo/microservices
       KUBERNETES_FILE_PREFIX: uac-qid-service
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
+    input_mapping: {
+      docker-image-resource: uac-qid-service-docker-latest,
+      kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
 - name: "SIT Deploy PubSub Service"
   serial: true
@@ -597,7 +620,9 @@ jobs:
       KUBERNETES_FILE_PATH: kubernetes-repo/microservices
       KUBERNETES_FILE_PREFIX: pubsub
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
+    input_mapping: {
+      docker-image-resource: pubsubsvc-docker-latest,
+      kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
 - name: "SIT Deploy Ops Tool"
   serial: true
@@ -624,4 +649,6 @@ jobs:
       KUBERNETES_FILE_PATH: kubernetes-repo/optional
       KUBERNETES_FILE_PREFIX: ops
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {kubernetes-repo: census-rm-kubernetes-ops-repo}
+    input_mapping: {
+      docker-image-resource: ops-docker-latest,
+      kubernetes-repo: census-rm-kubernetes-ops-repo}
