@@ -17,6 +17,7 @@ params:
 
 inputs:
   - name: kubernetes-repo
+  - name: docker-image-resource
 run:
   path: sh
   args:
