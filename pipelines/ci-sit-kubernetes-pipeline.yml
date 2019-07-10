@@ -3,7 +3,6 @@ resources:
 - name: census-rm-deploy
   type: git
   source:
-    branch: fix-mapping
     uri: git@github.com:ONSdigital/census-rm-deploy.git
     private_key: ((github.service_account_private_key))
 
@@ -219,7 +218,7 @@ jobs:
       KUBERNETES_FILE_PREFIX: case-api
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
-      docker-image-resource: case-processor-docker-latest,
+      docker-image-resource: case-api-docker-latest,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
 - name: "CI Deploy Case-Processor"
