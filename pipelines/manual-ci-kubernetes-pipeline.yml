@@ -186,7 +186,7 @@ jobs:
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: uacqidservice
       KUBERNETES_SELECTOR: app=uacqidservice
-      KUBERNETES_FILE_PATH: kubernetes-repo/((kubernetes-releases-directory))
+      KUBERNETES_FILE_PATH: kubernetes-repo/((release-directory))/microservices
       KUBERNETES_FILE_PREFIX: uac-qid-service
       SKIP_IMAGE_PATCH: true
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
