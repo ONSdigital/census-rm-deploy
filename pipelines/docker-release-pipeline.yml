@@ -80,6 +80,13 @@ resources:
       access_token: ((github.access_token))
       order_by: time
 
+  - name: fieldwork-adapter-release
+    type: github-release-latest
+    source:
+      owner: ONSdigital
+      repository: census-rm-fieldwork-adapter
+      access_token: ((github.access_token))
+      order_by: time
 
   - name: action-scheduler-docker-image-ci
     type: docker-image
@@ -204,6 +211,20 @@ resources:
     type: docker-image
     source:
       repository: ((docker-registry-gcr))/rm/census-rm-sample-loader
+      username: _json_key
+      password: ((gcp.service_account_json))
+
+  - name: fieldwork-adapter-docker-image-ci
+    type: docker-image
+    source:
+      repository: ((docker-registry-ci))/rm/census-rm-fieldwork-adapter
+      username: _json_key
+      password: ((gcp.service_account_json))
+  
+  - name: fieldwork-adapter-docker-image-gcr
+    type: docker-image
+    source:
+      repository: ((docker-registry-gcr))/rm/census-rm-fieldwork-adapter
       username: _json_key
       password: ((gcp.service_account_json))
 
@@ -600,6 +621,53 @@ jobs:
         cache_from:
           - sample-loader-docker-image-ci
         tag_file: sample-loader-release/tag
+        tag_as_latest: false
+      get_params:
+        skip_download: true
+
+  - name: build-fieldwork-adapter-release
+    plan:
+    - get: fieldwork-adapter-release
+      params:
+        include_source_tarball: true
+      trigger: true
+    - task: Build Fieldwork Adapter Image (release)
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: adoptopenjdk/maven-openjdk11
+        inputs:
+          - name: fieldwork-adapter-release
+        outputs:
+          - name: build
+          - name: extracted-fieldwork-adapter
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              mkdir -p build/target
+              cd fieldwork-adapter-release
+              tar -xzf source.tar.gz -C ../extracted-fieldwork-adapter --strip-components=1
+              cd ../extracted-fieldwork-adapter
+              mvn package -DskipITs -Ddockerfile.skip
+              cp target/census-rm-*.jar ../build/target
+              cp Dockerfile ../build
+    - put: fieldwork-adapter-docker-image-ci
+      params:
+        build: build
+        tag_file: fieldwork-adapter-release/tag
+        tag_as_latest: false
+      get_params:
+        save: true
+    - put: fieldwork-adapter-docker-image-gcr
+      params:
+        build: build
+        cache_from:
+          - fieldwork-adapter-docker-image-ci
+        tag_file: fieldwork-adapter-release/tag
         tag_as_latest: false
       get_params:
         skip_download: true

@@ -60,6 +60,11 @@ resources:
       uri: git@github.com:ONSdigital/census-rm-acceptance-tests.git
       private_key: ((github.service_account_private_key))
 
+  - name: fieldwork-adapter-master
+    type: git
+    source:
+      uri: git@github.com:ONSdigital/census-rm-fieldwork-adapter.git
+      private_key: ((github.service_account_private_key))
 
   - name: action-scheduler-docker-image-ci
     type: docker-image
@@ -198,6 +203,20 @@ resources:
     type: docker-image
     source:
       repository: ((docker-registry-gcr))/rm/census-rm-acceptance-tests
+      username: _json_key
+      password: ((gcp.service_account_json))
+
+  - name: fieldwork-adapter-docker-image-ci
+    type: docker-image
+    source:
+      repository: ((docker-registry-ci))/rm/census-rm-fieldwork-adapter
+      username: _json_key
+      password: ((gcp.service_account_json))
+
+  - name: fieldwork-adapter-docker-image-gcr
+    type: docker-image
+    source:
+      repository: ((docker-registry-gcr))/rm/census-rm-fieldwork-adapter
       username: _json_key
       password: ((gcp.service_account_json))
 
@@ -495,6 +514,48 @@ jobs:
         cache_from:
           - acceptance-tests-docker-image-ci
         tag_file: acceptance-tests-master/.git/ref
+        tag_as_latest: true
+      get_params:
+        skip_download: true
+
+  - name: build-fieldwork-adapter-master
+    plan:
+    - get: fieldwork-adapter-master
+      trigger: true
+    - task: Build Fieldwork Adapter Image (master)
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: adoptopenjdk/maven-openjdk11
+        inputs:
+          - name: fieldwork-adapter-master
+        outputs:
+          - name: build
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              mkdir -p build/target
+              cd fieldwork-adapter-master
+              mvn package -DskipITs -Ddockerfile.skip
+              cp target/*.jar ../build/target
+              cp Dockerfile ../build
+    - put: fieldwork-adapter-docker-image-ci
+      params:
+        build: build
+        tag_file: fieldwork-adapter-master/.git/ref
+        tag_as_latest: true
+      get_params:
+        save: true
+    - put: fieldwork-adapter-docker-image-gcr
+      params:
+        build: build
+        cache_from:
+          - fieldwork-adapter-docker-image-ci
+        tag_file: fieldwork-adapter-master/.git/ref
         tag_as_latest: true
       get_params:
         skip_download: true
