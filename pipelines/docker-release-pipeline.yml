@@ -335,6 +335,7 @@ jobs:
               mvn package -DskipITs -Ddockerfile.skip
               cp target/census-rm-*.jar ../build/target
               cp Dockerfile ../build
+              cp healthcheck.sh ../build
     - put: case-processor-docker-image-ci
       params:
         build: build
