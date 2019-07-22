@@ -11,7 +11,8 @@ resources:
   source:
     uri: git@github.com:ONSdigital/census-rm-kubernetes.git
     private_key: ((github.service_account_private_key))
-    paths: [((release-directory))/microservices/*]
+    paths: [release/microservices/*]
+    tag_filter: ((kubernetes-release))
 
 - name: batch-runner-repo
   type: git
@@ -24,7 +25,8 @@ resources:
   source:
     uri: git@github.com:ONSdigital/census-rm-kubernetes.git
     private_key: ((github.service_account_private_key))
-    paths: [optional/ops-*]
+    paths: [release/optional/ops-*]
+    tag_filter: ((kubernetes-release))
 
 - name: acceptance-tests-repo
   type: git
@@ -117,7 +119,7 @@ jobs:
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: action-scheduler
       KUBERNETES_SELECTOR: app=action-scheduler
-      KUBERNETES_FILE_PATH: kubernetes-repo/((release-directory))/microservices
+      KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
       KUBERNETES_FILE_PREFIX: action-scheduler
       SKIP_IMAGE_PATCH: true
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
@@ -140,7 +142,7 @@ jobs:
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: case-api
       KUBERNETES_SELECTOR: app=case-api
-      KUBERNETES_FILE_PATH: kubernetes-repo/((release-directory))/microservices
+      KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
       KUBERNETES_FILE_PREFIX: case-api
       SKIP_IMAGE_PATCH: true
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
@@ -163,7 +165,7 @@ jobs:
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: case-processor
       KUBERNETES_SELECTOR: app=case-processor
-      KUBERNETES_FILE_PATH: kubernetes-repo/((release-directory))/microservices
+      KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
       KUBERNETES_FILE_PREFIX: case-processor
       SKIP_IMAGE_PATCH: true
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
@@ -186,7 +188,7 @@ jobs:
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: uacqidservice
       KUBERNETES_SELECTOR: app=uacqidservice
-      KUBERNETES_FILE_PATH: kubernetes-repo/((release-directory))/microservices
+      KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
       KUBERNETES_FILE_PREFIX: uac-qid-service
       SKIP_IMAGE_PATCH: true
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
@@ -209,7 +211,7 @@ jobs:
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: pubsubsvc
       KUBERNETES_SELECTOR: app=pubsubsvc
-      KUBERNETES_FILE_PATH: kubernetes-repo/((release-directory))/microservices
+      KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
       KUBERNETES_FILE_PREFIX: pubsub
       SKIP_IMAGE_PATCH: true
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
@@ -232,7 +234,7 @@ jobs:
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: ops
       KUBERNETES_SELECTOR: app=ops
-      KUBERNETES_FILE_PATH: kubernetes-repo/optional
+      KUBERNETES_FILE_PATH: kubernetes-repo/release/optional
       KUBERNETES_FILE_PREFIX: ops
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-ops-repo}
@@ -254,7 +256,7 @@ jobs:
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_STATEFULSET_NAME: printfilesvc
       KUBERNETES_SELECTOR: app=printfilesvc
-      KUBERNETES_FILE_PATH: kubernetes-repo/((release-directory))/microservices
+      KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
       KUBERNETES_FILE_PREFIX: print-file-service
       SKIP_IMAGE_PATCH: true
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
