@@ -109,6 +109,13 @@ resources:
     username: _json_key
     password: ((gcp.service_account_json))
 
+- name: fieldwork-adapter-docker-latest
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-gcr-rm/rm/census-rm-fieldwork-adapter
+    username: _json_key
+    password: ((gcp.service_account_json))
+
 
 jobs:
 
@@ -116,7 +123,7 @@ jobs:
 # CI
 - name: "CI Deploy Infrastructure"
   serial: true
-  serial_groups: [ci-action-scheduler, ci-case-api, ci-case-processor, ci-uac-qid-service, ci-ops-tool, ci-pubsubsvc, ci-print-file-service]
+  serial_groups: [ci-action-scheduler, ci-case-api, ci-case-processor, ci-uac-qid-service, ci-ops-tool, ci-pubsubsvc, ci-print-file-service, ci-fieldwork-adapter]
   max_in_flight: 1
   plan:
   - get: census-rm-terraform
