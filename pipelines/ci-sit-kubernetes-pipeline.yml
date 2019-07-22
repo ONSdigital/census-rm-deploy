@@ -466,7 +466,7 @@ jobs:
       skip_download: true
   - get: fieldwork-adapter-docker-latest
     trigger: true
-    passed: ["CI Deploy Fieldwork Adaapter"]
+    passed: ["CI Deploy Fieldwork Adapter"]
     params:
       skip_download: true
   - task: "Run Acceptance Tests (in K8s)"
