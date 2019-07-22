@@ -61,7 +61,7 @@ jobs:
             gcp-project-name: census-rm-blacklodge
             kubernetes-cluster-name: rm-k8s-cluster
             acceptance-tests-image: eu.gcr.io/census-gcr-rm/rm/census-rm-acceptance-tests:latest
-            release-directory: releases/version-0
+            release-directory: releases/version-1
 
         - name: build-images
           team: rm
