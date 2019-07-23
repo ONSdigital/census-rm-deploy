@@ -484,7 +484,7 @@ jobs:
           args:
             - -exc
             - |
-              cd case-processor-release
+              cd ops-release
               tar -xzf source.tar.gz -C ../extracted-ops --strip-components=1
     - put: ops-docker-image-ci
       params:
