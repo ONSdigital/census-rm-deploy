@@ -1,13 +1,6 @@
 ---
 resources:
 
-- name: acceptance-tests-docker-image
-  type: docker-image
-  source:
-    repository: eu.gcr.io/census-gcr-rm/rm/census-rm-acceptance-tests
-    username: _json_key
-    password: ((gcp.service_account_json))
-
 - name: acceptance-tests-repo
   type: git
   source:
