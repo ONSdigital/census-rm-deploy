@@ -8,6 +8,14 @@ resource_types:
 
 resources:
 
+  - name: acceptance-tests-release
+    type: github-release-latest
+    source:
+      owner: ONSdigital
+      repository: census-rm-acceptance-tests
+      access_token: ((github.access_token))
+      order_by: time
+
   - name: action-scheduler-release
     type: github-release-latest
     source:
@@ -87,6 +95,20 @@ resources:
       repository: census-rm-fieldwork-adapter
       access_token: ((github.access_token))
       order_by: time
+
+  - name: acceptance-tests-docker-image-ci
+    type: docker-image
+    source:
+      repository: ((docker-registry-ci))/rm/census-rm-acceptance-tests
+      username: _json_key
+      password: ((gcp.service_account_json))
+
+  - name: acceptance-tests-docker-image-gcr
+    type: docker-image
+    source:
+      repository: ((docker-registry-gcr))/rm/census-rm-acceptance-tests
+      username: _json_key
+      password: ((gcp.service_account_json))
 
   - name: action-scheduler-docker-image-ci
     type: docker-image
@@ -669,6 +691,47 @@ jobs:
         cache_from:
           - fieldwork-adapter-docker-image-ci
         tag_file: fieldwork-adapter-release/tag
+        tag_as_latest: false
+      get_params:
+        skip_download: true
+
+  - name: build-acceptance-tests-release
+    plan:
+    - get: acceptance-tests-release
+      params:
+        include_source_tarball: true
+      trigger: true
+    - task: Build Acceptance Tests Image (release)
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: alpine
+        inputs:
+          - name: acceptance-tests-release
+        outputs:
+          - name: extracted-acceptance-tests
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              cd acceptance-tests-release
+              tar -xzf source.tar.gz -C ../extracted-acceptance-tests --strip-components=1
+    - put: acceptance-tests-docker-image-ci
+      params:
+        build: extracted-acceptance-tests
+        tag_file: acceptance-tests-release/tag
+        tag_as_latest: false
+      get_params:
+        save: true
+    - put: acceptance-tests-docker-image-gcr
+      params:
+        build: extracted-acceptance-tests
+        cache_from:
+          - acceptance-tests-docker-image-ci
+        tag_file: acceptance-tests-release/tag
         tag_as_latest: false
       get_params:
         skip_download: true
