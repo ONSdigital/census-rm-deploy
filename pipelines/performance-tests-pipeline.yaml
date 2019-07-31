@@ -1,0 +1,110 @@
+---
+resources:
+
+- name: 24h
+  type: time
+  source:
+    interval: 24h
+    days: [Monday, Tuesday, Wednesday, Thursday, Friday]
+
+- name: census-rm-kubernetes-repo
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-kubernetes.git
+    private_key: ((github.service_account_private_key))
+
+- name: census-rm-terraform-repo
+  type: git
+  source:
+    branch: ((terraform-branch))
+    uri: git@github.com:ONSdigital/census-rm-terraform.git
+    private_key: ((github.service_account_private_key))
+
+- name: performance-tests-repo
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-performance-tests.git
+    private_key: ((github.service_account_private_key))
+    paths: [kubernetes.env, tasks/*]
+
+- name: performance-tests-docker-image
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-gcr-rm/rm/census-rm-performance-tests
+    username: _json_key
+    password: ((gcp.service_account_json))
+
+
+jobs:
+
+
+# CI
+- name: "Deploy Performance Infrastructure"
+  serial: true
+  serial_groups: ["Performance Tests"]
+  max_in_flight: 1
+  plan:
+  - get: census-rm-terraform-repo
+    trigger: true
+  - get: census-rm-kubernetes-repo
+  - task: "Build & Deploy Performance Infrastructure"
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: google/cloud-sdk
+      params:
+        ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+        AUTO_APPLY: true
+        DEV_DUMMY_PGP: true
+        DEV_PUBSUB: true
+        DISABLE_CI_BINDING: true
+        ENV: ((performance-gcp-environment-name))
+        GOOGLE_APPLICATION_CREDENTIALS: /root/gcloud-service-key.json
+        KEEP_TMP_K8S: true
+      inputs:
+        - name: census-rm-terraform
+        - name: census-rm-kubernetes-repo
+      run:
+        path: bash
+        args:
+          - -exc
+          - |
+            apt-get install -y unzip procps  # NB: procps is used by Helm
+            git clone https://github.com/kamatama41/tfenv.git ~/.tfenv && \
+            ln -s /root/.tfenv/bin/* /usr/local/bin
+            cat >$GOOGLE_APPLICATION_CREDENTIALS <<EOL
+            $ADMIN_SERVICE_ACCOUNT_JSON
+            EOL
+            gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
+            cp -R census-rm-kubernetes-repo/ census-rm-terraform/tmp_rm_kube
+            cd census-rm-terraform
+            tfenv install
+            curl -L https://git.io/get_helm.sh | bash && \
+            helm init --client-only && \
+            helm plugin install https://github.com/rimusz/helm-tiller
+            ./apply.sh
+
+- name: "Performance Tests"
+  serial: true
+  serial_groups: ["Performance Tests"]
+  plan:
+  - get: 24h
+    trigger: true
+  - get: census-rm-terraform-repo
+    trigger: true
+    passed: ["Deploy Performance Infrastructure"]
+  - get: performance-tests-repo
+  - get: performance-tests-docker-image
+    trigger: true
+    params:
+      skip_download: true
+  - task: "Run Performance Tests (in K8s)"  # TODO: what is deemed a failure?
+    file: performance-tests-repo/tasks/kubectl-run-performance-tests.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((performance-gcp-project-name))
+      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+      PERFORMANCE_TESTS_IMAGE: ((performance-tests-image))
+    input_mapping: {performance-tests-repo: performance-tests-repo}

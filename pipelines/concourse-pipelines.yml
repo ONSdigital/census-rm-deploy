@@ -78,3 +78,13 @@ jobs:
           vars:
             docker-registry-ci: eu.gcr.io/census-rm-ci
             docker-registry-gcr: eu.gcr.io/census-gcr-rm
+
+        - name: test-performance
+          team: rm
+          config_file: census-rm-deploy/pipelines/performance-tests-pipeline.yml
+          unpaused: true
+          vars:
+            performance-gcp-environment-name: census-rm-performance
+            performance-kubernetes-cluster-name: rm-k8s-cluster
+            performance-tests-image: eu.gcr.io/census-gcr-rm/rm/census-rm-performance-tests:latest
+            terraform-branch: master
