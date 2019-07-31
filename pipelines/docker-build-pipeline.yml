@@ -60,6 +60,12 @@ resources:
       uri: git@github.com:ONSdigital/census-rm-acceptance-tests.git
       private_key: ((github.service_account_private_key))
 
+  - name: performance-tests-master
+    type: git
+    source:
+      uri: git@github.com:ONSdigital/census-rm-performance-tests.git
+      private_key: ((github.service_account_private_key))
+
   - name: fieldwork-adapter-master
     type: git
     source:
@@ -217,6 +223,20 @@ resources:
     type: docker-image
     source:
       repository: ((docker-registry-gcr))/rm/census-rm-fieldwork-adapter
+      username: _json_key
+      password: ((gcp.service_account_json))
+
+  - name: performance-tests-docker-image-ci
+    type: docker-image
+    source:
+      repository: ((docker-registry-ci))/rm/census-rm-performance-tests
+      username: _json_key
+      password: ((gcp.service_account_json))
+
+  - name: performance-tests-docker-image-gcr
+    type: docker-image
+    source:
+      repository: ((docker-registry-gcr))/rm/census-rm-performance-tests
       username: _json_key
       password: ((gcp.service_account_json))
 
@@ -514,6 +534,27 @@ jobs:
         cache_from:
           - acceptance-tests-docker-image-ci
         tag_file: acceptance-tests-master/.git/ref
+        tag_as_latest: true
+      get_params:
+        skip_download: true
+
+  - name: build-performance-tests-master
+    plan:
+    - get: performance-tests-master
+      trigger: true
+    - put: performance-tests-docker-image-ci
+      params:
+        build: performance-tests-master
+        tag_file: performance-tests-master/.git/ref
+        tag_as_latest: true
+      get_params:
+        save: true
+    - put: performance-tests-docker-image-gcr
+      params:
+        build: performance-tests-master
+        cache_from:
+          - performance-tests-docker-image-ci
+        tag_file: performance-tests-master/.git/ref
         tag_as_latest: true
       get_params:
         skip_download: true
