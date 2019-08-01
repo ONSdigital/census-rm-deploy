@@ -6,7 +6,17 @@ resource_types:
       repository: concourse/github-release-resource
       tag: 1.1.0
 
+  - name: slack-notification
+    type: docker-image
+    source:
+      repository: cfcommunity/slack-notification-resource
+
 resources:
+
+  - name: slack-alert
+    type: slack-notification
+    source:
+      url: ((slack.webhook))
 
   - name: acceptance-tests-release
     type: github-release-latest
@@ -260,6 +270,31 @@ jobs:
         include_source_tarball: true
       trigger: true
     - task: Build Action Scheduler Image (release)
+      on_failure:
+        put: slack-alert
+        params:
+          icon_emoji: ":concourse:"
+          username: Concourse
+          attachments: [
+              {
+                  "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "title": "$BUILD_JOB_NAME failed",
+                  "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "fields": [
+                      {
+                          "title": "Pipeline",
+                          "value": "$BUILD_PIPELINE_NAME",
+                          "short": true
+                      },
+                      {
+                          "title": "Build",
+                          "value": "#$BUILD_NAME",
+                          "short": true
+                      }
+                  ],
+                  "color": "#F35A00"
+              }
+          ]
       config:
         platform: linux
         image_resource:
@@ -285,6 +320,36 @@ jobs:
               cp Dockerfile ../build
               cp healthcheck.sh ../build
     - put: action-scheduler-docker-image-ci
+      on_failure:
+        put: slack-alert
+        params:
+          icon_emoji: ":concourse:"
+          username: Concourse
+          attachments: [
+              {
+                  "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "title": "$BUILD_JOB_NAME failed",
+                  "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "fields": [
+                      {
+                          "title": "Pipeline",
+                          "value": "$BUILD_PIPELINE_NAME",
+                          "short": true
+                      },
+                      {
+                          "title": "Registry",
+                          "value": "((docker-registry-ci))",
+                          "short": true
+                      },
+                      {
+                          "title": "Build",
+                          "value": "#$BUILD_NAME",
+                          "short": true
+                      }
+                  ],
+                  "color": "#F35A00"
+              }
+          ]
       params:
         build: build
         tag_file: action-scheduler-release/tag
@@ -292,6 +357,36 @@ jobs:
       get_params:
         save: true
     - put: action-scheduler-docker-image-gcr
+      on_failure:
+        put: slack-alert
+        params:
+          icon_emoji: ":concourse:"
+          username: Concourse
+          attachments: [
+              {
+                  "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "title": "$BUILD_JOB_NAME failed",
+                  "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "fields": [
+                      {
+                          "title": "Pipeline",
+                          "value": "$BUILD_PIPELINE_NAME",
+                          "short": true
+                      },
+                      {
+                          "title": "Registry",
+                          "value": "((docker-registry-gcr))",
+                          "short": true
+                      },
+                      {
+                          "title": "Build",
+                          "value": "#$BUILD_NAME",
+                          "short": true
+                      }
+                  ],
+                  "color": "#F35A00"
+              }
+          ]
       params:
         build: build
         cache_from:
@@ -308,6 +403,31 @@ jobs:
         include_source_tarball: true
       trigger: true
     - task: Build Case API Image (release)
+      on_failure:
+        put: slack-alert
+        params:
+          icon_emoji: ":concourse:"
+          username: Concourse
+          attachments: [
+              {
+                  "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "title": "$BUILD_JOB_NAME failed",
+                  "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "fields": [
+                      {
+                          "title": "Pipeline",
+                          "value": "$BUILD_PIPELINE_NAME",
+                          "short": true
+                      },
+                      {
+                          "title": "Build",
+                          "value": "#$BUILD_NAME",
+                          "short": true
+                      }
+                  ],
+                  "color": "#F35A00"
+              }
+          ]
       config:
         platform: linux
         image_resource:
@@ -332,6 +452,36 @@ jobs:
               cp target/census-rm-*.jar ../build/target
               cp Dockerfile ../build
     - put: case-api-docker-image-ci
+      on_failure:
+        put: slack-alert
+        params:
+          icon_emoji: ":concourse:"
+          username: Concourse
+          attachments: [
+              {
+                  "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "title": "$BUILD_JOB_NAME failed",
+                  "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "fields": [
+                      {
+                          "title": "Pipeline",
+                          "value": "$BUILD_PIPELINE_NAME",
+                          "short": true
+                      },
+                      {
+                          "title": "Registry",
+                          "value": "((docker-registry-ci))",
+                          "short": true
+                      },
+                      {
+                          "title": "Build",
+                          "value": "#$BUILD_NAME",
+                          "short": true
+                      }
+                  ],
+                  "color": "#F35A00"
+              }
+          ]
       params:
         build: build
         tag_file: case-api-release/tag
@@ -339,6 +489,36 @@ jobs:
       get_params:
         save: true
     - put: case-api-docker-image-gcr
+      on_failure:
+        put: slack-alert
+        params:
+          icon_emoji: ":concourse:"
+          username: Concourse
+          attachments: [
+              {
+                  "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "title": "$BUILD_JOB_NAME failed",
+                  "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "fields": [
+                      {
+                          "title": "Pipeline",
+                          "value": "$BUILD_PIPELINE_NAME",
+                          "short": true
+                      },
+                      {
+                          "title": "Registry",
+                          "value": "((docker-registry-gcr))",
+                          "short": true
+                      },
+                      {
+                          "title": "Build",
+                          "value": "#$BUILD_NAME",
+                          "short": true
+                      }
+                  ],
+                  "color": "#F35A00"
+              }
+          ]
       params:
         build: build
         cache_from:
@@ -355,6 +535,31 @@ jobs:
         include_source_tarball: true
       trigger: true
     - task: Build Case Processor Image (release)
+      on_failure:
+        put: slack-alert
+        params:
+          icon_emoji: ":concourse:"
+          username: Concourse
+          attachments: [
+              {
+                  "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "title": "$BUILD_JOB_NAME failed",
+                  "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "fields": [
+                      {
+                          "title": "Pipeline",
+                          "value": "$BUILD_PIPELINE_NAME",
+                          "short": true
+                      },
+                      {
+                          "title": "Build",
+                          "value": "#$BUILD_NAME",
+                          "short": true
+                      }
+                  ],
+                  "color": "#F35A00"
+              }
+          ]
       config:
         platform: linux
         image_resource:
@@ -380,6 +585,36 @@ jobs:
               cp Dockerfile ../build
               cp healthcheck.sh ../build
     - put: case-processor-docker-image-ci
+      on_failure:
+        put: slack-alert
+        params:
+          icon_emoji: ":concourse:"
+          username: Concourse
+          attachments: [
+              {
+                  "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "title": "$BUILD_JOB_NAME failed",
+                  "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "fields": [
+                      {
+                          "title": "Pipeline",
+                          "value": "$BUILD_PIPELINE_NAME",
+                          "short": true
+                      },
+                      {
+                          "title": "Registry",
+                          "value": "((docker-registry-ci))",
+                          "short": true
+                      },
+                      {
+                          "title": "Build",
+                          "value": "#$BUILD_NAME",
+                          "short": true
+                      }
+                  ],
+                  "color": "#F35A00"
+              }
+          ]
       params:
         build: build
         tag_file: case-processor-release/tag
@@ -387,6 +622,36 @@ jobs:
       get_params:
         save: true
     - put: case-processor-docker-image-gcr
+      on_failure:
+        put: slack-alert
+        params:
+          icon_emoji: ":concourse:"
+          username: Concourse
+          attachments: [
+              {
+                  "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "title": "$BUILD_JOB_NAME failed",
+                  "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "fields": [
+                      {
+                          "title": "Pipeline",
+                          "value": "$BUILD_PIPELINE_NAME",
+                          "short": true
+                      },
+                      {
+                          "title": "Registry",
+                          "value": "((docker-registry-gcr))",
+                          "short": true
+                      },
+                      {
+                          "title": "Build",
+                          "value": "#$BUILD_NAME",
+                          "short": true
+                      }
+                  ],
+                  "color": "#F35A00"
+              }
+          ]
       params:
         build: build
         cache_from:
@@ -403,6 +668,31 @@ jobs:
         include_source_tarball: true
       trigger: true
     - task: Build Print File Service Image (release)
+      on_failure:
+        put: slack-alert
+        params:
+          icon_emoji: ":concourse:"
+          username: Concourse
+          attachments: [
+              {
+                  "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "title": "$BUILD_JOB_NAME failed",
+                  "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "fields": [
+                      {
+                          "title": "Pipeline",
+                          "value": "$BUILD_PIPELINE_NAME",
+                          "short": true
+                      },
+                      {
+                          "title": "Build",
+                          "value": "#$BUILD_NAME",
+                          "short": true
+                      }
+                  ],
+                  "color": "#F35A00"
+              }
+          ]
       config:
         platform: linux
         image_resource:
@@ -421,6 +711,36 @@ jobs:
               cd print-file-service-release
               tar -xzf source.tar.gz -C ../extracted-print-file-service --strip-components=1
     - put: print-file-service-docker-image-ci
+      on_failure:
+        put: slack-alert
+        params:
+          icon_emoji: ":concourse:"
+          username: Concourse
+          attachments: [
+              {
+                  "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "title": "$BUILD_JOB_NAME failed",
+                  "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "fields": [
+                      {
+                          "title": "Pipeline",
+                          "value": "$BUILD_PIPELINE_NAME",
+                          "short": true
+                      },
+                      {
+                          "title": "Registry",
+                          "value": "((docker-registry-ci))",
+                          "short": true
+                      },
+                      {
+                          "title": "Build",
+                          "value": "#$BUILD_NAME",
+                          "short": true
+                      }
+                  ],
+                  "color": "#F35A00"
+              }
+          ]
       params:
         build: extracted-print-file-service
         tag_file: print-file-service-release/tag
@@ -428,6 +748,36 @@ jobs:
       get_params:
         save: true
     - put: print-file-service-docker-image-gcr
+      on_failure:
+        put: slack-alert
+        params:
+          icon_emoji: ":concourse:"
+          username: Concourse
+          attachments: [
+              {
+                  "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "title": "$BUILD_JOB_NAME failed",
+                  "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "fields": [
+                      {
+                          "title": "Pipeline",
+                          "value": "$BUILD_PIPELINE_NAME",
+                          "short": true
+                      },
+                      {
+                          "title": "Registry",
+                          "value": "((docker-registry-gcr))",
+                          "short": true
+                      },
+                      {
+                          "title": "Build",
+                          "value": "#$BUILD_NAME",
+                          "short": true
+                      }
+                  ],
+                  "color": "#F35A00"
+              }
+          ]
       params:
         build: extracted-print-file-service
         cache_from:
@@ -444,6 +794,31 @@ jobs:
         include_source_tarball: true
       trigger: true
     - task: Build UAC QID Service Image (release)
+      on_failure:
+        put: slack-alert
+        params:
+          icon_emoji: ":concourse:"
+          username: Concourse
+          attachments: [
+              {
+                  "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "title": "$BUILD_JOB_NAME failed",
+                  "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "fields": [
+                      {
+                          "title": "Pipeline",
+                          "value": "$BUILD_PIPELINE_NAME",
+                          "short": true
+                      },
+                      {
+                          "title": "Build",
+                          "value": "#$BUILD_NAME",
+                          "short": true
+                      }
+                  ],
+                  "color": "#F35A00"
+              }
+          ]
       config:
         platform: linux
         image_resource:
@@ -468,6 +843,36 @@ jobs:
               cp target/census-rm-*.jar ../build/target
               cp Dockerfile ../build
     - put: uac-qid-service-docker-image-ci
+      on_failure:
+        put: slack-alert
+        params:
+          icon_emoji: ":concourse:"
+          username: Concourse
+          attachments: [
+              {
+                  "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "title": "$BUILD_JOB_NAME failed",
+                  "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "fields": [
+                      {
+                          "title": "Pipeline",
+                          "value": "$BUILD_PIPELINE_NAME",
+                          "short": true
+                      },
+                      {
+                          "title": "Registry",
+                          "value": "((docker-registry-ci))",
+                          "short": true
+                      },
+                      {
+                          "title": "Build",
+                          "value": "#$BUILD_NAME",
+                          "short": true
+                      }
+                  ],
+                  "color": "#F35A00"
+              }
+          ]
       params:
         build: build
         tag_file: uac-qid-service-release/tag
@@ -475,6 +880,36 @@ jobs:
       get_params:
         save: true
     - put: uac-qid-service-docker-image-gcr
+      on_failure:
+        put: slack-alert
+        params:
+          icon_emoji: ":concourse:"
+          username: Concourse
+          attachments: [
+              {
+                  "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "title": "$BUILD_JOB_NAME failed",
+                  "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "fields": [
+                      {
+                          "title": "Pipeline",
+                          "value": "$BUILD_PIPELINE_NAME",
+                          "short": true
+                      },
+                      {
+                          "title": "Registry",
+                          "value": "((docker-registry-gcr))",
+                          "short": true
+                      },
+                      {
+                          "title": "Build",
+                          "value": "#$BUILD_NAME",
+                          "short": true
+                      }
+                  ],
+                  "color": "#F35A00"
+              }
+          ]
       params:
         build: build
         cache_from:
@@ -491,6 +926,31 @@ jobs:
         include_source_tarball: true
       trigger: true
     - task: Build Ops Image (release)
+      on_failure:
+        put: slack-alert
+        params:
+          icon_emoji: ":concourse:"
+          username: Concourse
+          attachments: [
+              {
+                  "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "title": "$BUILD_JOB_NAME failed",
+                  "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "fields": [
+                      {
+                          "title": "Pipeline",
+                          "value": "$BUILD_PIPELINE_NAME",
+                          "short": true
+                      },
+                      {
+                          "title": "Build",
+                          "value": "#$BUILD_NAME",
+                          "short": true
+                      }
+                  ],
+                  "color": "#F35A00"
+              }
+          ]
       config:
         platform: linux
         image_resource:
@@ -509,6 +969,36 @@ jobs:
               cd ops-release
               tar -xzf source.tar.gz -C ../extracted-ops --strip-components=1
     - put: ops-docker-image-ci
+      on_failure:
+        put: slack-alert
+        params:
+          icon_emoji: ":concourse:"
+          username: Concourse
+          attachments: [
+              {
+                  "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "title": "$BUILD_JOB_NAME failed",
+                  "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "fields": [
+                      {
+                          "title": "Pipeline",
+                          "value": "$BUILD_PIPELINE_NAME",
+                          "short": true
+                      },
+                      {
+                          "title": "Registry",
+                          "value": "((docker-registry-ci))",
+                          "short": true
+                      },
+                      {
+                          "title": "Build",
+                          "value": "#$BUILD_NAME",
+                          "short": true
+                      }
+                  ],
+                  "color": "#F35A00"
+              }
+          ]
       params:
         build: extracted-ops
         tag_file: ops-release/tag
@@ -516,6 +1006,36 @@ jobs:
       get_params:
         save: true
     - put: ops-docker-image-gcr
+      on_failure:
+        put: slack-alert
+        params:
+          icon_emoji: ":concourse:"
+          username: Concourse
+          attachments: [
+              {
+                  "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "title": "$BUILD_JOB_NAME failed",
+                  "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "fields": [
+                      {
+                          "title": "Pipeline",
+                          "value": "$BUILD_PIPELINE_NAME",
+                          "short": true
+                      },
+                      {
+                          "title": "Registry",
+                          "value": "((docker-registry-gcr))",
+                          "short": true
+                      },
+                      {
+                          "title": "Build",
+                          "value": "#$BUILD_NAME",
+                          "short": true
+                      }
+                  ],
+                  "color": "#F35A00"
+              }
+          ]
       params:
         build: extracted-ops
         cache_from:
@@ -532,6 +1052,31 @@ jobs:
         include_source_tarball: true
       trigger: true
     - task: Build PubSub Image (release)
+      on_failure:
+        put: slack-alert
+        params:
+          icon_emoji: ":concourse:"
+          username: Concourse
+          attachments: [
+              {
+                  "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "title": "$BUILD_JOB_NAME failed",
+                  "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "fields": [
+                      {
+                          "title": "Pipeline",
+                          "value": "$BUILD_PIPELINE_NAME",
+                          "short": true
+                      },
+                      {
+                          "title": "Build",
+                          "value": "#$BUILD_NAME",
+                          "short": true
+                      }
+                  ],
+                  "color": "#F35A00"
+              }
+          ]
       config:
         platform: linux
         image_resource:
@@ -550,6 +1095,36 @@ jobs:
               cd pubsub-release
               tar -xzf source.tar.gz -C ../extracted-pubsub --strip-components=1
     - put: pubsub-docker-image-ci
+      on_failure:
+        put: slack-alert
+        params:
+          icon_emoji: ":concourse:"
+          username: Concourse
+          attachments: [
+              {
+                  "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "title": "$BUILD_JOB_NAME failed",
+                  "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "fields": [
+                      {
+                          "title": "Pipeline",
+                          "value": "$BUILD_PIPELINE_NAME",
+                          "short": true
+                      },
+                      {
+                          "title": "Registry",
+                          "value": "((docker-registry-ci))",
+                          "short": true
+                      },
+                      {
+                          "title": "Build",
+                          "value": "#$BUILD_NAME",
+                          "short": true
+                      }
+                  ],
+                  "color": "#F35A00"
+              }
+          ]
       params:
         build: extracted-pubsub
         tag_file: pubsub-release/tag
@@ -557,6 +1132,36 @@ jobs:
       get_params:
         save: true
     - put: pubsub-docker-image-gcr
+      on_failure:
+        put: slack-alert
+        params:
+          icon_emoji: ":concourse:"
+          username: Concourse
+          attachments: [
+              {
+                  "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "title": "$BUILD_JOB_NAME failed",
+                  "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "fields": [
+                      {
+                          "title": "Pipeline",
+                          "value": "$BUILD_PIPELINE_NAME",
+                          "short": true
+                      },
+                      {
+                          "title": "Registry",
+                          "value": "((docker-registry-gcr))",
+                          "short": true
+                      },
+                      {
+                          "title": "Build",
+                          "value": "#$BUILD_NAME",
+                          "short": true
+                      }
+                  ],
+                  "color": "#F35A00"
+              }
+          ]
       params:
         build: extracted-pubsub
         cache_from:
@@ -573,6 +1178,31 @@ jobs:
         include_source_tarball: true
       trigger: true
     - task: Build Batch Runner Image (release)
+      on_failure:
+        put: slack-alert
+        params:
+          icon_emoji: ":concourse:"
+          username: Concourse
+          attachments: [
+              {
+                  "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "title": "$BUILD_JOB_NAME failed",
+                  "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "fields": [
+                      {
+                          "title": "Pipeline",
+                          "value": "$BUILD_PIPELINE_NAME",
+                          "short": true
+                      },
+                      {
+                          "title": "Build",
+                          "value": "#$BUILD_NAME",
+                          "short": true
+                      }
+                  ],
+                  "color": "#F35A00"
+              }
+          ]
       config:
         platform: linux
         image_resource:
@@ -591,6 +1221,36 @@ jobs:
               cd qid-batch-runner-release
               tar -xzf source.tar.gz -C ../extracted-batch-runner --strip-components=1
     - put: qid-batch-runner-docker-image-ci
+      on_failure:
+        put: slack-alert
+        params:
+          icon_emoji: ":concourse:"
+          username: Concourse
+          attachments: [
+              {
+                  "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "title": "$BUILD_JOB_NAME failed",
+                  "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "fields": [
+                      {
+                          "title": "Pipeline",
+                          "value": "$BUILD_PIPELINE_NAME",
+                          "short": true
+                      },
+                      {
+                          "title": "Registry",
+                          "value": "((docker-registry-ci))",
+                          "short": true
+                      },
+                      {
+                          "title": "Build",
+                          "value": "#$BUILD_NAME",
+                          "short": true
+                      }
+                  ],
+                  "color": "#F35A00"
+              }
+          ]
       params:
         build: extracted-batch-runner
         tag_file: qid-batch-runner-release/tag
@@ -598,6 +1258,36 @@ jobs:
       get_params:
         save: true
     - put: qid-batch-runner-docker-image-gcr
+      on_failure:
+        put: slack-alert
+        params:
+          icon_emoji: ":concourse:"
+          username: Concourse
+          attachments: [
+              {
+                  "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "title": "$BUILD_JOB_NAME failed",
+                  "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "fields": [
+                      {
+                          "title": "Pipeline",
+                          "value": "$BUILD_PIPELINE_NAME",
+                          "short": true
+                      },
+                      {
+                          "title": "Registry",
+                          "value": "((docker-registry-gcr))",
+                          "short": true
+                      },
+                      {
+                          "title": "Build",
+                          "value": "#$BUILD_NAME",
+                          "short": true
+                      }
+                  ],
+                  "color": "#F35A00"
+              }
+          ]
       params:
         build: extracted-batch-runner
         cache_from:
@@ -614,6 +1304,31 @@ jobs:
         include_source_tarball: true
       trigger: true
     - task: Build Sample Loader Image (release)
+      on_failure:
+        put: slack-alert
+        params:
+          icon_emoji: ":concourse:"
+          username: Concourse
+          attachments: [
+              {
+                  "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "title": "$BUILD_JOB_NAME failed",
+                  "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "fields": [
+                      {
+                          "title": "Pipeline",
+                          "value": "$BUILD_PIPELINE_NAME",
+                          "short": true
+                      },
+                      {
+                          "title": "Build",
+                          "value": "#$BUILD_NAME",
+                          "short": true
+                      }
+                  ],
+                  "color": "#F35A00"
+              }
+          ]
       config:
         platform: linux
         image_resource:
@@ -632,6 +1347,36 @@ jobs:
               cd sample-loader-release
               tar -xzf source.tar.gz -C ../extracted-sample-loader --strip-components=1
     - put: sample-loader-docker-image-ci
+      on_failure:
+        put: slack-alert
+        params:
+          icon_emoji: ":concourse:"
+          username: Concourse
+          attachments: [
+              {
+                  "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "title": "$BUILD_JOB_NAME failed",
+                  "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "fields": [
+                      {
+                          "title": "Pipeline",
+                          "value": "$BUILD_PIPELINE_NAME",
+                          "short": true
+                      },
+                      {
+                          "title": "Registry",
+                          "value": "((docker-registry-ci))",
+                          "short": true
+                      },
+                      {
+                          "title": "Build",
+                          "value": "#$BUILD_NAME",
+                          "short": true
+                      }
+                  ],
+                  "color": "#F35A00"
+              }
+          ]
       params:
         build: extracted-sample-loader
         tag_file: sample-loader-release/tag
@@ -639,6 +1384,36 @@ jobs:
       get_params:
         save: true
     - put: sample-loader-docker-image-gcr
+      on_failure:
+        put: slack-alert
+        params:
+          icon_emoji: ":concourse:"
+          username: Concourse
+          attachments: [
+              {
+                  "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "title": "$BUILD_JOB_NAME failed",
+                  "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "fields": [
+                      {
+                          "title": "Pipeline",
+                          "value": "$BUILD_PIPELINE_NAME",
+                          "short": true
+                      },
+                      {
+                          "title": "Registry",
+                          "value": "((docker-registry-gcr))",
+                          "short": true
+                      },
+                      {
+                          "title": "Build",
+                          "value": "#$BUILD_NAME",
+                          "short": true
+                      }
+                  ],
+                  "color": "#F35A00"
+              }
+          ]
       params:
         build: extracted-sample-loader
         cache_from:
@@ -655,6 +1430,31 @@ jobs:
         include_source_tarball: true
       trigger: true
     - task: Build Fieldwork Adapter Image (release)
+      on_failure:
+        put: slack-alert
+        params:
+          icon_emoji: ":concourse:"
+          username: Concourse
+          attachments: [
+              {
+                  "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "title": "$BUILD_JOB_NAME failed",
+                  "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "fields": [
+                      {
+                          "title": "Pipeline",
+                          "value": "$BUILD_PIPELINE_NAME",
+                          "short": true
+                      },
+                      {
+                          "title": "Build",
+                          "value": "#$BUILD_NAME",
+                          "short": true
+                      }
+                  ],
+                  "color": "#F35A00"
+              }
+          ]
       config:
         platform: linux
         image_resource:
@@ -679,6 +1479,36 @@ jobs:
               cp target/census-rm-*.jar ../build/target
               cp Dockerfile ../build
     - put: fieldwork-adapter-docker-image-ci
+      on_failure:
+        put: slack-alert
+        params:
+          icon_emoji: ":concourse:"
+          username: Concourse
+          attachments: [
+              {
+                  "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "title": "$BUILD_JOB_NAME failed",
+                  "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "fields": [
+                      {
+                          "title": "Pipeline",
+                          "value": "$BUILD_PIPELINE_NAME",
+                          "short": true
+                      },
+                      {
+                          "title": "Registry",
+                          "value": "((docker-registry-ci))",
+                          "short": true
+                      },
+                      {
+                          "title": "Build",
+                          "value": "#$BUILD_NAME",
+                          "short": true
+                      }
+                  ],
+                  "color": "#F35A00"
+              }
+          ]
       params:
         build: build
         tag_file: fieldwork-adapter-release/tag
@@ -686,6 +1516,36 @@ jobs:
       get_params:
         save: true
     - put: fieldwork-adapter-docker-image-gcr
+      on_failure:
+        put: slack-alert
+        params:
+          icon_emoji: ":concourse:"
+          username: Concourse
+          attachments: [
+              {
+                  "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "title": "$BUILD_JOB_NAME failed",
+                  "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "fields": [
+                      {
+                          "title": "Pipeline",
+                          "value": "$BUILD_PIPELINE_NAME",
+                          "short": true
+                      },
+                      {
+                          "title": "Registry",
+                          "value": "((docker-registry-gcr))",
+                          "short": true
+                      },
+                      {
+                          "title": "Build",
+                          "value": "#$BUILD_NAME",
+                          "short": true
+                      }
+                  ],
+                  "color": "#F35A00"
+              }
+          ]
       params:
         build: build
         cache_from:
@@ -702,6 +1562,31 @@ jobs:
         include_source_tarball: true
       trigger: true
     - task: Build Acceptance Tests Image (release)
+      on_failure:
+        put: slack-alert
+        params:
+          icon_emoji: ":concourse:"
+          username: Concourse
+          attachments: [
+              {
+                  "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "title": "$BUILD_JOB_NAME failed",
+                  "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "fields": [
+                      {
+                          "title": "Pipeline",
+                          "value": "$BUILD_PIPELINE_NAME",
+                          "short": true
+                      },
+                      {
+                          "title": "Build",
+                          "value": "#$BUILD_NAME",
+                          "short": true
+                      }
+                  ],
+                  "color": "#F35A00"
+              }
+          ]
       config:
         platform: linux
         image_resource:
@@ -720,6 +1605,36 @@ jobs:
               cd acceptance-tests-release
               tar -xzf source.tar.gz -C ../extracted-acceptance-tests --strip-components=1
     - put: acceptance-tests-docker-image-ci
+      on_failure:
+        put: slack-alert
+        params:
+          icon_emoji: ":concourse:"
+          username: Concourse
+          attachments: [
+              {
+                  "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "title": "$BUILD_JOB_NAME failed",
+                  "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "fields": [
+                      {
+                          "title": "Pipeline",
+                          "value": "$BUILD_PIPELINE_NAME",
+                          "short": true
+                      },
+                      {
+                          "title": "Registry",
+                          "value": "((docker-registry-ci))",
+                          "short": true
+                      },
+                      {
+                          "title": "Build",
+                          "value": "#$BUILD_NAME",
+                          "short": true
+                      }
+                  ],
+                  "color": "#F35A00"
+              }
+          ]
       params:
         build: extracted-acceptance-tests
         tag_file: acceptance-tests-release/tag
@@ -727,6 +1642,36 @@ jobs:
       get_params:
         save: true
     - put: acceptance-tests-docker-image-gcr
+      on_failure:
+        put: slack-alert
+        params:
+          icon_emoji: ":concourse:"
+          username: Concourse
+          attachments: [
+              {
+                  "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "title": "$BUILD_JOB_NAME failed",
+                  "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "fields": [
+                      {
+                          "title": "Pipeline",
+                          "value": "$BUILD_PIPELINE_NAME",
+                          "short": true
+                      },
+                      {
+                          "title": "Registry",
+                          "value": "((docker-registry-gcr))",
+                          "short": true
+                      },
+                      {
+                          "title": "Build",
+                          "value": "#$BUILD_NAME",
+                          "short": true
+                      }
+                  ],
+                  "color": "#F35A00"
+              }
+          ]
       params:
         build: extracted-acceptance-tests
         cache_from:
