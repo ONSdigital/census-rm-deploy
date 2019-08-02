@@ -6,3 +6,7 @@ install:
 
 script:
   - for i in pipelines/*.yml; do ./fly validate-pipeline -c $i; done
+
+branches:
+  only:
+    - master
