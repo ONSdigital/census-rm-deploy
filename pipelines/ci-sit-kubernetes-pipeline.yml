@@ -128,60 +128,86 @@ resources:
     username: _json_key
     password: ((gcp.service_account_json))
 
+templating:
 
-jobs:
-
-
-# CI
-- name: "CI Deploy Infrastructure"
-  serial: true
-  serial_groups: [ci-action-scheduler, ci-case-api, ci-case-processor, ci-uac-qid-service, ci-ops-tool, ci-pubsubsvc, ci-print-file-service, ci-fieldwork-adapter]
-  max_in_flight: 1
-  plan:
-  - get: census-rm-terraform
-    trigger: true
-  - get: census-rm-kubernetes-repo
-  - put: slack-alert
-    params:
-      icon_emoji: ":concourse:"
-      username: Concourse
-      attachments: [
-        {
-            "fallback": "$BUILD_JOB_NAME started... See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-            "title": "$BUILD_JOB_NAME started...",
-            "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-            "fields": [
-                {
-                    "title": "Pipeline",
-                    "value": "$BUILD_PIPELINE_NAME",
-                    "short": true
-                },
-                {
-                    "title": "Environment",
-                    "value": "((ci-gcp-environment-name))",
-                    "short": true
-                },
-                {
-                    "title": "Project",
-                    "value": "((ci-gcp-project-name))",
-                    "short": true
-                },
-                {
-                    "title": "Build",
-                    "value": "#$BUILD_NAME",
-                    "short": true
-                }
-            ],
-            "color": "#764FA5"
-        }
+slack_failure_alert_ci: &slack_failure_alert_ci
+  put: slack-alert
+  params:
+    icon_emoji: ":concourse:"
+    username: Concourse
+    attachments: [
+          {
+              "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+              "title": "$BUILD_JOB_NAME failed",
+              "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+              "fields": [
+                  {
+                      "title": "Pipeline",
+                      "value": "$BUILD_PIPELINE_NAME",
+                      "short": true
+                  },
+                  {
+                      "title": "Environment",
+                      "value": "((ci-gcp-environment-name))",
+                      "short": true
+                  },
+                  {
+                      "title": "Project",
+                      "value": "((ci-gcp-project-name))",
+                      "short": true
+                  },
+                  {
+                      "title": "Build",
+                      "value": "#$BUILD_NAME",
+                      "short": true
+                  }
+              ],
+              "color": "#F35A00"
+          }
       ]
-  - task: "Build & Deploy Infrastructure"
-    on_success:
-      put: slack-alert
-      params:
-        icon_emoji: ":concourse:"
-        username: Concourse
-        attachments: [
+
+slack_failure_alert_sit: &slack_failure_alert_sit
+  put: slack-alert
+  params:
+    icon_emoji: ":concourse:"
+    username: Concourse
+    attachments: [
+          {
+              "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+              "title": "$BUILD_JOB_NAME failed",
+              "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+              "fields": [
+                  {
+                      "title": "Pipeline",
+                      "value": "$BUILD_PIPELINE_NAME",
+                      "short": true
+                  },
+                  {
+                      "title": "Environment",
+                      "value": "((sit-gcp-environment-name))",
+                      "short": true
+                  },
+                  {
+                      "title": "Project",
+                      "value": "((sit-gcp-project-name))",
+                      "short": true
+                  },
+                  {
+                      "title": "Build",
+                      "value": "#$BUILD_NAME",
+                      "short": true
+                  }
+              ],
+              "color": "#F35A00"
+          }
+      ]
+
+slack_success_alert_ci: &slack_success_alert_ci
+  put: slack-alert
+  params:
+    icon_emoji: ":concourse:"
+    username: Concourse
+    attachments: [
           {
               "fallback": "$BUILD_JOB_NAME succeeded. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
               "title": "$BUILD_JOB_NAME succeeded",
@@ -208,44 +234,62 @@ jobs:
                       "short": true
                   }
               ],
+              "color": "#F35A00"
+          }
+      ]
+
+slack_started_alert_ci: &slack_started_alert_ci
+  put: slack-alert
+  params:
+    icon_emoji: ":concourse:"
+    username: Concourse
+    attachments: [
+          {
+              "fallback": "$BUILD_JOB_NAME started... See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+              "title": "$BUILD_JOB_NAME started...",
+              "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+              "fields": [
+                  {
+                      "title": "Pipeline",
+                      "value": "$BUILD_PIPELINE_NAME",
+                      "short": true
+                  },
+                  {
+                      "title": "Environment",
+                      "value": "((ci-gcp-environment-name))",
+                      "short": true
+                  },
+                  {
+                      "title": "Project",
+                      "value": "((ci-gcp-project-name))",
+                      "short": true
+                  },
+                  {
+                      "title": "Build",
+                      "value": "#$BUILD_NAME",
+                      "short": true
+                  }
+              ],
               "color": "#36a64f"
           }
-        ]
-    on_failure:
-      put: slack-alert
-      params:
-        icon_emoji: ":concourse:"
-        username: Concourse
-        attachments: [
-            {
-                "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "title": "$BUILD_JOB_NAME failed",
-                "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "fields": [
-                    {
-                        "title": "Pipeline",
-                        "value": "$BUILD_PIPELINE_NAME",
-                        "short": true
-                    },
-                    {
-                        "title": "Environment",
-                        "value": "((ci-gcp-environment-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Project",
-                        "value": "((ci-gcp-project-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Build",
-                        "value": "#$BUILD_NAME",
-                        "short": true
-                    }
-                ],
-                "color": "#F35A00"
-            }
-        ]
+      ]
+
+
+jobs:
+
+# CI
+- name: "CI Deploy Infrastructure"
+  serial: true
+  serial_groups: [ci-action-scheduler, ci-case-api, ci-case-processor, ci-uac-qid-service, ci-ops-tool, ci-pubsubsvc, ci-print-file-service, ci-fieldwork-adapter]
+  max_in_flight: 1
+  plan:
+  - get: census-rm-terraform
+    trigger: true
+  - get: census-rm-kubernetes-repo
+  - *slack_started_alert_ci
+  - task: "Build & Deploy Infrastructure"
+    on_success: *slack_success_alert_ci
+    on_failure: *slack_failure_alert_ci
     config:
       platform: linux
       image_resource:
@@ -302,41 +346,7 @@ jobs:
   - get: census-rm-deploy
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
-    on_failure:
-      put: slack-alert
-      params:
-        icon_emoji: ":concourse:"
-        username: Concourse
-        attachments: [
-            {
-                "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "title": "$BUILD_JOB_NAME failed",
-                "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "fields": [
-                    {
-                        "title": "Pipeline",
-                        "value": "$BUILD_PIPELINE_NAME",
-                        "short": true
-                    },
-                    {
-                        "title": "Environment",
-                        "value": "((ci-gcp-environment-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Project",
-                        "value": "((ci-gcp-project-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Build",
-                        "value": "#$BUILD_NAME",
-                        "short": true
-                    }
-                ],
-                "color": "#F35A00"
-            }
-        ]
+    on_failure: *slack_failure_alert_ci
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((ci-gcp-project-name))
@@ -366,41 +376,7 @@ jobs:
   - get: census-rm-deploy
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
-    on_failure:
-      put: slack-alert
-      params:
-        icon_emoji: ":concourse:"
-        username: Concourse
-        attachments: [
-            {
-                "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "title": "$BUILD_JOB_NAME failed",
-                "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "fields": [
-                    {
-                        "title": "Pipeline",
-                        "value": "$BUILD_PIPELINE_NAME",
-                        "short": true
-                    },
-                    {
-                        "title": "Environment",
-                        "value": "((ci-gcp-environment-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Project",
-                        "value": "((ci-gcp-project-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Build",
-                        "value": "#$BUILD_NAME",
-                        "short": true
-                    }
-                ],
-                "color": "#F35A00"
-            }
-        ]
+    on_failure: *slack_failure_alert_ci
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((ci-gcp-project-name))
@@ -430,41 +406,7 @@ jobs:
   - get: census-rm-deploy
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
-    on_failure:
-      put: slack-alert
-      params:
-        icon_emoji: ":concourse:"
-        username: Concourse
-        attachments: [
-            {
-                "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "title": "$BUILD_JOB_NAME failed",
-                "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "fields": [
-                    {
-                        "title": "Pipeline",
-                        "value": "$BUILD_PIPELINE_NAME",
-                        "short": true
-                    },
-                    {
-                        "title": "Environment",
-                        "value": "((ci-gcp-environment-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Project",
-                        "value": "((ci-gcp-project-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Build",
-                        "value": "#$BUILD_NAME",
-                        "short": true
-                    }
-                ],
-                "color": "#F35A00"
-            }
-        ]
+    on_failure: *slack_failure_alert_ci
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((ci-gcp-project-name))
@@ -494,41 +436,7 @@ jobs:
   - get: census-rm-deploy
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
-    on_failure:
-      put: slack-alert
-      params:
-        icon_emoji: ":concourse:"
-        username: Concourse
-        attachments: [
-            {
-                "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "title": "$BUILD_JOB_NAME failed",
-                "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "fields": [
-                    {
-                        "title": "Pipeline",
-                        "value": "$BUILD_PIPELINE_NAME",
-                        "short": true
-                    },
-                    {
-                        "title": "Environment",
-                        "value": "((ci-gcp-environment-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Project",
-                        "value": "((ci-gcp-project-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Build",
-                        "value": "#$BUILD_NAME",
-                        "short": true
-                    }
-                ],
-                "color": "#F35A00"
-            }
-        ]
+    on_failure: *slack_failure_alert_ci
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((ci-gcp-project-name))
@@ -558,41 +466,7 @@ jobs:
   - get: census-rm-deploy
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
-    on_failure:
-      put: slack-alert
-      params:
-        icon_emoji: ":concourse:"
-        username: Concourse
-        attachments: [
-            {
-                "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "title": "$BUILD_JOB_NAME failed",
-                "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "fields": [
-                    {
-                        "title": "Pipeline",
-                        "value": "$BUILD_PIPELINE_NAME",
-                        "short": true
-                    },
-                    {
-                        "title": "Environment",
-                        "value": "((ci-gcp-environment-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Project",
-                        "value": "((ci-gcp-project-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Build",
-                        "value": "#$BUILD_NAME",
-                        "short": true
-                    }
-                ],
-                "color": "#F35A00"
-            }
-        ]
+    on_failure: *slack_failure_alert_ci
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((ci-gcp-project-name))
@@ -622,41 +496,7 @@ jobs:
   - get: census-rm-deploy
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
-    on_failure:
-      put: slack-alert
-      params:
-        icon_emoji: ":concourse:"
-        username: Concourse
-        attachments: [
-            {
-                "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "title": "$BUILD_JOB_NAME failed",
-                "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "fields": [
-                    {
-                        "title": "Pipeline",
-                        "value": "$BUILD_PIPELINE_NAME",
-                        "short": true
-                    },
-                    {
-                        "title": "Environment",
-                        "value": "((ci-gcp-environment-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Project",
-                        "value": "((ci-gcp-project-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Build",
-                        "value": "#$BUILD_NAME",
-                        "short": true
-                    }
-                ],
-                "color": "#F35A00"
-            }
-        ]
+    on_failure: *slack_failure_alert_ci
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((ci-gcp-project-name))
@@ -686,41 +526,7 @@ jobs:
   - get: census-rm-deploy
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-statefulset.yml
-    on_failure:
-      put: slack-alert
-      params:
-        icon_emoji: ":concourse:"
-        username: Concourse
-        attachments: [
-            {
-                "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "title": "$BUILD_JOB_NAME failed",
-                "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "fields": [
-                    {
-                        "title": "Pipeline",
-                        "value": "$BUILD_PIPELINE_NAME",
-                        "short": true
-                    },
-                    {
-                        "title": "Environment",
-                        "value": "((ci-gcp-environment-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Project",
-                        "value": "((ci-gcp-project-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Build",
-                        "value": "#$BUILD_NAME",
-                        "short": true
-                    }
-                ],
-                "color": "#F35A00"
-            }
-        ]
+    on_failure: *slack_failure_alert_ci
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((ci-gcp-project-name))
@@ -750,41 +556,7 @@ jobs:
   - get: census-rm-deploy
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
-    on_failure:
-      put: slack-alert
-      params:
-        icon_emoji: ":concourse:"
-        username: Concourse
-        attachments: [
-            {
-                "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "title": "$BUILD_JOB_NAME failed",
-                "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "fields": [
-                    {
-                        "title": "Pipeline",
-                        "value": "$BUILD_PIPELINE_NAME",
-                        "short": true
-                    },
-                    {
-                        "title": "Environment",
-                        "value": "((ci-gcp-environment-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Project",
-                        "value": "((ci-gcp-project-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Build",
-                        "value": "#$BUILD_NAME",
-                        "short": true
-                    }
-                ],
-                "color": "#F35A00"
-            }
-        ]
+    on_failure: *slack_failure_alert_ci
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((ci-gcp-project-name))
@@ -867,41 +639,7 @@ jobs:
       skip_download: true
   - task: "Run Acceptance Tests (in K8s)"
     file: acceptance-tests-repo/tasks/kubectl-run-acceptance-tests.yml
-    on_failure:
-      put: slack-alert
-      params:
-        icon_emoji: ":concourse:"
-        username: Concourse
-        attachments: [
-            {
-                "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "title": "$BUILD_JOB_NAME failed",
-                "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "fields": [
-                    {
-                        "title": "Pipeline",
-                        "value": "$BUILD_PIPELINE_NAME",
-                        "short": true
-                    },
-                    {
-                        "title": "Environment",
-                        "value": "((ci-gcp-environment-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Project",
-                        "value": "((ci-gcp-project-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Build",
-                        "value": "#$BUILD_NAME",
-                        "short": true
-                    }
-                ],
-                "color": "#F35A00"
-            }
-        ]
+    on_failure: *slack_failure_alert_ci
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((ci-gcp-project-name))
@@ -929,41 +667,7 @@ jobs:
   - get: census-rm-deploy
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
-    on_failure:
-      put: slack-alert
-      params:
-        icon_emoji: ":concourse:"
-        username: Concourse
-        attachments: [
-            {
-                "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "title": "$BUILD_JOB_NAME failed",
-                "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "fields": [
-                    {
-                        "title": "Pipeline",
-                        "value": "$BUILD_PIPELINE_NAME",
-                        "short": true
-                    },
-                    {
-                        "title": "Environment",
-                        "value": "((sit-gcp-environment-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Project",
-                        "value": "((sit-gcp-project-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Build",
-                        "value": "#$BUILD_NAME",
-                        "short": true
-                    }
-                ],
-                "color": "#F35A00"
-            }
-        ]
+    on_failure: *slack_failure_alert_sit
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((sit-gcp-project-name))
@@ -995,41 +699,7 @@ jobs:
   - get: census-rm-deploy
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-statefulset.yml
-    on_failure:
-      put: slack-alert
-      params:
-        icon_emoji: ":concourse:"
-        username: Concourse
-        attachments: [
-            {
-                "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "title": "$BUILD_JOB_NAME failed",
-                "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "fields": [
-                    {
-                        "title": "Pipeline",
-                        "value": "$BUILD_PIPELINE_NAME",
-                        "short": true
-                    },
-                    {
-                        "title": "Environment",
-                        "value": "((sit-gcp-environment-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Project",
-                        "value": "((sit-gcp-project-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Build",
-                        "value": "#$BUILD_NAME",
-                        "short": true
-                    }
-                ],
-                "color": "#F35A00"
-            }
-        ]
+    on_failure: *slack_failure_alert_sit
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((sit-gcp-project-name))
@@ -1061,41 +731,7 @@ jobs:
   - get: census-rm-deploy
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
-    on_failure:
-      put: slack-alert
-      params:
-        icon_emoji: ":concourse:"
-        username: Concourse
-        attachments: [
-            {
-                "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "title": "$BUILD_JOB_NAME failed",
-                "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "fields": [
-                    {
-                        "title": "Pipeline",
-                        "value": "$BUILD_PIPELINE_NAME",
-                        "short": true
-                    },
-                    {
-                        "title": "Environment",
-                        "value": "((sit-gcp-environment-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Project",
-                        "value": "((sit-gcp-project-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Build",
-                        "value": "#$BUILD_NAME",
-                        "short": true
-                    }
-                ],
-                "color": "#F35A00"
-            }
-        ]
+    on_failure: *slack_failure_alert_sit
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((sit-gcp-project-name))
@@ -1127,41 +763,7 @@ jobs:
   - get: census-rm-deploy
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
-    on_failure:
-      put: slack-alert
-      params:
-        icon_emoji: ":concourse:"
-        username: Concourse
-        attachments: [
-            {
-                "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "title": "$BUILD_JOB_NAME failed",
-                "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "fields": [
-                    {
-                        "title": "Pipeline",
-                        "value": "$BUILD_PIPELINE_NAME",
-                        "short": true
-                    },
-                    {
-                        "title": "Environment",
-                        "value": "((sit-gcp-environment-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Project",
-                        "value": "((sit-gcp-project-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Build",
-                        "value": "#$BUILD_NAME",
-                        "short": true
-                    }
-                ],
-                "color": "#F35A00"
-            }
-        ]
+    on_failure: *slack_failure_alert_sit
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((sit-gcp-project-name))
@@ -1193,41 +795,7 @@ jobs:
   - get: census-rm-deploy
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
-    on_failure:
-      put: slack-alert
-      params:
-        icon_emoji: ":concourse:"
-        username: Concourse
-        attachments: [
-            {
-                "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "title": "$BUILD_JOB_NAME failed",
-                "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "fields": [
-                    {
-                        "title": "Pipeline",
-                        "value": "$BUILD_PIPELINE_NAME",
-                        "short": true
-                    },
-                    {
-                        "title": "Environment",
-                        "value": "((sit-gcp-environment-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Project",
-                        "value": "((sit-gcp-project-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Build",
-                        "value": "#$BUILD_NAME",
-                        "short": true
-                    }
-                ],
-                "color": "#F35A00"
-            }
-        ]
+    on_failure: *slack_failure_alert_sit
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((sit-gcp-project-name))
@@ -1259,41 +827,7 @@ jobs:
   - get: census-rm-deploy
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
-    on_failure:
-      put: slack-alert
-      params:
-        icon_emoji: ":concourse:"
-        username: Concourse
-        attachments: [
-            {
-                "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "title": "$BUILD_JOB_NAME failed",
-                "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "fields": [
-                    {
-                        "title": "Pipeline",
-                        "value": "$BUILD_PIPELINE_NAME",
-                        "short": true
-                    },
-                    {
-                        "title": "Environment",
-                        "value": "((sit-gcp-environment-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Project",
-                        "value": "((sit-gcp-project-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Build",
-                        "value": "#$BUILD_NAME",
-                        "short": true
-                    }
-                ],
-                "color": "#F35A00"
-            }
-        ]
+    on_failure: *slack_failure_alert_sit
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((sit-gcp-project-name))
@@ -1323,41 +857,7 @@ jobs:
   - get: census-rm-deploy
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
-    on_failure:
-      put: slack-alert
-      params:
-        icon_emoji: ":concourse:"
-        username: Concourse
-        attachments: [
-            {
-                "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "title": "$BUILD_JOB_NAME failed",
-                "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "fields": [
-                    {
-                        "title": "Pipeline",
-                        "value": "$BUILD_PIPELINE_NAME",
-                        "short": true
-                    },
-                    {
-                        "title": "Environment",
-                        "value": "((sit-gcp-environment-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Project",
-                        "value": "((sit-gcp-project-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Build",
-                        "value": "#$BUILD_NAME",
-                        "short": true
-                    }
-                ],
-                "color": "#F35A00"
-            }
-        ]
+    on_failure: *slack_failure_alert_sit
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((sit-gcp-project-name))
@@ -1389,41 +889,7 @@ jobs:
   - get: census-rm-deploy
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
-    on_failure:
-      put: slack-alert
-      params:
-        icon_emoji: ":concourse:"
-        username: Concourse
-        attachments: [
-            {
-                "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "title": "$BUILD_JOB_NAME failed",
-                "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "fields": [
-                    {
-                        "title": "Pipeline",
-                        "value": "$BUILD_PIPELINE_NAME",
-                        "short": true
-                    },
-                    {
-                        "title": "Environment",
-                        "value": "((sit-gcp-environment-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Project",
-                        "value": "((sit-gcp-project-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Build",
-                        "value": "#$BUILD_NAME",
-                        "short": true
-                    }
-                ],
-                "color": "#F35A00"
-            }
-        ]
+    on_failure: *slack_failure_alert_sit
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((sit-gcp-project-name))
