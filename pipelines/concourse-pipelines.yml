@@ -5,7 +5,17 @@ resource_types:
     source:
       repository: concourse/concourse-pipeline-resource
 
+  - name: slack-notification
+    type: docker-image
+    source:
+      repository: cfcommunity/slack-notification-resource
+
 resources:
+
+  - name: slack-alert
+    type: slack-notification
+    source:
+      url: ((slack.webhook))
 
   - name: census-rm-deploy
     type: git
@@ -31,6 +41,31 @@ jobs:
     - get: census-rm-deploy
       trigger: true
     - put: pipelines
+      on_failure:
+        put: slack-alert
+        params:
+          icon_emoji: ":concourse:"
+          username: Concourse
+          attachments: [
+              {
+                  "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "title": "$BUILD_JOB_NAME failed",
+                  "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                  "fields": [
+                      {
+                          "title": "Pipeline",
+                          "value": "$BUILD_PIPELINE_NAME",
+                          "short": true
+                      },
+                      {
+                          "title": "Build",
+                          "value": "#$BUILD_NAME",
+                          "short": true
+                      }
+                  ],
+                  "color": "#F35A00"
+              }
+          ]
       params:
         pipelines:
 
