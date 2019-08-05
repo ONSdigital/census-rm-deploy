@@ -449,4 +449,5 @@ jobs:
       GCP_PROJECT_NAME: ((gcp-project-name))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       ACCEPTANCE_TESTS_IMAGE: ((acceptance-tests-image))
+      BATCH_RUNNER_CONFIG: batch-runner-repo/qid-batch-runner.yml
     input_mapping: {acceptance-tests-repo: acceptance-tests-repo}
