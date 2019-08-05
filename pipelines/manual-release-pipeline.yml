@@ -26,12 +26,6 @@ resources:
     paths: [release/microservices/*]
     tag_filter: ((kubernetes-release))
 
-- name: batch-runner-repo
-  type: git
-  source:
-    uri: git@github.com:ONSdigital/census-rm-qid-batch-runner.git
-    private_key: ((github.service_account_private_key))
-
 - name: census-rm-kubernetes-ops-repo
   type: git
   source:
@@ -46,76 +40,6 @@ resources:
     uri: git@github.com:ONSdigital/census-rm-acceptance-tests.git
     private_key: ((github.service_account_private_key))
     paths: [kubernetes.env, tasks/*]
-
-- name: acceptance-tests-docker-image
-  type: docker-image
-  source:
-    repository: eu.gcr.io/census-gcr-rm/rm/census-rm-acceptance-tests
-    username: _json_key
-    password: ((gcp.service_account_json))
-
-- name: action-scheduler-docker-latest
-  type: docker-image
-  source:
-    repository: eu.gcr.io/census-gcr-rm/rm/census-rm-action-scheduler
-    username: _json_key
-    password: ((gcp.service_account_json))
-
-- name: case-api-docker-latest
-  type: docker-image
-  source:
-    repository: eu.gcr.io/census-gcr-rm/rm/census-rm-case-api
-    username: _json_key
-    password: ((gcp.service_account_json))
-
-- name: case-processor-docker-latest
-  type: docker-image
-  source:
-    repository: eu.gcr.io/census-gcr-rm/rm/census-rm-case-processor
-    username: _json_key
-    password: ((gcp.service_account_json))
-
-- name: uac-qid-service-docker-latest
-  type: docker-image
-  source:
-    repository: eu.gcr.io/census-gcr-rm/rm/census-rm-uac-qid-service
-    username: _json_key
-    password: ((gcp.service_account_json))
-
-- name: pubsubsvc-docker-latest
-  type: docker-image
-  source:
-    repository: eu.gcr.io/census-gcr-rm/rm/census-rm-pubsub
-    username: _json_key
-    password: ((gcp.service_account_json))
-
-- name: ops-docker-latest
-  type: docker-image
-  source:
-    repository: eu.gcr.io/census-gcr-rm/rm/census-rm-ops
-    username: _json_key
-    password: ((gcp.service_account_json))
-
-- name: qid-batch-runner-docker-latest
-  type: docker-image
-  source:
-    repository: eu.gcr.io/census-gcr-rm/rm/census-rm-qid-batch-runner
-    username: _json_key
-    password: ((gcp.service_account_json))
-
-- name: print-file-service-docker-latest
-  type: docker-image
-  source:
-    repository: eu.gcr.io/census-gcr-rm/rm/census-rm-print-file-service
-    username: _json_key
-    password: ((gcp.service_account_json))
-
-- name: fieldwork-adapter-docker-latest
-  type: docker-image
-  source:
-    repository: eu.gcr.io/census-gcr-rm/rm/census-rm-fieldwork-adapter
-    username: _json_key
-    password: ((gcp.service_account_json))
 
 templating:
 
@@ -163,9 +87,6 @@ jobs:
   serial_groups: [action-scheduler]
   plan:
   - get: census-rm-kubernetes-microservices-repo
-  - get: action-scheduler-docker-latest
-    params:
-      skip_download: true
   - get: census-rm-deploy
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
@@ -187,9 +108,6 @@ jobs:
   serial_groups: [case-api]
   plan:
   - get: census-rm-kubernetes-microservices-repo
-  - get: case-api-docker-latest
-    params:
-      skip_download: true
   - get: census-rm-deploy
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
@@ -211,9 +129,6 @@ jobs:
   serial_groups: [case-processor]
   plan:
   - get: census-rm-kubernetes-microservices-repo
-  - get: case-processor-docker-latest
-    params:
-      skip_download: true
   - get: census-rm-deploy
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
@@ -235,9 +150,6 @@ jobs:
   serial_groups: [uac-qid-service]
   plan:
   - get: census-rm-kubernetes-microservices-repo
-  - get: uac-qid-service-docker-latest
-    params:
-      skip_download: true
   - get: census-rm-deploy
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
@@ -259,9 +171,6 @@ jobs:
   serial_groups: [pubsubsvc]
   plan:
   - get: census-rm-kubernetes-microservices-repo
-  - get: pubsubsvc-docker-latest
-    params:
-      skip_download: true
   - get: census-rm-deploy
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
@@ -283,9 +192,6 @@ jobs:
   serial_groups: [ops]
   plan:
   - get: census-rm-kubernetes-ops-repo
-  - get: ops-docker-latest
-    params:
-      skip_download: true
   - get: census-rm-deploy
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
@@ -306,9 +212,6 @@ jobs:
   serial_groups: [print-file-service]
   plan:
   - get: census-rm-kubernetes-microservices-repo
-  - get: print-file-service-docker-latest
-    params:
-      skip_download: true
   - get: census-rm-deploy
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-statefulset.yml
@@ -330,9 +233,6 @@ jobs:
   serial_groups: [fieldwork-adapter]
   plan:
   - get: census-rm-kubernetes-microservices-repo
-  - get: fieldwork-adapter-docker-latest
-    params:
-      skip_download: true
   - get: census-rm-deploy
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
@@ -348,47 +248,13 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
-
 - name: "Acceptance Tests"
   serial: true
   serial_groups: [action-scheduler, case-api, case-processor, uac-qid-service, pubsubsvc, print-file-service, fieldwork-adapter]
   plan:
   - get: acceptance-tests-repo
-  - get: batch-runner-repo
-  - get: acceptance-tests-docker-image
-    params:
-      skip_download: true
   - get: census-rm-kubernetes-microservices-repo
     passed: [action-scheduler, case-api, case-processor, uac-qid-service, pubsubsvc, print-file-service, fieldwork-adapter]
-  - get: action-scheduler-docker-latest
-    passed: [action-scheduler]
-    params:
-      skip_download: true
-  - get: case-api-docker-latest
-    passed: [case-api]
-    params:
-      skip_download: true
-  - get: case-processor-docker-latest
-    passed: [case-processor]
-    params:
-      skip_download: true
-  - get: uac-qid-service-docker-latest
-    passed: [uac-qid-service]
-    params:
-      skip_download: true
-  - get: pubsubsvc-docker-latest
-    passed: [pubsubsvc]
-    params:
-      skip_download: true
-  - get: qid-batch-runner-docker-latest
-    params:
-      skip_download: true
-  - get: print-file-service-docker-latest
-    params:
-      skip_download: true
-  - get: fieldwork-adapter-docker-latest
-    params:
-      skip_download: true
   - task: "Run Acceptance Tests (in K8s)"
     file: acceptance-tests-repo/tasks/kubectl-run-acceptance-tests.yml
     on_failure: *slack_failure_alert
@@ -397,4 +263,5 @@ jobs:
       GCP_PROJECT_NAME: ((gcp-project-name))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       ACCEPTANCE_TESTS_IMAGE: ((acceptance-tests-image))
+      BATCH_RUNNER_CONFIG: census-rm-kubernetes-microservices-repo/release/microservices/qid-batch-runner-deployment.yml
     input_mapping: {acceptance-tests-repo: acceptance-tests-repo}

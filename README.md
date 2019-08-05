@@ -55,8 +55,8 @@ Create a secrets YAML file containing the required configuration:
 | ci-gcp-admin-account-json | \| <br>\<GCP Concourse admin account key json                                       | JSON representation of a GCloud account access key with IAM permissions                  |
 
 
-### [Manual CI Kubernetes Pipeline](pipelines/manual-ci-kubernetes-pipeline.yml)
-This is a copy of the CI section of [CI-SIT Kubernetes Pipeline](#ci-sit-kuberenetes-pipeline) with all the automatic triggers removed. This is useful for any environment where we want to be deploying the latest docker image builds, but not necessarily as soon as they're built.
+### [Manual Release Pipeline](pipelines/manual-release-pipeline.yml)
+This pipeline targets release/prod-like environments with all the automatic triggers removed. This is useful for any environment where we want to be deploying release tagged versions of the docker images, but not necessarily as soon as they're built.
 
 #### How to fly
 Create a secrets YAML file containing the required configuration:
@@ -65,7 +65,6 @@ Create a secrets YAML file containing the required configuration:
 | ------------------------ | ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
 | kubernetes-cluster-name  | String                                                                              | The name of the kubernetes cluster                                                       |
 | acceptance-tests-image   | String                                                                              | The name of the acceptance tests image to run                                            |
-| github-private-key       | \| <br>-----BEGIN PRIVATE KEY----- <br>\<private key> <br>-----END PRIVATE KEY----- | A private SSH key for Github with permissions to clone private repositories              |
-| gcp-service-account-json | \| <br>\<GCP service account key json>                                              | JSON representation of a GCloud service account access key with required IAM permissions |
-| gcp-project-name         | String                                                                              | The name of the GCP project the targeted cluster belongs to                              |
 | gcp-environment-name     | String                                                                              | The name of the GCP project suffix the targeted cluster belongs to                       |
+| gcp-project-name         | String                                                                              | The name of the GCP project targeted cluster belongs to                                                       |
+| kubernetes-release       | String                                                                              | The semantic version string of the tagged [kubernetes repository](https://github.com/ONSdigital/census-rm-kubernetes)                                                       |

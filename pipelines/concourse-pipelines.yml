@@ -90,7 +90,7 @@ jobs:
 
         - name: census-rm-blacklodge
           team: rm
-          config_file: census-rm-deploy/pipelines/manual-ci-kubernetes-pipeline.yml
+          config_file: census-rm-deploy/pipelines/manual-release-pipeline.yml
           vars:
             gcp-environment-name: blacklodge
             gcp-project-name: census-rm-blacklodge
