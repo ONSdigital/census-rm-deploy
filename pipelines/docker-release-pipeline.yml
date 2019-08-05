@@ -806,6 +806,7 @@ jobs:
               mvn package -DskipITs -Ddockerfile.skip
               cp target/census-rm-*.jar ../build/target
               cp Dockerfile ../build
+              cp healthcheck.sh ../build
     - put: fieldwork-adapter-docker-image-ci
       on_failure: *slack_failure_alert_ci
       params:
