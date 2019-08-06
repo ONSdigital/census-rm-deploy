@@ -37,8 +37,6 @@ resources:
 
 jobs:
 
-
-# CI
 - name: "Deploy Performance Infrastructure"
   serial: true
   serial_groups: ["Performance Tests"]
