@@ -30,7 +30,7 @@ resources:
 - name: performance-tests-docker-image
   type: docker-image
   source:
-    repository: eu.gcr.io/census-gcr-rm/rm/census-rm-performance-tests
+    repository: ((performance-tests-image))
     username: _json_key
     password: ((gcp.service_account_json))
 
@@ -56,8 +56,8 @@ jobs:
         ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
         AUTO_APPLY: true
         DEV_DUMMY_PGP: true
+        DEV_LOCAL_SFTP: true
         DEV_PUBSUB: true
-        DISABLE_CI_BINDING: true
         ENV: ((performance-gcp-environment-name))
         GOOGLE_APPLICATION_CREDENTIALS: /root/gcloud-service-key.json
         KEEP_TMP_K8S: true
