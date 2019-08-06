@@ -62,7 +62,7 @@ jobs:
         GOOGLE_APPLICATION_CREDENTIALS: /root/gcloud-service-key.json
         KEEP_TMP_K8S: true
       inputs:
-        - name: census-rm-terraform
+        - name: census-rm-terraform-repo
         - name: census-rm-kubernetes-repo
       run:
         path: bash
@@ -76,8 +76,8 @@ jobs:
             $ADMIN_SERVICE_ACCOUNT_JSON
             EOL
             gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
-            cp -R census-rm-kubernetes-repo/ census-rm-terraform/tmp_rm_kube
-            cd census-rm-terraform
+            cp -R census-rm-kubernetes-repo/ census-rm-terraform-repo/tmp_rm_kube
+            cd census-rm-terraform-repo
             tfenv install
             curl -L https://git.io/get_helm.sh | bash && \
             helm init --client-only && \
