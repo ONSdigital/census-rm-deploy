@@ -234,7 +234,7 @@ slack_success_alert_ci: &slack_success_alert_ci
                       "short": true
                   }
               ],
-              "color": "#F35A00"
+              "color": "#36a64f"
           }
       ]
 
