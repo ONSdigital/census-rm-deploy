@@ -97,6 +97,7 @@ jobs:
             kubernetes-cluster-name: rm-k8s-cluster
             acceptance-tests-image: eu.gcr.io/census-gcr-rm/rm/census-rm-acceptance-tests:v1.0.0
             kubernetes-release: v1.2.0
+            acceptance-tests-release: v1.0.0
 
         - name: build-images
           team: rm
