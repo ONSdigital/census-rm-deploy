@@ -106,6 +106,14 @@ resources:
       access_token: ((github.access_token))
       order_by: time
 
+  - name: notify-processor-release
+    type: github-release-latest
+    source:
+      owner: ONSdigital
+      repository: census-rm-notify-processor
+      access_token: ((github.access_token))
+      order_by: time
+
   - name: acceptance-tests-docker-image-ci
     type: docker-image
     source:
@@ -257,6 +265,20 @@ resources:
     type: docker-image
     source:
       repository: ((docker-registry-gcr))/rm/census-rm-fieldwork-adapter
+      username: _json_key
+      password: ((gcp.service_account_json))
+
+  - name: notify-processor-docker-image-ci
+    type: docker-image
+    source:
+      repository: ((docker-registry-ci))/rm/census-rm-notify-processor
+      username: _json_key
+      password: ((gcp.service_account_json))
+  
+  - name: notify-processor-docker-image-gcr
+    type: docker-image
+    source:
+      repository: ((docker-registry-gcr))/rm/census-rm-notify-processor
       username: _json_key
       password: ((gcp.service_account_json))
 
@@ -822,6 +844,57 @@ jobs:
         cache_from:
           - fieldwork-adapter-docker-image-ci
         tag_file: fieldwork-adapter-release/tag
+        tag_as_latest: false
+      get_params:
+        skip_download: true
+
+  - name: build-notify-processor-release
+    plan:
+    - get: notify-processor-release
+      params:
+        include_source_tarball: true
+      trigger: true
+    - task: Build Notify Processor Image (release)
+      on_failure: *slack_failure_alert_prebuild
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: adoptopenjdk/maven-openjdk11
+        inputs:
+          - name: notify-processor-release
+        outputs:
+          - name: build
+          - name: extracted-notify-processor
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              mkdir -p build/target
+              cd notify-processor-release
+              tar -xzf source.tar.gz -C ../extracted-notify-processor --strip-components=1
+              cd ../extracted-notify-processor
+              mvn package -DskipITs -Ddockerfile.skip
+              cp target/census-rm-*.jar ../build/target
+              cp Dockerfile ../build
+              cp healthcheck.sh ../build
+    - put: notify-processor-docker-image-ci
+      on_failure: *slack_failure_alert_ci
+      params:
+        build: build
+        tag_file: notify-processor-release/tag
+        tag_as_latest: false
+      get_params:
+        save: true
+    - put: notify-processor-docker-image-gcr
+      on_failure: *slack_failure_alert_gcr
+      params:
+        build: build
+        cache_from:
+          - notify-processor-docker-image-ci
+        tag_file: notify-processor-release/tag
         tag_as_latest: false
       get_params:
         skip_download: true
