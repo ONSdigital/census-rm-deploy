@@ -637,7 +637,7 @@ jobs:
       KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: notify-stub
       KUBERNETES_SELECTOR: app=notify-stub
-      KUBERNETES_FILE_PATH: kubernetes-repo/microservices
+      KUBERNETES_FILE_PATH: kubernetes-repo/optional
       KUBERNETES_FILE_PREFIX: notify-stub
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
