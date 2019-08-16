@@ -78,6 +78,18 @@ resources:
       uri: git@github.com:ONSdigital/census-rm-fieldwork-adapter.git
       private_key: ((github.service_account_private_key))
 
+  - name: notify-processor-master
+    type: git
+    source:
+      uri: git@github.com:ONSdigital/census-rm-notify-processor.git
+      private_key: ((github.service_account_private_key))
+
+  - name: notify-stub-master
+    type: git
+    source:
+      uri: git@github.com:ONSdigital/census-rm-notify-stub.git
+      private_key: ((github.service_account_private_key))
+
   - name: action-scheduler-docker-image-ci
     type: docker-image
     source:
@@ -229,6 +241,34 @@ resources:
     type: docker-image
     source:
       repository: ((docker-registry-gcr))/rm/census-rm-fieldwork-adapter
+      username: _json_key
+      password: ((gcp.service_account_json))
+
+  - name: notify-processor-docker-image-ci
+    type: docker-image
+    source:
+      repository: ((docker-registry-ci))/rm/census-rm-notify-processor
+      username: _json_key
+      password: ((gcp.service_account_json))
+
+  - name: notify-processor-docker-image-gcr
+    type: docker-image
+    source:
+      repository: ((docker-registry-gcr))/rm/census-rm-notify-processor
+      username: _json_key
+      password: ((gcp.service_account_json))
+
+  - name: notify-stub-docker-image-ci
+    type: docker-image
+    source:
+      repository: ((docker-registry-ci))/rm/census-rm-notify-stub
+      username: _json_key
+      password: ((gcp.service_account_json))
+
+  - name: notify-stub-docker-image-gcr
+    type: docker-image
+    source:
+      repository: ((docker-registry-gcr))/rm/census-rm-notify-stub
       username: _json_key
       password: ((gcp.service_account_json))
 
@@ -690,3 +730,73 @@ jobs:
         tag_as_latest: true
       get_params:
         skip_download: true
+
+  - name: build-notify-processor-master
+    plan:
+    - get: notify-processor-master
+      trigger: true
+    - task: Build Notify Processor Image (master)
+      on_failure: *slack_failure_alert_prebuild
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: adoptopenjdk/maven-openjdk11
+        inputs:
+          - name: notify-processor-master
+        outputs:
+          - name: build
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              mkdir -p build/target
+              cd notify-processor-master
+              mvn package -DskipITs -Ddockerfile.skip
+              cp target/*.jar ../build/target
+              cp Dockerfile ../build
+              cp healthcheck.sh ../build
+    - put: notify-processor-docker-image-ci
+      on_failure: *slack_failure_alert_ci
+      params:
+        build: build
+        tag_file: notify-processor-master/.git/ref
+        tag_as_latest: true
+      get_params:
+        save: true
+    - put: notify-processor-docker-image-gcr
+      on_failure: *slack_failure_alert_gcr
+      params:
+        build: build
+        cache_from:
+          - notify-processor-docker-image-ci
+        tag_file: notify-processor-master/.git/ref
+        tag_as_latest: true
+      get_params:
+        skip_download: true
+
+    - name: build-notify-stub-master
+      plan:
+      - get: notify-stub-master
+        trigger: true
+      - put: notify-stub-docker-image-ci
+        on_failure: *slack_failure_alert_ci
+        params:
+          build: notify-stub-master
+          tag_file: notify-stub-master/.git/ref
+          tag_as_latest: true
+        get_params:
+          save: true
+      - put: notify-stub-docker-image-gcr
+        on_failure: *slack_failure_alert_gcr
+        params:
+          build: notify-stub-master
+          cache_from:
+            - notify-stub-docker-image-ci
+          tag_file: notify-stub-master/.git/ref
+          tag_as_latest: true
+        get_params:
+          skip_download: true
+
