@@ -777,26 +777,26 @@ jobs:
       get_params:
         skip_download: true
 
-    - name: build-notify-stub-master
-      plan:
-      - get: notify-stub-master
-        trigger: true
-      - put: notify-stub-docker-image-ci
-        on_failure: *slack_failure_alert_ci
-        params:
-          build: notify-stub-master
-          tag_file: notify-stub-master/.git/ref
-          tag_as_latest: true
-        get_params:
-          save: true
-      - put: notify-stub-docker-image-gcr
-        on_failure: *slack_failure_alert_gcr
-        params:
-          build: notify-stub-master
-          cache_from:
-            - notify-stub-docker-image-ci
-          tag_file: notify-stub-master/.git/ref
-          tag_as_latest: true
-        get_params:
-          skip_download: true
+  - name: build-notify-stub-master
+    plan:
+    - get: notify-stub-master
+      trigger: true
+    - put: notify-stub-docker-image-ci
+      on_failure: *slack_failure_alert_ci
+      params:
+        build: notify-stub-master
+        tag_file: notify-stub-master/.git/ref
+        tag_as_latest: true
+      get_params:
+        save: true
+    - put: notify-stub-docker-image-gcr
+      on_failure: *slack_failure_alert_gcr
+      params:
+        build: notify-stub-master
+        cache_from:
+          - notify-stub-docker-image-ci
+        tag_file: notify-stub-master/.git/ref
+        tag_as_latest: true
+      get_params:
+        skip_download: true
 
