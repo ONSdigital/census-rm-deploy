@@ -162,7 +162,7 @@ resources:
       repository: ((docker-registry-ci))/rm/census-rm-case-processor
       username: _json_key
       password: ((gcp.service_account_json))
-  
+
   - name: case-processor-docker-image-gcr
     type: docker-image
     source:
@@ -260,7 +260,7 @@ resources:
       repository: ((docker-registry-ci))/rm/census-rm-fieldwork-adapter
       username: _json_key
       password: ((gcp.service_account_json))
-  
+
   - name: fieldwork-adapter-docker-image-gcr
     type: docker-image
     source:
@@ -274,7 +274,7 @@ resources:
       repository: ((docker-registry-ci))/rm/census-rm-notify-processor
       username: _json_key
       password: ((gcp.service_account_json))
-  
+
   - name: notify-processor-docker-image-gcr
     type: docker-image
     source:
