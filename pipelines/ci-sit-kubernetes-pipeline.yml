@@ -629,7 +629,7 @@ jobs:
       skip_download: true
   - get: census-rm-deploy
   - task: apply-deployment
-    file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
     on_failure: *slack_failure_alert_ci
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
