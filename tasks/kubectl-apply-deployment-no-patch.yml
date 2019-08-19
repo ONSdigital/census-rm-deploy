@@ -17,7 +17,6 @@ params:
 
 inputs:
   - name: kubernetes-repo
-  - name: docker-image-resource
 run:
   path: sh
   args:
@@ -31,18 +30,12 @@ run:
       gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
       gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
 
-      # Apply service config
-      kubectl apply -f ${KUBERNETES_FILE_PATH}/${KUBERNETES_FILE_PREFIX}-service.yml --record
-
       # Apply deployment config
       kubectl apply -f ${KUBERNETES_FILE_PATH}/${KUBERNETES_FILE_PREFIX}-deployment.yml --record
 
-      # Patch deployment to use docker image specified in pipeline rather than deployment script
-      kubectl patch deployment ${KUBERNETES_DEPLOYMENT_NAME} --type='json' -p="[{\"op\":\"replace\",\"path\":\"/spec/template/spec/containers/0/image\",\"value\":\"$(cat docker-image-resource/repository)\"}]" --record
-
-      # Patch deployment with timestamp/image digest to force pod recreation
-      kubectl patch deployment ${KUBERNETES_DEPLOYMENT_NAME} -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat docker-image-resource/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}" --record
-
+      # Patch deployment with timestamp to force pod recreation
+      kubectl patch deployment ${KUBERNETES_DEPLOYMENT_NAME} -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\"}}}}}" --record
+      
       # Wait for rollout to finish
       kubectl rollout status deploy ${KUBERNETES_DEPLOYMENT_NAME} --watch=true --timeout=${WAIT_UNTIL_AVAILABLE_TIMEOUT}
 
