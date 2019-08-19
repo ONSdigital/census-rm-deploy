@@ -257,7 +257,7 @@ jobs:
   - get: census-rm-kubernetes-microservices-repo
   - get: census-rm-deploy
   - task: apply-deployment
-    file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
+    file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_failure_alert
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
