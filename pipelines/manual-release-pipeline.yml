@@ -17,7 +17,6 @@ resources:
   source:
     uri: git@github.com:ONSdigital/census-rm-deploy.git
     private_key: ((github.service_account_private_key))
-    branch: fix-missing-input-blacklodge
 
 - name: census-rm-kubernetes-microservices-repo
   type: git
