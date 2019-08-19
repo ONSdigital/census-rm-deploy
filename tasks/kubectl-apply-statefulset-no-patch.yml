@@ -17,7 +17,6 @@ params:
 
 inputs:
   - name: kubernetes-repo
-  - name: docker-image-resource
 run:
   path: sh
   args:
@@ -34,11 +33,8 @@ run:
       # Apply statefulset config
       kubectl apply -f ${KUBERNETES_FILE_PATH}/${KUBERNETES_FILE_PREFIX}-statefulset.yml --record
 
-      # Patch statefulset to use docker image specified in pipeline rather than statefulset script
-      kubectl patch sts ${KUBERNETES_STATEFULSET_NAME} --type='json' -p="[{\"op\":\"replace\",\"path\":\"/spec/template/spec/containers/0/image\",\"value\":\"$(cat docker-image-resource/repository)\"}]" --record
-
-      # Patch statefulset with timestamp/image digest to force pod recreation
-      kubectl patch sts ${KUBERNETES_STATEFULSET_NAME} -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat docker-image-resource/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}" --record
+      # Patch statefulset with timestamp to force pod recreation
+      kubectl patch sts ${KUBERNETES_STATEFULSET_NAME} -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\"}}}}}" --record
 
       # Wait for rollout to finish
       kubectl rollout status sts ${KUBERNETES_STATEFULSET_NAME} --watch=true --timeout=${WAIT_UNTIL_AVAILABLE_TIMEOUT}
