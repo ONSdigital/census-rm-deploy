@@ -114,6 +114,14 @@ resources:
       access_token: ((github.access_token))
       order_by: time
 
+  - name: data-exporter-release
+    type: github-release-latest
+    source:
+      owner: ONSdigital
+      repository: census-rm-dataexporter
+      access_token: ((github.access_token))
+      order_by: time
+
   - name: acceptance-tests-docker-image-ci
     type: docker-image
     source:
@@ -162,7 +170,7 @@ resources:
       repository: ((docker-registry-ci))/rm/census-rm-case-processor
       username: _json_key
       password: ((gcp.service_account_json))
-  
+
   - name: case-processor-docker-image-gcr
     type: docker-image
     source:
@@ -260,7 +268,7 @@ resources:
       repository: ((docker-registry-ci))/rm/census-rm-fieldwork-adapter
       username: _json_key
       password: ((gcp.service_account_json))
-  
+
   - name: fieldwork-adapter-docker-image-gcr
     type: docker-image
     source:
@@ -274,11 +282,25 @@ resources:
       repository: ((docker-registry-ci))/rm/census-rm-notify-processor
       username: _json_key
       password: ((gcp.service_account_json))
-  
+
   - name: notify-processor-docker-image-gcr
     type: docker-image
     source:
       repository: ((docker-registry-gcr))/rm/census-rm-notify-processor
+      username: _json_key
+      password: ((gcp.service_account_json))
+
+  - name: data-exporter-docker-image-ci
+    type: docker-image
+    source:
+      repository: ((docker-registry-ci))/rm/census-rm-data-exporter
+      username: _json_key
+      password: ((gcp.service_account_json))
+
+  - name: data-exporter-docker-image-gcr
+    type: docker-image
+    source:
+      repository: ((docker-registry-gcr))/rm/census-rm-data-exporter
       username: _json_key
       password: ((gcp.service_account_json))
 
@@ -939,6 +961,50 @@ jobs:
         cache_from:
           - acceptance-tests-docker-image-ci
         tag_file: acceptance-tests-release/tag
+        tag_as_latest: false
+      get_params:
+        skip_download: true
+
+  - name: build-data-exporter-release
+    plan:
+    - get: data-exporter-release
+      params:
+        include_source_tarball: true
+      trigger: true
+    - task: Build Data Exporter Image (release)
+      on_failure: *slack_failure_alert_prebuild
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: alpine
+        inputs:
+          - name: data-exporter-release
+        outputs:
+          - name: extracted-data-exporter
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              cd data-exporter-release
+              tar -xzf source.tar.gz -C ../extracted-data-exporter --strip-components=1
+    - put: data-exporter-docker-image-ci
+      on_failure: *slack_failure_alert_ci
+      params:
+        build: extracted-data-exporter
+        tag_file: data-exporter-release/tag
+        tag_as_latest: false
+      get_params:
+        save: true
+    - put: data-exporter-docker-image-gcr
+      on_failure: *slack_failure_alert_gcr
+      params:
+        build: extracted-data-exporter
+        cache_from:
+          - data-exporter-docker-image-ci
+        tag_file: data-exporter-release/tag
         tag_as_latest: false
       get_params:
         skip_download: true

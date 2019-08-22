@@ -90,6 +90,12 @@ resources:
       uri: git@github.com:ONSdigital/census-rm-notify-stub.git
       private_key: ((github.service_account_private_key))
 
+  - name: data-exporter-master
+    type: git
+    source:
+      uri: git@github.com:ONSdigital/census-rm-dataexporter.git
+      private_key: ((github.service_account_private_key))
+
   - name: action-scheduler-docker-image-ci
     type: docker-image
     source:
@@ -269,6 +275,20 @@ resources:
     type: docker-image
     source:
       repository: ((docker-registry-gcr))/rm/census-rm-notify-stub
+      username: _json_key
+      password: ((gcp.service_account_json))
+
+  - name: data-exporter-docker-image-ci
+    type: docker-image
+    source:
+      repository: ((docker-registry-ci))/rm/census-rm-data-exporter
+      username: _json_key
+      password: ((gcp.service_account_json))
+
+  - name: data-exporter-docker-image-gcr
+    type: docker-image
+    source:
+      repository: ((docker-registry-gcr))/rm/census-rm-data-exporter
       username: _json_key
       password: ((gcp.service_account_json))
 
@@ -800,3 +820,25 @@ jobs:
       get_params:
         skip_download: true
 
+  - name: build-data-exporter-master
+    plan:
+    - get: data-exporter-master
+      trigger: true
+    - put: data-exporter-docker-image-ci
+      on_failure: *slack_failure_alert_ci
+      params:
+        build: data-exporter-master/docker
+        tag_file: data-exporter-master/.git/ref
+        tag_as_latest: true
+      get_params:
+        save: true
+    - put: data-exporter-docker-image-gcr
+      on_failure: *slack_failure_alert_gcr
+      params:
+        build: data-exporter-master/docker
+        cache_from:
+          - data-exporter-docker-image-ci
+        tag_file: data-exporter-master/.git/ref
+        tag_as_latest: true
+      get_params:
+        skip_download: true
