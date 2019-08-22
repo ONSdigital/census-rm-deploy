@@ -79,25 +79,25 @@ jobs:
           config_file: census-rm-deploy/pipelines/ci-sit-kubernetes-pipeline.yml
           unpaused: true
           vars:
+            acceptance-tests-image: eu.gcr.io/census-gcr-rm/rm/census-rm-acceptance-tests:latest
             ci-gcp-environment-name: ci
             ci-gcp-project-name: census-rm-ci
             ci-kubernetes-cluster-name: rm-k8s-cluster
-            terraform-branch: master
-            acceptance-tests-image: eu.gcr.io/census-gcr-rm/rm/census-rm-acceptance-tests:latest
             sit-gcp-environment-name: whitelodge
             sit-gcp-project-name: census-rm-whitelodge
             sit-kubernetes-cluster-name: rm-k8s-cluster
+            terraform-branch: master
 
         - name: census-rm-blacklodge
           team: rm
           config_file: census-rm-deploy/pipelines/manual-release-pipeline.yml
           vars:
+            acceptance-tests-image: eu.gcr.io/census-gcr-rm/rm/census-rm-acceptance-tests:v1.0.0
+            acceptance-tests-release: v1.0.0
             gcp-environment-name: blacklodge
             gcp-project-name: census-rm-blacklodge
             kubernetes-cluster-name: rm-k8s-cluster
-            acceptance-tests-image: eu.gcr.io/census-gcr-rm/rm/census-rm-acceptance-tests:v1.0.0
-            kubernetes-release: v1.2.0
-            acceptance-tests-release: v1.0.0
+            kubernetes-release: v1.3.0
 
         - name: build-images
           team: rm
