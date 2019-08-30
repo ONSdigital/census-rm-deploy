@@ -92,12 +92,10 @@ jobs:
           team: rm
           config_file: census-rm-deploy/pipelines/manual-release-pipeline.yml
           vars:
-            acceptance-tests-image: eu.gcr.io/census-gcr-rm/rm/census-rm-acceptance-tests:v1.0.0
-            acceptance-tests-release: v1.0.0
             gcp-environment-name: blacklodge
             gcp-project-name: census-rm-blacklodge
             kubernetes-cluster-name: rm-k8s-cluster
-            kubernetes-release: v1.3.0
+            kubernetes-release: v1.4.0
 
         - name: build-images
           team: rm
