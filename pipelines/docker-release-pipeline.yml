@@ -993,7 +993,7 @@ jobs:
     - put: data-exporter-docker-image-ci
       on_failure: *slack_failure_alert_ci
       params:
-        build: extracted-data-exporter
+        build: extracted-data-exporter/docker
         tag_file: data-exporter-release/tag
         tag_as_latest: false
       get_params:
@@ -1001,7 +1001,7 @@ jobs:
     - put: data-exporter-docker-image-gcr
       on_failure: *slack_failure_alert_gcr
       params:
-        build: extracted-data-exporter
+        build: extracted-data-exporter/docker
         cache_from:
           - data-exporter-docker-image-ci
         tag_file: data-exporter-release/tag
