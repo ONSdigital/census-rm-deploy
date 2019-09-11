@@ -51,6 +51,13 @@ resources:
     private_key: ((github.service_account_private_key))
     paths: [optional/ops-*]
 
+- name: census-rm-kubernetes-dependencies-repo
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-kubernetes.git
+    private_key: ((github.service_account_private_key))
+    paths: [dependencies/*, rabbitmq/*, setup-dependencies.sh]
+
 - name: acceptance-tests-repo
   type: git
   source:
@@ -298,6 +305,8 @@ jobs:
   max_in_flight: 1
   plan:
   - get: census-rm-terraform
+    trigger: true
+  - get: census-rm-kubernetes-dependencies-repo
     trigger: true
   - get: census-rm-kubernetes-repo
   - *slack_started_alert_ci
