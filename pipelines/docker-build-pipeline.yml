@@ -48,6 +48,12 @@ resources:
       uri: git@github.com:ONSdigital/census-rm-ops.git
       private_key: ((github.service_account_private_key))
 
+  - name: rm-toolbox-master
+    type: git
+    source:
+      uri: git@github.com/ONSdigital/census-rm-toolbox
+      private_key: ((github.service_account_private_key))
+
   - name: pubsub-master
     type: git
     source:
@@ -177,6 +183,20 @@ resources:
     type: docker-image
     source:
       repository: ((docker-registry-gcr))/rm/census-rm-ops
+      username: _json_key
+      password: ((gcp.service_account_json))
+
+  - name: rm-toolbox-docker-image-ci
+    type: docker-image
+    source:
+      repository: ((docker-registry-ci))/rm/census-rm-toolbox
+      username: _json_key
+      password: ((gcp.service_account_json))
+
+  - name: rm-toolbox-docker-image-gcr
+    type: docker-image
+    source:
+      repository: ((docker-registry-gcr))/rm/census-rm-toolbox
       username: _json_key
       password: ((gcp.service_account_json))
 
@@ -609,6 +629,29 @@ jobs:
         cache_from:
           - ops-docker-image-ci
         tag_file: ops-master/.git/ref
+        tag_as_latest: true
+      get_params:
+        skip_download: true
+
+  - name: build-rm-toolbox-master
+    plan:
+    - get: rm-toolbox-master
+      trigger: true
+    - put: rm-toolbox-docker-image-ci
+      on_failure: *slack_failure_alert_ci
+      params:
+        build: rm-toolbox-master
+        tag_file: rm-toolbox-master/.git/ref
+        tag_as_latest: true
+      get_params:
+        save: true
+    - put: rm-toolbox-docker-image-gcr
+      on_failure: *slack_failure_alert_gcr
+      params:
+        build: rm-toolbox-master
+        cache_from:
+          - rm-toolbox-docker-image-ci
+        tag_file: rm-toolbox-master/.git/ref
         tag_as_latest: true
       get_params:
         skip_download: true

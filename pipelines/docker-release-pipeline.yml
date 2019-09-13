@@ -74,6 +74,14 @@ resources:
       access_token: ((github.access_token))
       order_by: time
 
+  - name: rm-toolbox-release
+    type: github-release-latest
+    source:
+      owner: ONSdigital
+      repository: census-rm-toolbox
+      access_token: ((github.access_token))
+      order_by: time
+
   - name: pubsub-release
     type: github-release-latest
     source:
@@ -219,6 +227,21 @@ resources:
       repository: ((docker-registry-gcr))/rm/census-rm-ops
       username: _json_key
       password: ((gcp.service_account_json))
+
+  - name: rm-toolbox-docker-image-ci
+    type: docker-image
+    source:
+      repository: ((docker-registry-ci))/rm/census-rm-toolbox
+      username: _json_key
+      password: ((gcp.service_account_json))
+
+  - name: ops-docker-image-gcr
+    type: docker-image
+    source:
+      repository: ((docker-registry-gcr))/rm/census-rm-toolbox
+      username: _json_key
+      password: ((gcp.service_account_json))
+
 
   - name: pubsub-docker-image-ci
     type: docker-image
@@ -686,6 +709,51 @@ jobs:
         tag_as_latest: false
       get_params:
         skip_download: true
+
+  - name: build-rm-toolbox-release
+    plan:
+    - get: rm-toolbox-release
+      params:
+        include_source_tarball: true
+      trigger: true
+    - task: Build RM-toolbox Image (release)
+      on_failure: *slack_failure_alert_prebuild
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: alpine
+        inputs:
+          - name: rm-toolbox-release
+        outputs:
+          - name: extracted-rm-toolbox
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              cd rm-toolbox-release
+              tar -xzf source.tar.gz -C ../extracted-rm-toolbox --strip-components=1
+    - put: rm-toolbox-docker-image-ci
+      on_failure: *slack_failure_alert_ci
+      params:
+        build: extracted-rm-toolbox
+        tag_file: rm-toolbox-release/tag
+        tag_as_latest: false
+      get_params:
+        save: true
+    - put: rm-toolbox-docker-image-gcr
+      on_failure: *slack_failure_alert_gcr
+      params:
+        build: extracted-rm-toolbox
+        cache_from:
+          - rm-toolbox-docker-image-ci
+        tag_file: rm-toolbox-release/tag
+        tag_as_latest: false
+      get_params:
+        skip_download: true
+
 
   - name: build-pubsub-release
     plan:
