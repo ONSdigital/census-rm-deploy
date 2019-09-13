@@ -51,7 +51,7 @@ resources:
   - name: rm-toolbox-master
     type: git
     source:
-      uri: git@github.com/ONSdigital/census-rm-toolbox.git
+      uri: git@github.com:ONSdigital/census-rm-toolbox.git
       private_key: ((github.service_account_private_key))
 
   - name: pubsub-master
