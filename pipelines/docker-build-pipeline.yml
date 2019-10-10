@@ -102,6 +102,12 @@ resources:
       uri: git@github.com:ONSdigital/census-rm-dataexporter.git
       private_key: ((github.service_account_private_key))
 
+  - name: exception-manager-master
+    type: git
+    source:
+      uri: git@github.com:ONSdigital/census-rm-exception-manager.git
+      private_key: ((github.service_account_private_key))
+
   - name: action-scheduler-docker-image-ci
     type: docker-image
     source:
@@ -309,6 +315,20 @@ resources:
     type: docker-image
     source:
       repository: ((docker-registry-gcr))/rm/census-rm-data-exporter
+      username: _json_key
+      password: ((gcp.service_account_json))
+
+  - name: exception-manager-docker-image-ci
+    type: docker-image
+    source:
+      repository: ((docker-registry-ci))/rm/census-rm-exception-manager
+      username: _json_key
+      password: ((gcp.service_account_json))
+
+  - name: exception-manager-docker-image-gcr
+    type: docker-image
+    source:
+      repository: ((docker-registry-gcr))/rm/census-rm-exception-manager
       username: _json_key
       password: ((gcp.service_account_json))
 
@@ -882,6 +902,29 @@ jobs:
         cache_from:
           - data-exporter-docker-image-ci
         tag_file: data-exporter-master/.git/ref
+        tag_as_latest: true
+      get_params:
+        skip_download: true
+
+  - name: build-exception-manager-master
+    plan:
+    - get: exception-manager-master
+      trigger: true
+    - put: exception-manager-docker-image-ci
+      on_failure: *slack_failure_alert_ci
+      params:
+        build: exception-manager-master/docker
+        tag_file: exception-manager-master/.git/ref
+        tag_as_latest: true
+      get_params:
+        save: true
+    - put: exception-manager-docker-image-gcr
+      on_failure: *slack_failure_alert_gcr
+      params:
+        build: exception-manager-master/docker
+        cache_from:
+          - exception-manager-docker-image-ci
+        tag_file: exception-manager-master/.git/ref
         tag_as_latest: true
       get_params:
         skip_download: true
