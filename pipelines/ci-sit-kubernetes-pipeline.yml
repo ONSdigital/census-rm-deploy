@@ -1106,5 +1106,5 @@ jobs:
       KUBERNETES_FILE_PREFIX: exception-manager
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
-      docker-image-resource: cexception-manager-docker-latest,
+      docker-image-resource: exception-manager-docker-latest,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
