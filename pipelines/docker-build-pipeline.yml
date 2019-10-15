@@ -910,10 +910,32 @@ jobs:
     plan:
     - get: exception-manager-master
       trigger: true
+    - task: Build Exception Manager Image (master)
+      on_failure: *slack_failure_alert_prebuild
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: adoptopenjdk/maven-openjdk11
+        inputs:
+          - name: exception-manager-master
+        outputs:
+          - name: build
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              mkdir -p build/target
+              cd cexception-manager-master
+              mvn package -DskipITs -Ddockerfile.skip
+              cp target/census-rm-*.jar ../build/target
+              cp Dockerfile ../build
     - put: exception-manager-docker-image-ci
       on_failure: *slack_failure_alert_ci
       params:
-        build: exception-manager-master/docker
+        build: build
         tag_file: exception-manager-master/.git/ref
         tag_as_latest: true
       get_params:
@@ -921,7 +943,7 @@ jobs:
     - put: exception-manager-docker-image-gcr
       on_failure: *slack_failure_alert_gcr
       params:
-        build: exception-manager-master/docker
+        build: build
         cache_from:
           - exception-manager-docker-image-ci
         tag_file: exception-manager-master/.git/ref
