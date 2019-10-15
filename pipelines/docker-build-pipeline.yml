@@ -928,7 +928,7 @@ jobs:
             - -exc
             - |
               mkdir -p build/target
-              cd cexception-manager-master
+              cd exception-manager-master
               mvn package -DskipITs -Ddockerfile.skip
               cp target/census-rm-*.jar ../build/target
               cp Dockerfile ../build
