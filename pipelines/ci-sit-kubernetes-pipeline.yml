@@ -696,7 +696,7 @@ jobs:
   - get: census-rm-terraform
     trigger: true
     passed: ["CI Deploy Infrastructure"]
-  - get: census-rm-kubernetes-optional-repo
+  - get: census-rm-kubernetes-microservices-repo
     trigger: true
   - get: exception-manager-docker-latest
     trigger: true
