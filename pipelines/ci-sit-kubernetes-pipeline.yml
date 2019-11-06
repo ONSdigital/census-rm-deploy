@@ -892,7 +892,7 @@ jobs:
              "CI Deploy Exception Manager"]
   - get: census-rm-kubernetes-optional-repo
     trigger: true
-    pased: ["CI Deploy Toolbox",
+    passed: ["CI Deploy Toolbox",
             "CI Deploy Event Latency Monitor",
             "CI Deploy Rabbit Monitor",
             "CI Deploy Regional Counts"]
