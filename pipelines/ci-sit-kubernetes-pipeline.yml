@@ -893,9 +893,9 @@ jobs:
   - get: census-rm-kubernetes-optional-repo
     trigger: true
     passed: ["CI Deploy Toolbox",
-            "CI Deploy Event Latency Monitor",
-            "CI Deploy Rabbit Monitor",
-            "CI Deploy Regional Counts"]
+             "CI Deploy Event Latency Monitor",
+             "CI Deploy Rabbit Monitor",
+             "CI Deploy Regional Counts"]
   - get: action-scheduler-docker-latest
     trigger: true
     passed: ["CI Deploy Action-Scheduler"]
