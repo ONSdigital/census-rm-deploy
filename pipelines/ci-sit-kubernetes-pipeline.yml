@@ -740,10 +740,10 @@ jobs:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((ci-gcp-project-name))
       KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
-      KUBERNETES_DEPLOYMENT_NAME: toolbox
-      KUBERNETES_SELECTOR: app=toolbox
+      KUBERNETES_DEPLOYMENT_NAME: census-rm-toolbox
+      KUBERNETES_SELECTOR: app=census-rm-toolbox
       KUBERNETES_FILE_PATH: kubernetes-repo/optional
-      KUBERNETES_FILE_PREFIX: census-rm-toolbox
+      KUBERNETES_FILE_PREFIX: census-rm-toolbox-dev
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
       docker-image-resource: toolbox-docker-latest,
@@ -773,7 +773,7 @@ jobs:
       KUBERNETES_DEPLOYMENT_NAME: eventlatencymonitor
       KUBERNETES_SELECTOR: app=eventlatencymonitor
       KUBERNETES_FILE_PATH: kubernetes-repo/optional
-      KUBERNETES_FILE_PREFIX: eventlatencymonitor
+      KUBERNETES_FILE_PREFIX: eventlatencymonitor-dev
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
       docker-image-resource: toolbox-docker-latest,
@@ -833,7 +833,7 @@ jobs:
       KUBERNETES_DEPLOYMENT_NAME: regionalcounts
       KUBERNETES_SELECTOR: app=regionalcounts
       KUBERNETES_FILE_PATH: kubernetes-repo/optional
-      KUBERNETES_FILE_PREFIX: census-rm-toolbox
+      KUBERNETES_FILE_PREFIX: regional-counts-dev
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
       docker-image-resource: toolbox-docker-latest,
