@@ -892,10 +892,10 @@ jobs:
              "CI Deploy Exception Manager"]
   - get: census-rm-kubernetes-optional-repo
     trigger: true
-    pased: ["CI Deploy Toolbox",
-            "CI Deploy Event Latency Monitor",
-            "CI Deploy Rabbit Monitor",
-            "CI Deploy Regional Counts"]
+    passed: ["CI Deploy Toolbox",
+             "CI Deploy Event Latency Monitor",
+             "CI Deploy Rabbit Monitor",
+             "CI Deploy Regional Counts"]
   - get: action-scheduler-docker-latest
     trigger: true
     passed: ["CI Deploy Action-Scheduler"]
