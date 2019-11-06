@@ -888,11 +888,11 @@ jobs:
              "CI Deploy Print File Service",
              "CI Deploy Fieldwork Adapter",
              "CI Deploy Notify Processor",
-             "CI Deploy Notify Stub"]
+             "CI Deploy Notify Stub",
+             "CI Deploy Exception Manager"]
   - get: census-rm-kubernetes-optional-repo
     trigger: true
-    pased: ["CI Deploy Exception Manager",
-            "CI Deploy Toolbox",
+    pased: ["CI Deploy Toolbox",
             "CI Deploy Event Latency Monitor",
             "CI Deploy Rabbit Monitor",
             "CI Deploy Regional Counts"]
