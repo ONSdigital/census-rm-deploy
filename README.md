@@ -56,7 +56,7 @@ Create a secrets YAML file containing the required configuration:
 
 
 ### [Manual Release Pipeline](pipelines/manual-release-pipeline.yml)
-This pipeline targets release/prod-like environments with all the automatic triggers removed. This is useful for any environment where we want to be deploying release tagged versions of the docker images, but not necessarily as soon as they're built.
+This pipeline is designed for deploying release tagged versions of the docker images, but not necessarily as soon as they're built. It fetches only commits with tags matching `v*.*.*`. The job `Trigger All` acts as a gate for deploying all the apps on the currently selected release version. To deploy a specific version, disable all versions above it on the resource UI, then trigger the `Trigger All` job.
 
 #### How to fly
 Create a secrets YAML file containing the required configuration:
@@ -67,4 +67,3 @@ Create a secrets YAML file containing the required configuration:
 | acceptance-tests-image   | String                                                                              | The name of the acceptance tests image to run                                            |
 | gcp-environment-name     | String                                                                              | The name of the GCP project suffix the targeted cluster belongs to                       |
 | gcp-project-name         | String                                                                              | The name of the GCP project targeted cluster belongs to                                                       |
-| kubernetes-release       | String                                                                              | The semantic version string of the tagged [kubernetes repository](https://github.com/ONSdigital/census-rm-kubernetes)                                                       |
