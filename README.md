@@ -56,7 +56,8 @@ Create a secrets YAML file containing the required configuration:
 
 
 ### [Manual Release Pipeline](pipelines/manual-release-pipeline.yml)
-This pipeline is designed for deploying release tagged versions of the docker images, but not necessarily as soon as they're built. It fetches only commits with tags matching `v*.*.*`. The job `Trigger All` acts as a gate for deploying all the apps on the currently selected release version. To deploy a specific version, disable all versions above it on the resource UI, then trigger the `Trigger All` job.
+This pipeline is designed for deploying release tagged versions of the docker images, but not necessarily as soon as they're built. It fetches only commits with tags matching `v*.*.*`. The `Deploy` job is what should be triggered manually by the user to deploy the active version. This works by acting as a gate on the `every-minute` resource. All the individual service deploy jobs are set to trigger off the `every-minute` resource but require the `Deploy` job to have passed, which is only triggered manually. This allows all the services to be deployed with one manual trigger of the `Deploy` job, once every minute. The version to be deployed can be changed by selectively enabling only the desired version ref in the resource UI.
+ To deploy a specific version, disable all versions above it on the resource UI, then trigger the `Deploy` job.
 
 #### How to fly
 Create a secrets YAML file containing the required configuration:
