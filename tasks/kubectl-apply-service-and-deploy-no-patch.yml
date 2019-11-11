@@ -36,9 +36,6 @@ run:
       # Apply deployment config
       kubectl apply -f ${KUBERNETES_FILE_PATH}/${KUBERNETES_FILE_PREFIX}-deployment.yml --record
 
-      # Patch deployment with timestamp to force pod recreation
-      kubectl patch deployment ${KUBERNETES_DEPLOYMENT_NAME} -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\"}}}}}" --record
-
       # Wait for rollout to finish
       kubectl rollout status deploy ${KUBERNETES_DEPLOYMENT_NAME} --watch=true --timeout=${WAIT_UNTIL_AVAILABLE_TIMEOUT}
 

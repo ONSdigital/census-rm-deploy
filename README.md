@@ -56,7 +56,8 @@ Create a secrets YAML file containing the required configuration:
 
 
 ### [Manual Release Pipeline](pipelines/manual-release-pipeline.yml)
-This pipeline targets release/prod-like environments with all the automatic triggers removed. This is useful for any environment where we want to be deploying release tagged versions of the docker images, but not necessarily as soon as they're built.
+This pipeline is designed for deploying release tagged versions of the docker images, but not necessarily as soon as they're built. It fetches only commits with tags matching `v*.*.*`. The `Deploy` job is what should be triggered manually by the user to deploy the active version. This works by acting as a gate on the `every-minute` resource. All the individual service deploy jobs are set to trigger off the `every-minute` resource but require the `Deploy` job to have passed, which is only triggered manually. This allows all the services to be deployed with one manual trigger of the `Deploy` job, once every minute. The version to be deployed can be changed by selectively enabling only the desired version ref in the resource UI.
+ To deploy a specific version, disable all versions above it on the resource UI, then trigger the `Deploy` job. See https://concourse-ci.org/manual-trigger-example.html
 
 #### How to fly
 Create a secrets YAML file containing the required configuration:
@@ -67,4 +68,12 @@ Create a secrets YAML file containing the required configuration:
 | acceptance-tests-image   | String                                                                              | The name of the acceptance tests image to run                                            |
 | gcp-environment-name     | String                                                                              | The name of the GCP project suffix the targeted cluster belongs to                       |
 | gcp-project-name         | String                                                                              | The name of the GCP project targeted cluster belongs to                                                       |
-| kubernetes-release       | String                                                                              | The semantic version string of the tagged [kubernetes repository](https://github.com/ONSdigital/census-rm-kubernetes)                                                       |
+
+#### Force checking for older versions
+By default the github resource will only pick tags from the newest since the pipeline was first flown. If you need to use an older tag you can force it to check older resources versions with the [`check-resource` fly command](https://concourse-ci.org/managing-resources.html#fly-check-resource) with an appropraite `from`, e.g.
+
+```shell-script
+fly -t <target> check-resource -r <pipeline>/census-rm-kubernetes-release -f ref:v1.0.0
+```
+
+This would bring in all versions from `v1.0.0` chronologically.
