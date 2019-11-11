@@ -101,6 +101,37 @@ slack_success_alert: &slack_success_alert
           }
       ]
 
+slack_in_progress_alert: &slack_in_progress_alert
+  put: slack-alert
+  params:
+    icon_emoji: ":concourse:"
+    username: Concourse
+    attachments: [
+          {
+              "fallback": "((gcp-environment-name)) release started. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME",
+              "title": "((gcp-environment-name)) Release Started",
+              "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME",
+              "fields": [
+                  {
+                      "title": "Pipeline",
+                      "value": "$BUILD_PIPELINE_NAME",
+                      "short": true
+                  },
+                  {
+                      "title": "Environment",
+                      "value": "((gcp-environment-name))",
+                      "short": true
+                  },
+                  {
+                      "title": "Project",
+                      "value": "((gcp-project-name))",
+                      "short": true
+                  }
+              ],
+              "color": "#ffe100"
+          }
+      ]
+
 
 jobs:
 
@@ -109,6 +140,7 @@ jobs:
   plan:
     - get: every-minute
     - get: census-rm-kubernetes-release
+  on_success: *slack_in_progress_alert
 
 - name: "Action Scheduler"
   disable_manual_trigger: true
