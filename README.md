@@ -68,3 +68,12 @@ Create a secrets YAML file containing the required configuration:
 | acceptance-tests-image   | String                                                                              | The name of the acceptance tests image to run                                            |
 | gcp-environment-name     | String                                                                              | The name of the GCP project suffix the targeted cluster belongs to                       |
 | gcp-project-name         | String                                                                              | The name of the GCP project targeted cluster belongs to                                                       |
+
+#### Force checking for older versions
+By default the github resource will only pick tags from the newest since the pipeline was first flown. If you need to use an older tag you can force it to check older resources versions with the [`check-resource` fly command](https://concourse-ci.org/managing-resources.html#fly-check-resource) with an appropraite `from`, e.g.
+
+```shell-script
+fly -t <target> check-resource -r <pipeline>/census-rm-kubernetes-release -f ref:v1.0.0
+```
+
+This would bring in all versions from `v1.0.0` chronologically.
