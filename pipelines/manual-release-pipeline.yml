@@ -73,13 +73,12 @@ slack_failure_alert: &slack_failure_alert
 slack_success_alert: &slack_success_alert
   put: slack-alert
   params:
-    release-ref: census-rm-kuberenetes-release/.git/ref
     icon_emoji: ":concourse:"
     username: Concourse
     attachments: [
           {
-              "fallback": "$BUILD_PIPELINE_NAME release succeeded. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME",
-              "title": "$BUILD_PIPELINE_NAME Release Succeeded",
+              "fallback": "((gcp-environment-name)) release succeeded. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME",
+              "title": "((gcp-environment-name)) Release Succeeded",
               "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME",
               "fields": [
                   {
@@ -95,11 +94,6 @@ slack_success_alert: &slack_success_alert
                   {
                       "title": "Project",
                       "value": "((gcp-project-name))",
-                      "short": true
-                  },
-                  {
-                      "title": "Version",
-                      "value": "${cat release-ref}",
                       "short": true
                   }
               ],
@@ -117,6 +111,7 @@ jobs:
     - get: census-rm-kubernetes-release
 
 - name: "Action Scheduler"
+  disable_manual_trigger: true
   serial: true
   serial_groups: [action-scheduler]
   plan:
@@ -142,6 +137,7 @@ jobs:
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
 
 - name: "Case API"
+  disable_manual_trigger: true
   serial: true
   serial_groups: [case-api]
   plan:
@@ -167,6 +163,7 @@ jobs:
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
 
 - name: "Case Processor"
+  disable_manual_trigger: true
   serial: true
   serial_groups: [case-processor]
   plan:
@@ -192,6 +189,7 @@ jobs:
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
 
 - name: "UAC QID Service"
+  disable_manual_trigger: true
   serial: true
   serial_groups: [uac-qid-service]
   plan:
@@ -217,6 +215,7 @@ jobs:
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
 
 - name: "PubSub Service"
+  disable_manual_trigger: true
   serial: true
   serial_groups: [pubsubsvc]
   plan:
@@ -242,6 +241,7 @@ jobs:
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
 
 - name: "Ops Tool"
+  disable_manual_trigger: true
   serial: true
   serial_groups: [ops]
   plan:
@@ -267,6 +267,7 @@ jobs:
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
 
 - name: "Print File Service"
+  disable_manual_trigger: true
   serial: true
   serial_groups: [print-file-service]
   plan:
@@ -292,6 +293,7 @@ jobs:
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
 
 - name: "Fieldwork Adapter"
+  disable_manual_trigger: true
   serial: true
   serial_groups: [fieldwork-adapter]
   plan:
@@ -317,6 +319,7 @@ jobs:
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
 
 - name: "Notify Processor"
+  disable_manual_trigger: true
   serial: true
   serial_groups: [notify-processor]
   plan:
@@ -342,6 +345,7 @@ jobs:
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
 
 - name: "Exception Manager"
+  disable_manual_trigger: true
   serial: true
   serial_groups: [exception-manager]
   plan:
@@ -367,6 +371,7 @@ jobs:
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
 
 - name: "Toolbox"
+  disable_manual_trigger: true
   serial: true
   serial_groups: [toolbox]
   plan:
@@ -392,6 +397,7 @@ jobs:
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
 
 - name: "Event Latency Monitor"
+  disable_manual_trigger: true
   serial: true
   serial_groups: [event-latency-monitor]
   plan:
@@ -417,6 +423,7 @@ jobs:
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
 
 - name: "Rabbit Monitor"
+  disable_manual_trigger: true
   serial: true
   serial_groups: [rabbitmonitor]
   plan:
@@ -442,6 +449,7 @@ jobs:
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
 
 - name: "Regional Counts"
+  disable_manual_trigger: true
   serial: true
   serial_groups: [regionalcounts]
   plan:
@@ -466,7 +474,8 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
 
-- name: "Report Success"  
+- name: "Report Success"
+  disable_manual_trigger: true
   serial: true
   plan:
   - get: census-rm-kubernetes-release
