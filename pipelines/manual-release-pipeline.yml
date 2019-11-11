@@ -510,7 +510,6 @@ jobs:
   disable_manual_trigger: true
   serial: true
   plan:
-  - get: census-rm-kubernetes-release
   - get: every-minute
     trigger: true
     passed: ["Action Scheduler", 
