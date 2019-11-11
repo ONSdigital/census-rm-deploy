@@ -95,7 +95,6 @@ jobs:
             gcp-environment-name: blacklodge
             gcp-project-name: census-rm-blacklodge
             kubernetes-cluster-name: rm-k8s-cluster
-            kubernetes-release: v1.4.0
 
         - name: build-images
           team: rm
