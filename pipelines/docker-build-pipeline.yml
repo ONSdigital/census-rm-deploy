@@ -980,7 +980,7 @@ jobs:
     - put: performance-tests-docker-image-ci
       on_failure: *slack_failure_alert_ci
       params:
-        build: performance-tests-master/docker
+        build: performance-tests-master
         tag_file: performance-tests-master/.git/ref
         tag_as_latest: true
       get_params:
@@ -988,7 +988,7 @@ jobs:
     - put: performance-tests-docker-image-gcr
       on_failure: *slack_failure_alert_gcr
       params:
-        build: performance-tests-master/docker
+        build: performance-tests-master
         cache_from:
           - performance-tests-docker-image-ci
         tag_file: performance-tests-master/.git/ref
