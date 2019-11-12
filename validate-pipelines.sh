@@ -2,6 +2,7 @@
 
 EXIT_STATUS=0
 for i in pipelines/*.yml; do
+    echo "Validating $i"
     fly validate-pipeline -c $i
     VALIDATE_STATUS=$?
     if [ $VALIDATE_STATUS -ne 0 ]; then
