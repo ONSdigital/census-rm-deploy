@@ -12,6 +12,7 @@ resources:
     source:
       url: ((slack.webhook))
 
+  # Git repos
   - name: action-scheduler-master
     type: git
     source:
@@ -108,6 +109,13 @@ resources:
       uri: git@github.com:ONSdigital/census-rm-exception-manager.git
       private_key: ((github.service_account_private_key))
 
+  - name: performance-tests-master
+    type: git
+    source:
+      uri: git@github.com:ONSdigital/census-rm-performance-tests.git
+      private_key: ((github.service_account_private_key))
+
+  # Docker images
   - name: action-scheduler-docker-image-ci
     type: docker-image
     source:
@@ -329,6 +337,20 @@ resources:
     type: docker-image
     source:
       repository: ((docker-registry-gcr))/rm/census-rm-exception-manager
+      username: _json_key
+      password: ((gcp.service_account_json))
+
+  - name: performance-tests-docker-image-ci
+    type: docker-image
+    source:
+      repository: ((docker-registry-ci))/rm/census-rm-performance-tests
+      username: _json_key
+      password: ((gcp.service_account_json))
+
+  - name: performance-tests-docker-image-gcr
+    type: docker-image
+    source:
+      repository: ((docker-registry-gcr))/rm/census-rm-performance-tests
       username: _json_key
       password: ((gcp.service_account_json))
 
@@ -947,6 +969,29 @@ jobs:
         cache_from:
           - exception-manager-docker-image-ci
         tag_file: exception-manager-master/.git/ref
+        tag_as_latest: true
+      get_params:
+        skip_download: true
+
+  - name: build-performance-tests-master
+    plan:
+    - get: performance-tests-master
+      trigger: true
+    - put: performance-tests-docker-image-ci
+      on_failure: *slack_failure_alert_ci
+      params:
+        build: performance-tests-master/docker
+        tag_file: performance-tests-master/.git/ref
+        tag_as_latest: true
+      get_params:
+        save: true
+    - put: performance-tests-docker-image-gcr
+      on_failure: *slack_failure_alert_gcr
+      params:
+        build: performance-tests-master/docker
+        cache_from:
+          - performance-tests-docker-image-ci
+        tag_file: performance-tests-master/.git/ref
         tag_as_latest: true
       get_params:
         skip_download: true

@@ -18,6 +18,7 @@ resources:
     source:
       url: ((slack.webhook))
 
+  # Github Releases
   - name: acceptance-tests-release
     type: github-release-latest
     source:
@@ -138,6 +139,15 @@ resources:
       access_token: ((github.access_token))
       order_by: time
 
+  - name: performance-tests-release
+    type: github-release-latest
+    source:
+      owner: ONSdigital
+      repository: census-rm-performance-tests
+      access_token: ((github.access_token))
+      order_by: time
+
+  # Docker Images
   - name: acceptance-tests-docker-image-ci
     type: docker-image
     source:
@@ -346,6 +356,20 @@ resources:
     type: docker-image
     source:
       repository: ((docker-registry-gcr))/rm/census-rm-exception-manager
+      username: _json_key
+      password: ((gcp.service_account_json))
+
+  - name: performance-tests-docker-image-ci
+    type: docker-image
+    source:
+      repository: ((docker-registry-ci))/rm/census-rm-performance-tests
+      username: _json_key
+      password: ((gcp.service_account_json))
+
+  - name: performance-tests-docker-image-gcr
+    type: docker-image
+    source:
+      repository: ((docker-registry-gcr))/rm/census-rm-performance-tests
       username: _json_key
       password: ((gcp.service_account_json))
 
@@ -1145,6 +1169,50 @@ jobs:
         cache_from:
           - exception-manager-docker-image-ci
         tag_file: exception-manager-release/tag
+        tag_as_latest: false
+      get_params:
+        skip_download: true
+
+  - name: build-performance-tests-release
+    plan:
+    - get: performance-tests-release
+      params:
+        include_source_tarball: true
+      trigger: true
+    - task: Build Data Exporter Image (release)
+      on_failure: *slack_failure_alert_prebuild
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: alpine
+        inputs:
+          - name: performance-tests-release
+        outputs:
+          - name: extracted-performance-tests
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              cd performance-tests-release
+              tar -xzf source.tar.gz -C ../extracted-performance-tests --strip-components=1
+    - put: performance-tests-docker-image-ci
+      on_failure: *slack_failure_alert_ci
+      params:
+        build: extracted-performance-tests/docker
+        tag_file: performance-tests-release/tag
+        tag_as_latest: false
+      get_params:
+        save: true
+    - put: performance-tests-docker-image-gcr
+      on_failure: *slack_failure_alert_gcr
+      params:
+        build: extracted-performance-tests/docker
+        cache_from:
+          - performance-tests-docker-image-ci
+        tag_file: performance-tests-release/tag
         tag_as_latest: false
       get_params:
         skip_download: true
