@@ -1201,7 +1201,7 @@ jobs:
     - put: performance-tests-docker-image-ci
       on_failure: *slack_failure_alert_ci
       params:
-        build: extracted-performance-tests/docker
+        build: extracted-performance-tests
         tag_file: performance-tests-release/tag
         tag_as_latest: false
       get_params:
@@ -1209,7 +1209,7 @@ jobs:
     - put: performance-tests-docker-image-gcr
       on_failure: *slack_failure_alert_gcr
       params:
-        build: extracted-performance-tests/docker
+        build: extracted-performance-tests
         cache_from:
           - performance-tests-docker-image-ci
         tag_file: performance-tests-release/tag
