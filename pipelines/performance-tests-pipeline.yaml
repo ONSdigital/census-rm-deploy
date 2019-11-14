@@ -1,0 +1,44 @@
+---
+resources:
+
+- name: 24h
+  type: time
+  source:
+    interval: 24h
+    days: [Monday, Tuesday, Wednesday, Thursday, Friday]
+
+- name: performance-tests-repo
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-performance-tests.git
+    paths: [kubernetes.env, tasks/*]
+    private_key: ((github.service_account_private_key))
+
+- name: performance-tests-docker-image
+  type: docker-image
+  source:
+    repository: ((performance-tests-image))
+    username: _json_key
+    password: ((gcp.service_account_json))
+
+jobs:
+
+- name: "Performance Tests"
+  serial: true
+  serial_groups: ["Performance Tests"]
+  plan:
+  - get: 24h
+    trigger: false
+  - get: performance-tests-repo
+  - get: performance-tests-docker-image
+    trigger: true
+    params:
+      skip_download: true
+  - task: "Run Performance Tests (in K8s)"  # TODO: what is deemed a failure?
+    file: performance-tests-repo/tasks/kubectl-run-performance-tests.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((performance-gcp-project-name))
+      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+      PERFORMANCE_TESTS_IMAGE: ((performance-tests-image))
+    input_mapping: {performance-tests-repo: performance-tests-repo}
