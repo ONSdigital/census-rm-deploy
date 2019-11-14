@@ -560,7 +560,7 @@ jobs:
         source:
           repository: eu.gcr.io/census-gcr/gcloud-kubectl
       params:
-        ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+        SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
         KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
         GCP_PROJECT_NAME: ((performance-gcp-project-name))
         CASE_PROCESSOR_REPLICAS: ((case-processor-replicas))
