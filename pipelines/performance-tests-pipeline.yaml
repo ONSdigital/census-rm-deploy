@@ -1,12 +1,6 @@
 ---
 resources:
 
-- name: 24h
-  type: time
-  source:
-    interval: 24h
-    days: [Monday, Tuesday, Wednesday, Thursday, Friday]
-
 - name: performance-tests-repo
   type: git
   source:
@@ -27,8 +21,6 @@ jobs:
   serial: true
   serial_groups: ["Performance Tests"]
   plan:
-  - get: 24h
-    trigger: false
   - get: performance-tests-repo
   - get: performance-tests-docker-image
     trigger: true
