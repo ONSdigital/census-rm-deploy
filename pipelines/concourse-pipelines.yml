@@ -117,6 +117,7 @@ jobs:
           config_file: census-rm-deploy/pipelines/performance-tests-pipeline.yml
           unpaused: true
           vars:
-            docker-registry-cli: eu.gcr.io/census-rm-ci
-            docker-registry-gcr: eu.gcr.io/census-gcr-rm
-            
+            gcp-environment-name: performance
+            gcp-project-name: census-rm-performance
+            kubernetes-cluster-name: rm-k8s-cluster
+           
