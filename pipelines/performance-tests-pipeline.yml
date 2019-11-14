@@ -35,7 +35,7 @@ slack_release_failure: &slack_release_failure
                   },
                   {
                       "title": "Environment",
-                      "value": "((gcp-environment-name))",
+                      "value": "((performance-gcp-environment-name))",
                       "short": true
                   },
                   {
@@ -60,8 +60,8 @@ slack_release_success: &slack_release_success
     username: Concourse
     attachments: [
           {
-              "fallback": "((gcp-environment-name)) release succeeded. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME",
-              "title": "((gcp-environment-name)) Release Succeeded",
+              "fallback": "((performance-gcp-environment-name)) release succeeded. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME",
+              "title": "((performance-gcp-environment-name)) Release Succeeded",
               "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME",
               "fields": [
                   {
@@ -71,7 +71,7 @@ slack_release_success: &slack_release_success
                   },
                   {
                       "title": "Environment",
-                      "value": "((gcp-environment-name))",
+                      "value": "((performance-gcp-environment-name))",
                       "short": true
                   },
                   {
@@ -91,8 +91,8 @@ slack_release_in_progress: &slack_release_in_progress
     username: Concourse
     attachments: [
           {
-              "fallback": "((gcp-environment-name)) release started. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME",
-              "title": "((gcp-environment-name)) Release Started",
+              "fallback": "((performance-gcp-environment-name)) release started. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME",
+              "title": "((performance-gcp-environment-name)) Release Started",
               "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME",
               "fields": [
                   {
@@ -102,7 +102,7 @@ slack_release_in_progress: &slack_release_in_progress
                   },
                   {
                       "title": "Environment",
-                      "value": "((gcp-environment-name))",
+                      "value": "((performance-gcp-environment-name))",
                       "short": true
                   },
                   {
@@ -133,7 +133,7 @@ slack_performance_tests_failure: &slack_performance_tests_failure
                   },
                   {
                       "title": "Environment",
-                      "value": "((gcp-environment-name))",
+                      "value": "((performance-gcp-environment-name))",
                       "short": true
                   },
                   {
@@ -169,7 +169,7 @@ slack_performance_tests_finished: &slack_performance_tests_finished
                   },
                   {
                       "title": "Environment",
-                      "value": "((gcp-environment-name))",
+                      "value": "((performance-gcp-environment-name))",
                       "short": true
                   },
                   {
@@ -625,7 +625,7 @@ jobs:
                     },
                     {
                         "title": "Environment",
-                        "value": "((gcp-environment-name))",
+                        "value": "((performance-gcp-environment-name))",
                         "short": true
                     },
                     {
