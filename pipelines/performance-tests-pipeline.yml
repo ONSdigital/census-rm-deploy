@@ -65,11 +65,6 @@ slack_release_failure: &slack_release_failure
                       "short": true
                   },
                   {
-                      "title": "Environment",
-                      "value": "((performance-gcp-environment-name))",
-                      "short": true
-                  },
-                  {
                       "title": "Project",
                       "value": "((performance-gcp-project-name))",
                       "short": true
@@ -91,23 +86,23 @@ slack_release_success: &slack_release_success
     username: Concourse
     attachments: [
           {
-              "fallback": "((performance-gcp-environment-name)) release succeeded. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME",
-              "title": "((performance-gcp-environment-name)) Release Succeeded",
+              "fallback": "((performance-gcp-project-name)) release succeeded. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME",
+              "title": "((performance-gcp-project-name)) Release Succeeded",
               "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME",
               "fields": [
                   {
                       "title": "Pipeline",
                       "value": "$BUILD_PIPELINE_NAME",
                       "short": true
-                  },
-                  {
-                      "title": "Environment",
-                      "value": "((performance-gcp-environment-name))",
-                      "short": true
-                  },
+                  }, 
                   {
                       "title": "Project",
                       "value": "((performance-gcp-project-name))",
+                      "short": true
+                  },
+                  {
+                      "title": "Build",
+                      "value": "#$BUILD_NAME",
                       "short": true
                   }
               ],
@@ -122,23 +117,23 @@ slack_release_in_progress: &slack_release_in_progress
     username: Concourse
     attachments: [
           {
-              "fallback": "((performance-gcp-environment-name)) release started. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME",
-              "title": "((performance-gcp-environment-name)) Release Started",
+              "fallback": "((performance-gcp-project-name)) release started. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME",
+              "title": "((performance-gcp-project-name)) Release Started",
               "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME",
               "fields": [
                   {
                       "title": "Pipeline",
                       "value": "$BUILD_PIPELINE_NAME",
                       "short": true
-                  },
-                  {
-                      "title": "Environment",
-                      "value": "((performance-gcp-environment-name))",
-                      "short": true
-                  },
+                  },  
                   {
                       "title": "Project",
                       "value": "((performance-gcp-project-name))",
+                      "short": true
+                  },
+                  {
+                      "title": "Build",
+                      "value": "#$BUILD_NAME",
                       "short": true
                   }
               ],
@@ -163,10 +158,37 @@ slack_performance_tests_failure: &slack_performance_tests_failure
                       "short": true
                   },
                   {
-                      "title": "Environment",
-                      "value": "((performance-gcp-environment-name))",
+                      "title": "Project",
+                      "value": "((performance-gcp-project-name))",
                       "short": true
                   },
+                  {
+                      "title": "Build",
+                      "value": "#$BUILD_NAME",
+                      "short": true
+                  }
+              ],
+              "color": "#F35A00"
+          }
+      ]
+
+slack_performance_setup_failure: &slack_performance_setup_failure
+  put: slack-alert
+  params:
+    icon_emoji: ":concourse:"
+    username: Concourse
+    attachments: [
+          {
+              "fallback": "Performance tests setup failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+              "title": "$BUILD_JOB_NAME failed",
+              "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+              "fields": [
+                  {
+                      "title": "Pipeline",
+                      "value": "$BUILD_PIPELINE_NAME",
+                      "short": true
+                  },
+                  
                   {
                       "title": "Project",
                       "value": "((performance-gcp-project-name))",
@@ -199,11 +221,6 @@ slack_performance_tests_finished: &slack_performance_tests_finished
                       "short": true
                   },
                   {
-                      "title": "Environment",
-                      "value": "((performance-gcp-environment-name))",
-                      "short": true
-                  },
-                  {
                       "title": "Project",
                       "value": "((performance-gcp-project-name))",
                       "short": true
@@ -217,6 +234,38 @@ slack_performance_tests_finished: &slack_performance_tests_finished
               "color": "#36a64f"
           }
       ]
+
+slack_performance_tests_started: &slack_performance_tests_started
+  put: slack-alert
+  params:
+    icon_emoji: ":concourse:"
+    username: Concourse
+    attachments: [
+          {
+              "fallback": "Performance tests run started. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME",
+              "title": "Performance Tests Started",
+              "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME",
+              "fields": [
+                  {
+                      "title": "Pipeline",
+                      "value": "$BUILD_PIPELINE_NAME",
+                      "short": true
+                  },
+                  {
+                      "title": "Project",
+                      "value": "((performance-gcp-project-name))",
+                      "short": true
+                  },
+                  {
+                      "title": "Build",
+                      "value": "#$BUILD_NAME",
+                      "short": true
+                  }
+              ],
+              "color": "#ffe100"
+          }
+      ]
+
 
 jobs:
 
@@ -560,7 +609,31 @@ jobs:
       "Rabbit Monitor"]
   - *slack_release_success
 
-- name: "Scale Apps and Run Tests"
+- name: "Run Performance Tests"
+  serial: true
+  serial_groups: [
+    action-scheduler,
+    case-api,
+    case-processor,
+    fieldwork-adapter,
+    notify-processor,
+    uac-qid-service,
+    pubsubsvc,
+    print-file-service,
+    exception-manager,
+    toolbox,
+    event-latency-monitor,
+    rabbitmonitor]
+  plan:
+  - get: performance-tests-repo
+  - get: performance-tests-docker-image
+    params:
+      skip_download: true
+  - get: every-minute
+  - *slack_performance_tests_started
+
+- name: "Scale Apps"
+  disable_manual_trigger: true
   serial: true
   serial_groups: [
     scale-apps,
@@ -577,12 +650,13 @@ jobs:
     event-latency-monitor,
     rabbitmonitor]
   plan:
-  - get: census-rm-kubernetes-release
   - get: performance-tests-repo
   - get: performance-tests-docker-image
     params:
       skip_download: true
   - get: every-minute
+    trigger: true
+    passed: ["Run Performance Tests"]
   - task: "Scale apps"
     config:
       platform: linux
@@ -612,6 +686,7 @@ jobs:
             # Scale apps up
             kubectl scale deployment case-processor --replicas=$CASE_PROCESSOR_REPLICAS
             kubectl scale deployment uacqidservice --replicas=$UAC_QID_REPLICAS
+  on_failure: *slack_performance_setup_failure
 
 - name: "Performance Tests"
   disable_manual_trigger: true
@@ -638,41 +713,7 @@ jobs:
       skip_download: true
   - get: every-minute
     trigger: true
-    passed: ["Scale Apps and Run Tests"]
-  - put: slack-alert
-    params:
-      icon_emoji: ":concourse:"
-      username: Concourse
-      attachments: [
-            {
-                "fallback": "Performance tests run started. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME",
-                "title": "Performance Tests Started",
-                "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME",
-                "fields": [
-                    {
-                        "title": "Pipeline",
-                        "value": "$BUILD_PIPELINE_NAME",
-                        "short": true
-                    },
-                    {
-                        "title": "Environment",
-                        "value": "((performance-gcp-environment-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Project",
-                        "value": "((performance-gcp-project-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Build",
-                        "value": "#$BUILD_NAME",
-                        "short": true
-                    }
-                ],
-                "color": "#ffe100"
-            }
-        ]
+    passed: ["Scale Apps"]
   - task: "Run Performance Tests (in K8s)"
     file: performance-tests-repo/tasks/kubectl-run-performance-tests.yml
     params:
@@ -681,5 +722,5 @@ jobs:
       KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
       PERFORMANCE_TESTS_IMAGE: ((performance-tests-image))
     input_mapping: {performance-tests-repo: performance-tests-repo}
-    on_failure: *slack_performance_tests_failure
-    on_success: *slack_performance_tests_finished
+  on_failure: *slack_performance_tests_failure
+  on_success: *slack_performance_tests_finished
