@@ -1,5 +1,36 @@
 ---
+resource_types:
+- name: slack-notification
+  type: docker-image
+  source:
+    repository: cfcommunity/slack-notification-resource
+
 resources:
+
+- name: slack-alert
+  type: slack-notification
+  source:
+    url: ((slack.webhook))
+
+- name: census-rm-deploy
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-deploy.git
+    private_key: ((github.service_account_private_key))
+
+- name: census-rm-kubernetes-release
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-kubernetes.git
+    private_key: ((github.service_account_private_key))
+    paths: [release/*]
+    tag_filter: v*.*.*
+    branch: master
+
+- name: every-minute
+  type: time
+  source:
+    interval: 1m
 
 - name: performance-tests-repo
   type: git
