@@ -1,4 +1,27 @@
 ---
+groups:
+- name: Deploy
+  jobs:
+  - Deploy
+  - Action Scheduler
+  - Case API
+  - Case Processor
+  - Event Latency Monitor
+  - Exception Manager
+  - Fieldwork Adapter
+  - Notify Processor
+  - Print File Service
+  - PubSub Service
+  - Rabbit Monitor
+  - Toolbox
+  - UAC QID Service
+  - Report Success
+- name: Performance Tests
+  jobs:
+  - Run Performance Tests
+  - Scale Apps
+  - Performance Tests
+
 resource_types:
 - name: slack-notification
   type: docker-image
