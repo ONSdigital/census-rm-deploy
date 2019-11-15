@@ -1,4 +1,120 @@
 ---
+groups:
+- name: "Docker Builds"
+  jobs:
+  - build-acceptance-tests-master
+  - build-action-scheduler-master
+  - build-batch-runner-master
+  - build-case-api-master
+  - build-case-processor-master
+  - build-data-exporter-master
+  - build-exception-manager-master
+  - build-fieldwork-adapter-master
+  - build-notify-processor-master 
+  - build-notify-stub-master
+  - build-ops-master
+  - build-performance-tests-master
+  - build-print-file-service-master
+  - build-pubsub-master
+  - build-sample-loader-master
+  - build-toolbox-master
+  - build-uac-qid-service-master
+
+- name: "CI Deployments"
+  jobs:
+  - "CI Deploy Infrastructure"
+  - "CI Deploy Action-Scheduler"
+  - "CI Deploy Case-API"
+  - "CI Deploy Case-Processor"
+  - "CI Deploy UAC QID Service"
+  - "CI Deploy PubSub Service"
+  - "CI Deploy Ops Tool"
+  - "CI Deploy Print File Service"
+  - "CI Deploy Fieldwork Adapter"
+  - "CI Deploy Notify Processor"
+  - "CI Deploy Notify Stub"
+  - "CI Deploy Exception Manager"
+  - "CI Deploy Toolbox"
+  - "CI Deploy Event Latency Monitor"
+  - "CI Deploy Rabbit Monitor"
+  - "CI Deploy Regional Counts"
+
+- name: "Acceptance Tests"
+  jobs:
+  - "CI Acceptance Tests"
+
+- name: "Whitelodge Deployments"
+  jobs:
+  - "SIT Deploy Infrastructure"
+  - "SIT Deploy Action-Scheduler"
+  - "SIT Deploy Case-API"
+  - "SIT Deploy Case-Processor"
+  - "SIT Deploy UAC QID Service"
+  - "SIT Deploy PubSub Service"
+  - "SIT Deploy Ops Tool"
+  - "SIT Deploy Print File Service"
+  - "SIT Deploy Fieldwork Adapter"
+  - "SIT Deploy Notify Processor"
+  - "SIT Deploy Notify Stub"
+  - "SIT Deploy Exception Manager"
+  - "SIT Deploy Toolbox"
+  - "SIT Deploy Event Latency Monitor"
+  - "SIT Deploy Rabbit Monitor"
+  - "SIT Deploy Regional Counts"
+
+- name: "All"
+  jobs:
+  - build-acceptance-tests-master
+  - build-action-scheduler-master
+  - build-batch-runner-master
+  - build-case-api-master
+  - build-case-processor-master
+  - build-data-exporter-master
+  - build-exception-manager-master
+  - build-fieldwork-adapter-master
+  - build-notify-processor-master 
+  - build-notify-stub-master
+  - build-ops-master
+  - build-performance-tests-master
+  - build-print-file-service-master
+  - build-pubsub-master
+  - build-sample-loader-master
+  - build-toolbox-master
+  - build-uac-qid-service-master
+  - "CI Deploy Infrastructure"
+  - "CI Deploy Action-Scheduler"
+  - "CI Deploy Case-API"
+  - "CI Deploy Case-Processor"
+  - "CI Deploy UAC QID Service"
+  - "CI Deploy PubSub Service"
+  - "CI Deploy Ops Tool"
+  - "CI Deploy Print File Service"
+  - "CI Deploy Fieldwork Adapter"
+  - "CI Deploy Notify Processor"
+  - "CI Deploy Notify Stub"
+  - "CI Deploy Exception Manager"
+  - "CI Deploy Toolbox"
+  - "CI Deploy Event Latency Monitor"
+  - "CI Deploy Rabbit Monitor"
+  - "CI Deploy Regional Counts"
+  - "CI Acceptance Tests"
+  - "SIT Deploy Infrastructure"
+  - "SIT Deploy Action-Scheduler"
+  - "SIT Deploy Case-API"
+  - "SIT Deploy Case-Processor"
+  - "SIT Deploy UAC QID Service"
+  - "SIT Deploy PubSub Service"
+  - "SIT Deploy Ops Tool"
+  - "SIT Deploy Print File Service"
+  - "SIT Deploy Fieldwork Adapter"
+  - "SIT Deploy Notify Processor"
+  - "SIT Deploy Notify Stub"
+  - "SIT Deploy Exception Manager"
+  - "SIT Deploy Toolbox"
+  - "SIT Deploy Event Latency Monitor"
+  - "SIT Deploy Rabbit Monitor"
+  - "SIT Deploy Regional Counts"
+
 resource_types:
 
 - name: slack-notification
@@ -32,144 +148,347 @@ resources:
     uri: git@github.com:ONSdigital/census-rm-terraform.git
     private_key: ((github.service_account_private_key))
 
-- name: batch-runner-repo
+- name: action-scheduler-master
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-action-scheduler.git
+    private_key: ((github.service_account_private_key))
+
+- name: case-api-master
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-case-api.git
+    private_key: ((github.service_account_private_key))
+
+- name: case-processor-master
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-case-processor.git
+    private_key: ((github.service_account_private_key))
+
+- name: print-file-service-master
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-print-file-service
+    private_key: ((github.service_account_private_key))
+
+- name: uac-qid-service-master
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-uac-qid-service.git
+    private_key: ((github.service_account_private_key))
+
+- name: ops-master
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-ops.git
+    private_key: ((github.service_account_private_key))
+
+- name: toolbox-master
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-toolbox.git
+    private_key: ((github.service_account_private_key))
+
+- name: pubsub-master
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-pubsub.git
+    private_key: ((github.service_account_private_key))
+
+- name: qid-batch-runner-master
   type: git
   source:
     uri: git@github.com:ONSdigital/census-rm-qid-batch-runner.git
     private_key: ((github.service_account_private_key))
 
-- name: census-rm-kubernetes-microservices-repo
+- name: sample-loader-master
   type: git
   source:
-    uri: git@github.com:ONSdigital/census-rm-kubernetes.git
+    uri: git@github.com:ONSdigital/census-rm-sample-loader.git
     private_key: ((github.service_account_private_key))
-    paths: [microservices/*]
 
-- name: census-rm-kubernetes-ops-repo
-  type: git
-  source:
-    uri: git@github.com:ONSdigital/census-rm-kubernetes.git
-    private_key: ((github.service_account_private_key))
-    paths: [optional/ops-*]
-
-- name: census-rm-kubernetes-optional-repo
-  type: git
-  source:
-    uri: git@github.com:ONSdigital/census-rm-kubernetes.git
-    private_key: ((github.service_account_private_key))
-    paths: [optional/*]
-
-- name: census-rm-kubernetes-dependencies-repo
-  type: git
-  source:
-    uri: git@github.com:ONSdigital/census-rm-kubernetes.git
-    private_key: ((github.service_account_private_key))
-    paths: [dependencies/*, rabbitmq/*, setup-dependencies.sh]
-
-- name: acceptance-tests-repo
+- name: acceptance-tests-master
   type: git
   source:
     uri: git@github.com:ONSdigital/census-rm-acceptance-tests.git
     private_key: ((github.service_account_private_key))
-    paths: [kubernetes.env, tasks/*]
 
-- name: acceptance-tests-docker-image
+- name: fieldwork-adapter-master
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-fieldwork-adapter.git
+    private_key: ((github.service_account_private_key))
+
+- name: notify-processor-master
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-notify-processor.git
+    private_key: ((github.service_account_private_key))
+
+- name: notify-stub-master
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-notify-stub.git
+    private_key: ((github.service_account_private_key))
+
+- name: data-exporter-master
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-dataexporter.git
+    private_key: ((github.service_account_private_key))
+
+- name: exception-manager-master
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-exception-manager.git
+    private_key: ((github.service_account_private_key))
+
+- name: performance-tests-master
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-performance-tests.git
+    private_key: ((github.service_account_private_key))
+
+# Docker images
+- name: action-scheduler-docker-image-ci
   type: docker-image
   source:
-    repository: eu.gcr.io/census-gcr-rm/rm/census-rm-acceptance-tests
+    repository: ((docker-registry-ci))/rm/census-rm-action-scheduler
     username: _json_key
     password: ((gcp.service_account_json))
 
-- name: action-scheduler-docker-latest
+- name: action-scheduler-docker-image-gcr
   type: docker-image
   source:
-    repository: eu.gcr.io/census-gcr-rm/rm/census-rm-action-scheduler
+    repository: ((docker-registry-gcr))/rm/census-rm-action-scheduler
     username: _json_key
     password: ((gcp.service_account_json))
 
-- name: case-api-docker-latest
+- name: case-api-docker-image-ci
   type: docker-image
   source:
-    repository: eu.gcr.io/census-gcr-rm/rm/census-rm-case-api
+    repository: ((docker-registry-ci))/rm/census-rm-case-api
     username: _json_key
     password: ((gcp.service_account_json))
 
-- name: case-processor-docker-latest
+- name: case-api-docker-image-gcr
   type: docker-image
   source:
-    repository: eu.gcr.io/census-gcr-rm/rm/census-rm-case-processor
+    repository: ((docker-registry-gcr))/rm/census-rm-case-api
     username: _json_key
     password: ((gcp.service_account_json))
 
-- name: uac-qid-service-docker-latest
+- name: case-processor-docker-image-ci
   type: docker-image
   source:
-    repository: eu.gcr.io/census-gcr-rm/rm/census-rm-uac-qid-service
+    repository: ((docker-registry-ci))/rm/census-rm-case-processor
     username: _json_key
     password: ((gcp.service_account_json))
 
-- name: pubsubsvc-docker-latest
+- name: case-processor-docker-image-gcr
   type: docker-image
   source:
-    repository: eu.gcr.io/census-gcr-rm/rm/census-rm-pubsub
+    repository: ((docker-registry-gcr))/rm/census-rm-case-processor
     username: _json_key
     password: ((gcp.service_account_json))
 
-- name: ops-docker-latest
+- name: print-file-service-docker-image-ci
   type: docker-image
   source:
-    repository: eu.gcr.io/census-gcr-rm/rm/census-rm-ops
+    repository: ((docker-registry-ci))/rm/census-rm-print-file-service
     username: _json_key
     password: ((gcp.service_account_json))
 
-- name: qid-batch-runner-docker-latest
+- name: print-file-service-docker-image-gcr
   type: docker-image
   source:
-    repository: eu.gcr.io/census-gcr-rm/rm/census-rm-qid-batch-runner
+    repository: ((docker-registry-gcr))/rm/census-rm-print-file-service
     username: _json_key
     password: ((gcp.service_account_json))
 
-- name: print-file-service-docker-latest
+- name: uac-qid-service-docker-image-ci
   type: docker-image
   source:
-    repository: eu.gcr.io/census-gcr-rm/rm/census-rm-print-file-service
+    repository: ((docker-registry-ci))/rm/census-rm-uac-qid-service
     username: _json_key
     password: ((gcp.service_account_json))
 
-- name: fieldwork-adapter-docker-latest
+- name: uac-qid-service-docker-image-gcr
   type: docker-image
   source:
-    repository: eu.gcr.io/census-gcr-rm/rm/census-rm-fieldwork-adapter
+    repository: ((docker-registry-gcr))/rm/census-rm-uac-qid-service
     username: _json_key
     password: ((gcp.service_account_json))
 
-- name: notify-processor-docker-latest
+- name: ops-docker-image-ci
   type: docker-image
   source:
-    repository: eu.gcr.io/census-gcr-rm/rm/census-rm-notify-processor
+    repository: ((docker-registry-ci))/rm/census-rm-ops
     username: _json_key
     password: ((gcp.service_account_json))
 
-- name: notify-stub-docker-latest
+- name: ops-docker-image-gcr
   type: docker-image
   source:
-    repository: eu.gcr.io/census-gcr-rm/rm/census-rm-notify-stub
+    repository: ((docker-registry-gcr))/rm/census-rm-ops
     username: _json_key
     password: ((gcp.service_account_json))
 
-- name: exception-manager-docker-latest
+- name: toolbox-docker-image-ci
   type: docker-image
   source:
-    repository: eu.gcr.io/census-gcr-rm/rm/census-rm-exception-manager
+    repository: ((docker-registry-ci))/rm/census-rm-toolbox
     username: _json_key
     password: ((gcp.service_account_json))
 
-- name: toolbox-docker-latest
+- name: toolbox-docker-image-gcr
   type: docker-image
   source:
-    repository: eu.gcr.io/census-gcr-rm/rm/census-rm-toolbox
+    repository: ((docker-registry-gcr))/rm/census-rm-toolbox
     username: _json_key
     password: ((gcp.service_account_json))
+
+- name: pubsub-docker-image-ci
+  type: docker-image
+  source:
+    repository: ((docker-registry-ci))/rm/census-rm-pubsub
+    username: _json_key
+    password: ((gcp.service_account_json))
+
+- name: pubsub-docker-image-gcr
+  type: docker-image
+  source:
+    repository: ((docker-registry-gcr))/rm/census-rm-pubsub
+    username: _json_key
+    password: ((gcp.service_account_json))
+
+- name: qid-batch-runner-docker-image-ci
+  type: docker-image
+  source:
+    repository: ((docker-registry-ci))/rm/census-rm-qid-batch-runner
+    username: _json_key
+    password: ((gcp.service_account_json))
+
+- name: qid-batch-runner-docker-image-gcr
+  type: docker-image
+  source:
+    repository: ((docker-registry-gcr))/rm/census-rm-qid-batch-runner
+    username: _json_key
+    password: ((gcp.service_account_json))
+
+- name: sample-loader-docker-image-ci
+  type: docker-image
+  source:
+    repository: ((docker-registry-ci))/rm/census-rm-sample-loader
+    username: _json_key
+    password: ((gcp.service_account_json))
+
+- name: sample-loader-docker-image-gcr
+  type: docker-image
+  source:
+    repository: ((docker-registry-gcr))/rm/census-rm-sample-loader
+    username: _json_key
+    password: ((gcp.service_account_json))
+
+- name: acceptance-tests-docker-image-ci
+  type: docker-image
+  source:
+    repository: ((docker-registry-ci))/rm/census-rm-acceptance-tests
+    username: _json_key
+    password: ((gcp.service_account_json))
+
+- name: acceptance-tests-docker-image-gcr
+  type: docker-image
+  source:
+    repository: ((docker-registry-gcr))/rm/census-rm-acceptance-tests
+    username: _json_key
+    password: ((gcp.service_account_json))
+
+- name: fieldwork-adapter-docker-image-ci
+  type: docker-image
+  source:
+    repository: ((docker-registry-ci))/rm/census-rm-fieldwork-adapter
+    username: _json_key
+    password: ((gcp.service_account_json))
+
+- name: fieldwork-adapter-docker-image-gcr
+  type: docker-image
+  source:
+    repository: ((docker-registry-gcr))/rm/census-rm-fieldwork-adapter
+    username: _json_key
+    password: ((gcp.service_account_json))
+
+- name: notify-processor-docker-image-ci
+  type: docker-image
+  source:
+    repository: ((docker-registry-ci))/rm/census-rm-notify-processor
+    username: _json_key
+    password: ((gcp.service_account_json))
+
+- name: notify-processor-docker-image-gcr
+  type: docker-image
+  source:
+    repository: ((docker-registry-gcr))/rm/census-rm-notify-processor
+    username: _json_key
+    password: ((gcp.service_account_json))
+
+- name: notify-stub-docker-image-ci
+  type: docker-image
+  source:
+    repository: ((docker-registry-ci))/rm/census-rm-notify-stub
+    username: _json_key
+    password: ((gcp.service_account_json))
+
+- name: notify-stub-docker-image-gcr
+  type: docker-image
+  source:
+    repository: ((docker-registry-gcr))/rm/census-rm-notify-stub
+    username: _json_key
+    password: ((gcp.service_account_json))
+
+- name: data-exporter-docker-image-ci
+  type: docker-image
+  source:
+    repository: ((docker-registry-ci))/rm/census-rm-data-exporter
+    username: _json_key
+    password: ((gcp.service_account_json))
+
+- name: data-exporter-docker-image-gcr
+  type: docker-image
+  source:
+    repository: ((docker-registry-gcr))/rm/census-rm-data-exporter
+    username: _json_key
+    password: ((gcp.service_account_json))
+
+- name: exception-manager-docker-image-ci
+  type: docker-image
+  source:
+    repository: ((docker-registry-ci))/rm/census-rm-exception-manager
+    username: _json_key
+    password: ((gcp.service_account_json))
+
+- name: exception-manager-docker-image-gcr
+  type: docker-image
+  source:
+    repository: ((docker-registry-gcr))/rm/census-rm-exception-manager
+    username: _json_key
+    password: ((gcp.service_account_json))
+
+- name: performance-tests-docker-image-ci
+  type: docker-image
+  source:
+    repository: ((docker-registry-ci))/rm/census-rm-performance-tests
+    username: _json_key
+    password: ((gcp.service_account_json))
+
+- name: performance-tests-docker-image-gcr
+  type: docker-image
+  source:
+    repository: ((docker-registry-gcr))/rm/census-rm-performance-tests
+    username: _json_key
+    password: ((gcp.service_account_json))
+
 
 templating:
 
@@ -317,27 +636,669 @@ slack_started_alert_ci: &slack_started_alert_ci
           }
       ]
 
+slack_failure_alert_prebuild: &slack_failure_alert_prebuild
+  put: slack-alert
+  params:
+    icon_emoji: ":concourse:"
+    username: Concourse
+    attachments: [
+        {
+            "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+            "title": "$BUILD_JOB_NAME failed",
+            "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+            "fields": [
+                {
+                    "title": "Pipeline",
+                    "value": "$BUILD_PIPELINE_NAME",
+                    "short": true
+                },
+                {
+                    "title": "Build",
+                    "value": "#$BUILD_NAME",
+                    "short": true
+                }
+            ],
+            "color": "#F35A00"
+        }
+    ]
+
+slack_failure_alert_ci: &slack_failure_alert_ci
+  put: slack-alert
+  params:
+    icon_emoji: ":concourse:"
+    username: Concourse
+    attachments: [
+        {
+            "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+            "title": "$BUILD_JOB_NAME failed",
+            "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+            "fields": [
+                {
+                    "title": "Pipeline",
+                    "value": "$BUILD_PIPELINE_NAME",
+                    "short": true
+                },
+                {
+                    "title": "Registry",
+                    "value": "((docker-registry-ci))",
+                    "short": true
+                },
+                {
+                    "title": "Build",
+                    "value": "#$BUILD_NAME",
+                    "short": true
+                }
+            ],
+            "color": "#F35A00"
+        }
+    ]
+
+slack_failure_alert_gcr: &slack_failure_alert_gcr
+  put: slack-alert
+  params:
+    icon_emoji: ":concourse:"
+    username: Concourse
+    attachments: [
+        {
+            "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+            "title": "$BUILD_JOB_NAME failed",
+            "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+            "fields": [
+                {
+                    "title": "Pipeline",
+                    "value": "$BUILD_PIPELINE_NAME",
+                    "short": true
+                },
+                {
+                    "title": "Registry",
+                    "value": "((docker-registry-gcr))",
+                    "short": true
+                },
+
+                {
+                    "title": "Build",
+                    "value": "#$BUILD_NAME",
+                    "short": true
+                }
+            ],
+            "color": "#F35A00"
+        }
+    ]
+
 
 jobs:
 
-# CI
+# Docker Builds
+- name: build-action-scheduler-master
+  serial_groups: [docker-builds]
+  plan:
+  - get: action-scheduler-master
+    trigger: true
+  - task: Build Action Scheduler Image (master)
+    on_failure: *slack_failure_alert_prebuild
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: adoptopenjdk/maven-openjdk11
+      inputs:
+        - name: action-scheduler-master
+      outputs:
+        - name: build
+      run:
+        path: sh
+        args:
+          - -exc
+          - |
+            mkdir -p build/target
+            cd action-scheduler-master
+            mvn package -DskipITs -Ddockerfile.skip
+            cp target/census-rm-*.jar ../build/target
+            cp Dockerfile ../build
+            cp healthcheck.sh ../build
+  - put: action-scheduler-docker-image-ci
+    on_failure: *slack_failure_alert_ci
+    params:
+      build: build
+      tag_file: action-scheduler-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      save: true
+  - put: action-scheduler-docker-image-gcr
+    on_failure: *slack_failure_alert_gcr
+    params:
+      build: build
+      cache_from:
+        - action-scheduler-docker-image-ci
+      tag_file: action-scheduler-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      skip_download: true
+
+- name: build-case-api-master
+  serial_groups: [docker-builds]
+  plan:
+  - get: case-api-master
+    trigger: true
+  - task: Build Case API Image (master)
+    on_failure: *slack_failure_alert_prebuild
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: adoptopenjdk/maven-openjdk11
+      inputs:
+        - name: case-api-master
+      outputs:
+        - name: build
+      run:
+        path: sh
+        args:
+          - -exc
+          - |
+            mkdir -p build/target
+            cd case-api-master
+            mvn package -DskipITs -Ddockerfile.skip
+            cp target/census-rm-*.jar ../build/target
+            cp Dockerfile ../build
+  - put: case-api-docker-image-ci
+    on_failure: *slack_failure_alert_ci
+    params:
+      build: build
+      tag_file: case-api-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      save: true
+  - put: case-api-docker-image-gcr
+    on_failure: *slack_failure_alert_gcr
+    params:
+      build: build
+      cache_from:
+        - case-api-docker-image-ci
+      tag_file: case-api-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      skip_download: true
+
+- name: build-case-processor-master
+  serial_groups: [docker-builds]
+  plan:
+  - get: case-processor-master
+    trigger: true
+  - task: Build Case Processor Image (master)
+    on_failure: *slack_failure_alert_prebuild
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: adoptopenjdk/maven-openjdk11
+      inputs:
+        - name: case-processor-master
+      outputs:
+        - name: build
+      run:
+        path: sh
+        args:
+          - -exc
+          - |
+            mkdir -p build/target
+            cd case-processor-master
+            mvn package -DskipITs -Ddockerfile.skip
+            cp target/census-rm-*.jar ../build/target
+            cp Dockerfile ../build
+            cp healthcheck.sh ../build
+  - put: case-processor-docker-image-ci
+    on_failure: *slack_failure_alert_ci
+    params:
+      build: build
+      tag_file: case-processor-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      save: true
+  - put: case-processor-docker-image-gcr
+    on_failure: *slack_failure_alert_gcr
+    params:
+      build: build
+      cache_from:
+        - case-processor-docker-image-ci
+      tag_file: case-processor-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      skip_download: true
+
+- name: build-print-file-service-master
+  serial_groups: [docker-builds]
+  plan:
+  - get: print-file-service-master
+    trigger: true
+  - put: print-file-service-docker-image-ci
+    on_failure: *slack_failure_alert_ci
+    params:
+      build: print-file-service-master
+      tag_file: print-file-service-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      save: true
+  - put: print-file-service-docker-image-gcr
+    on_failure: *slack_failure_alert_gcr
+    params:
+      build: print-file-service-master
+      cache_from:
+        - print-file-service-docker-image-ci
+      tag_file: print-file-service-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      skip_download: true
+
+- name: build-uac-qid-service-master
+  plan:
+  - get: uac-qid-service-master
+    trigger: true
+  - task: Build UAC QID Service Image (master)
+    on_failure: *slack_failure_alert_prebuild
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: adoptopenjdk/maven-openjdk11
+      inputs:
+        - name: uac-qid-service-master
+      outputs:
+        - name: build
+      run:
+        path: sh
+        args:
+          - -exc
+          - |
+            mkdir -p build/target
+            cd uac-qid-service-master
+            mvn package -DskipITs -Ddockerfile.skip
+            cp target/*.jar ../build/target
+            cp Dockerfile ../build
+  - put: uac-qid-service-docker-image-ci
+    on_failure: *slack_failure_alert_ci
+    params:
+      build: build
+      tag_file: uac-qid-service-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      save: true
+  - put: uac-qid-service-docker-image-gcr
+    on_failure: *slack_failure_alert_gcr
+    params:
+      build: build
+      cache_from:
+        - uac-qid-service-docker-image-ci
+      tag_file: uac-qid-service-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      skip_download: true
+
+- name: build-ops-master
+  serial_groups: [docker-builds]
+  plan:
+  - get: ops-master
+    trigger: true
+  - put: ops-docker-image-ci
+    on_failure: *slack_failure_alert_ci
+    params:
+      build: ops-master
+      tag_file: ops-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      save: true
+  - put: ops-docker-image-gcr
+    on_failure: *slack_failure_alert_gcr
+    params:
+      build: ops-master
+      cache_from:
+        - ops-docker-image-ci
+      tag_file: ops-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      skip_download: true
+
+- name: build-toolbox-master
+  serial_groups: [docker-builds]
+  plan:
+  - get: toolbox-master
+    trigger: true
+  - put: toolbox-docker-image-ci
+    on_failure: *slack_failure_alert_ci
+    params:
+      build: toolbox-master
+      tag_file: toolbox-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      save: true
+  - put: toolbox-docker-image-gcr
+    on_failure: *slack_failure_alert_gcr
+    params:
+      build: toolbox-master
+      cache_from:
+        - toolbox-docker-image-ci
+      tag_file: toolbox-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      skip_download: true
+
+- name: build-pubsub-master
+  serial_groups: [docker-builds]
+  plan:
+  - get: pubsub-master
+    trigger: true
+  - put: pubsub-docker-image-ci
+    on_failure: *slack_failure_alert_ci
+    params:
+      build: pubsub-master
+      tag_file: pubsub-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      save: true
+  - put: pubsub-docker-image-gcr
+    on_failure: *slack_failure_alert_gcr
+    params:
+      build: pubsub-master
+      cache_from:
+        - pubsub-docker-image-ci
+      tag_file: pubsub-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      skip_download: true
+
+- name: build-batch-runner-master
+  serial_groups: [docker-builds]
+  plan:
+  - get: qid-batch-runner-master
+    trigger: true
+  - put: qid-batch-runner-docker-image-ci
+    on_failure: *slack_failure_alert_ci
+    params:
+      build: qid-batch-runner-master
+      tag_file: qid-batch-runner-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      save: true
+  - put: qid-batch-runner-docker-image-gcr
+    on_failure: *slack_failure_alert_gcr
+    params:
+      build: qid-batch-runner-master
+      cache_from:
+        - qid-batch-runner-docker-image-ci
+      tag_file: qid-batch-runner-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      skip_download: true
+
+- name: build-sample-loader-master
+  serial_groups: [docker-builds]
+  plan:
+  - get: sample-loader-master
+    trigger: true
+  - put: sample-loader-docker-image-ci
+    on_failure: *slack_failure_alert_ci
+    params:
+      build: sample-loader-master
+      tag_file: sample-loader-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      save: true
+  - put: sample-loader-docker-image-gcr
+    on_failure: *slack_failure_alert_gcr
+    params:
+      build: sample-loader-master
+      cache_from:
+        - sample-loader-docker-image-ci
+      tag_file: sample-loader-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      skip_download: true
+
+- name: build-acceptance-tests-master
+  serial_groups: [docker-builds]
+  plan:
+  - get: acceptance-tests-master
+    trigger: true
+  - put: acceptance-tests-docker-image-ci
+    on_failure: *slack_failure_alert_ci
+    params:
+      build: acceptance-tests-master
+      tag_file: acceptance-tests-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      save: true
+  - put: acceptance-tests-docker-image-gcr
+    on_failure: *slack_failure_alert_gcr
+    params:
+      build: acceptance-tests-master
+      cache_from:
+        - acceptance-tests-docker-image-ci
+      tag_file: acceptance-tests-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      skip_download: true
+
+- name: build-fieldwork-adapter-master
+  serial_groups: [docker-builds]
+  plan:
+  - get: fieldwork-adapter-master
+    trigger: true
+  - task: Build Fieldwork Adapter Image (master)
+    on_failure: *slack_failure_alert_prebuild
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: adoptopenjdk/maven-openjdk11
+      inputs:
+        - name: fieldwork-adapter-master
+      outputs:
+        - name: build
+      run:
+        path: sh
+        args:
+          - -exc
+          - |
+            mkdir -p build/target
+            cd fieldwork-adapter-master
+            mvn package -DskipITs -Ddockerfile.skip
+            cp target/*.jar ../build/target
+            cp Dockerfile ../build
+            cp healthcheck.sh ../build
+  - put: fieldwork-adapter-docker-image-ci
+    on_failure: *slack_failure_alert_ci
+    params:
+      build: build
+      tag_file: fieldwork-adapter-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      save: true
+  - put: fieldwork-adapter-docker-image-gcr
+    on_failure: *slack_failure_alert_gcr
+    params:
+      build: build
+      cache_from:
+        - fieldwork-adapter-docker-image-ci
+      tag_file: fieldwork-adapter-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      skip_download: true
+
+- name: build-notify-processor-master
+  serial_groups: [docker-builds]
+  plan:
+  - get: notify-processor-master
+    trigger: true
+  - task: Build Notify Processor Image (master)
+    on_failure: *slack_failure_alert_prebuild
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: adoptopenjdk/maven-openjdk11
+      inputs:
+        - name: notify-processor-master
+      outputs:
+        - name: build
+      run:
+        path: sh
+        args:
+          - -exc
+          - |
+            mkdir -p build/target
+            cd notify-processor-master
+            mvn package -DskipITs -Ddockerfile.skip
+            cp target/*.jar ../build/target
+            cp Dockerfile ../build
+            cp healthcheck.sh ../build
+  - put: notify-processor-docker-image-ci
+    on_failure: *slack_failure_alert_ci
+    params:
+      build: build
+      tag_file: notify-processor-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      save: true
+  - put: notify-processor-docker-image-gcr
+    on_failure: *slack_failure_alert_gcr
+    params:
+      build: build
+      cache_from:
+        - notify-processor-docker-image-ci
+      tag_file: notify-processor-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      skip_download: true
+
+- name: build-notify-stub-master
+  serial_groups: [docker-builds]
+  plan:
+  - get: notify-stub-master
+    trigger: true
+  - put: notify-stub-docker-image-ci
+    on_failure: *slack_failure_alert_ci
+    params:
+      build: notify-stub-master
+      tag_file: notify-stub-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      save: true
+  - put: notify-stub-docker-image-gcr
+    on_failure: *slack_failure_alert_gcr
+    params:
+      build: notify-stub-master
+      cache_from:
+        - notify-stub-docker-image-ci
+      tag_file: notify-stub-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      skip_download: true
+
+- name: build-data-exporter-master
+  serial_groups: [docker-builds]
+  plan:
+  - get: data-exporter-master
+    trigger: true
+  - put: data-exporter-docker-image-ci
+    on_failure: *slack_failure_alert_ci
+    params:
+      build: data-exporter-master/docker
+      tag_file: data-exporter-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      save: true
+  - put: data-exporter-docker-image-gcr
+    on_failure: *slack_failure_alert_gcr
+    params:
+      build: data-exporter-master/docker
+      cache_from:
+        - data-exporter-docker-image-ci
+      tag_file: data-exporter-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      skip_download: true
+
+- name: build-exception-manager-master
+  serial_groups: [docker-builds]
+  plan:
+  - get: exception-manager-master
+    trigger: true
+  - task: Build Exception Manager Image (master)
+    on_failure: *slack_failure_alert_prebuild
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: adoptopenjdk/maven-openjdk11
+      inputs:
+        - name: exception-manager-master
+      outputs:
+        - name: build
+      run:
+        path: sh
+        args:
+          - -exc
+          - |
+            mkdir -p build/target
+            cd exception-manager-master
+            mvn package -DskipITs -Ddockerfile.skip
+            cp target/census-rm-*.jar ../build/target
+            cp Dockerfile ../build
+  - put: exception-manager-docker-image-ci
+    on_failure: *slack_failure_alert_ci
+    params:
+      build: build
+      tag_file: exception-manager-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      save: true
+  - put: exception-manager-docker-image-gcr
+    on_failure: *slack_failure_alert_gcr
+    params:
+      build: build
+      cache_from:
+        - exception-manager-docker-image-ci
+      tag_file: exception-manager-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      skip_download: true
+
+- name: build-performance-tests-master
+  serial_groups: [docker-builds]
+  plan:
+  - get: performance-tests-master
+    trigger: true
+  - put: performance-tests-docker-image-ci
+    on_failure: *slack_failure_alert_ci
+    params:
+      build: performance-tests-master
+      tag_file: performance-tests-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      save: true
+  - put: performance-tests-docker-image-gcr
+    on_failure: *slack_failure_alert_gcr
+    params:
+      build: performance-tests-master
+      cache_from:
+        - performance-tests-docker-image-ci
+      tag_file: performance-tests-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      skip_download: true
+
+
+# CI Deployments
 - name: "CI Deploy Infrastructure"
   serial: true
-  serial_groups: [ci-action-scheduler,
-                  ci-case-api, 
-                  ci-case-processor, 
-                  ci-uac-qid-service, 
-                  ci-ops-tool, 
-                  ci-pubsubsvc, 
-                  ci-print-file-service, 
-                  ci-fieldwork-adapter, 
-                  ci-notify-processor, 
-                  ci-notify-stub, 
-                  ci-exception-manager,
-                  ci-toolbox,
-                  ci-eventlatencymonitor,
-                  ci-rabbitmonitor,
-                  ci-regionalcounts]
+  serial_groups: [ci-deploy-infrastructure]
   max_in_flight: 1
   plan:
   - get: census-rm-terraform
@@ -391,15 +1352,18 @@ jobs:
 
 - name: "CI Deploy Action-Scheduler"
   serial: true
-  serial_groups: [ci-action-scheduler]
+  serial_groups: [ci-deploy-infrastructure,
+                  ci-acceptance-tests]
   plan:
   - get: census-rm-terraform
     trigger: true
     passed: ["CI Deploy Infrastructure"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
-  - get: action-scheduler-docker-latest
+  - get: action-scheduler-master
     trigger: true
+    passed: [build-action-scheduler-master]
+  - get: action-scheduler-docker-image-gcr
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -416,20 +1380,23 @@ jobs:
       KUBERNETES_FILE_PREFIX: action-scheduler
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
-      docker-image-resource: action-scheduler-docker-latest,
+      docker-image-resource: action-scheduler-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
 - name: "CI Deploy Case-API"
   serial: true
-  serial_groups: [ci-case-api]
+  serial_groups: [ci-deploy-infrastructure,
+                  ci-acceptance-tests]
   plan:
   - get: census-rm-terraform
     trigger: true
     passed: ["CI Deploy Infrastructure"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
-  - get: case-api-docker-latest
+  - get: case-api-master
     trigger: true
+    passed: [build-case-api-master]
+  - get: case-api-docker-image-gcr
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -446,20 +1413,23 @@ jobs:
       KUBERNETES_FILE_PREFIX: case-api
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
-      docker-image-resource: case-api-docker-latest,
+      docker-image-resource: case-api-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
 - name: "CI Deploy Case-Processor"
   serial: true
-  serial_groups: [ci-case-processor]
+  serial_groups: [ci-deploy-infrastructure,
+                  ci-acceptance-tests]
   plan:
   - get: census-rm-terraform
     trigger: true
     passed: ["CI Deploy Infrastructure"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
-  - get: case-processor-docker-latest
+  - get: case-processor-master
     trigger: true
+    passed: [build-case-processor-master]
+  - get: case-processor-docker-image-gcr
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -476,20 +1446,23 @@ jobs:
       KUBERNETES_FILE_PREFIX: case-processor
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
-      docker-image-resource: case-processor-docker-latest,
+      docker-image-resource: case-processor-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
 - name: "CI Deploy UAC QID Service"
   serial: true
-  serial_groups: [ci-uac-qid-service]
+  serial_groups: [ci-deploy-infrastructure,
+                  ci-acceptance-tests]
   plan:
   - get: census-rm-terraform
     trigger: true
     passed: ["CI Deploy Infrastructure"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
-  - get: uac-qid-service-docker-latest
+  - get: uac-qid-service-master
     trigger: true
+    passed: [build-uac-qid-service-master]
+  - get: uac-qid-service-docker-image-gcr
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -506,20 +1479,23 @@ jobs:
       KUBERNETES_FILE_PREFIX: uac-qid-service
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
-      docker-image-resource: uac-qid-service-docker-latest,
+      docker-image-resource: uac-qid-service-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
 - name: "CI Deploy PubSub Service"
   serial: true
-  serial_groups: [ci-pubsubsvc]
+  serial_groups: [ci-deploy-infrastructure,
+                  ci-acceptance-tests]
   plan:
   - get: census-rm-terraform
     trigger: true
     passed: ["CI Deploy Infrastructure"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
-  - get: pubsubsvc-docker-latest
+  - get: pubsub-master
     trigger: true
+    passed: [build-pubsub-master]
+  - get: pubsub-docker-image-gcr
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -536,20 +1512,23 @@ jobs:
       KUBERNETES_FILE_PREFIX: pubsub
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
-      docker-image-resource: pubsubsvc-docker-latest,
+      docker-image-resource: pubsubsvc-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
 - name: "CI Deploy Ops Tool"
   serial: true
-  serial_groups: [ci-ops-tool]
+  serial_groups: [ci-deploy-infrastructure,
+                  ci-acceptance-tests]
   plan:
   - get: census-rm-terraform
     trigger: true
     passed: ["CI Deploy Infrastructure"]
   - get: census-rm-kubernetes-ops-repo
     trigger: true
-  - get: ops-docker-latest
+  - get: ops-master
     trigger: true
+    passed: [build-ops-master]
+  - get: ops-docker-image-gcr
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -566,20 +1545,23 @@ jobs:
       KUBERNETES_FILE_PREFIX: ops
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
-      docker-image-resource: ops-docker-latest,
+      docker-image-resource: ops-docker-image-gc,
       kubernetes-repo: census-rm-kubernetes-ops-repo}
 
 - name: "CI Deploy Print File Service"
   serial: true
-  serial_groups: [ci-print-file-service]
+  serial_groups: [ci-deploy-infrastructure,
+                  ci-acceptance-tests]
   plan:
   - get: census-rm-terraform
     trigger: true
     passed: ["CI Deploy Infrastructure"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
-  - get: print-file-service-docker-latest
+  - get: print-file-service-master
     trigger: true
+    passed: [build-print-file-service-master]
+  - get: print-file-service-docker-image-gcr
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -596,20 +1578,23 @@ jobs:
       KUBERNETES_FILE_PREFIX: print-file-service
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
-      docker-image-resource: print-file-service-docker-latest,
+      docker-image-resource: print-file-service-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
 - name: "CI Deploy Fieldwork Adapter"
   serial: true
-  serial_groups: [ci-fieldwork-adapter]
+  serial_groups: [ci-deploy-infrastructure,
+                  ci-acceptance-tests]
   plan:
   - get: census-rm-terraform
     trigger: true
     passed: ["CI Deploy Infrastructure"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
-  - get: fieldwork-adapter-docker-latest
+  - get: fieldwork-adapter-master
     trigger: true
+    passed: [build-fieldwork-adapter-master]
+  - get: fieldwork-adapter-service-docker-image-gcr
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -626,20 +1611,23 @@ jobs:
       KUBERNETES_FILE_PREFIX: fieldwork-adapter
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
-      docker-image-resource: fieldwork-adapter-docker-latest,
+      docker-image-resource: fieldwork-adapter-service-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
 - name: "CI Deploy Notify Processor"
   serial: true
-  serial_groups: [ci-notify-processor]
+  serial_groups: [ci-deploy-infrastructure,
+                  ci-acceptance-tests]
   plan:
   - get: census-rm-terraform
     trigger: true
     passed: ["CI Deploy Infrastructure"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
-  - get: notify-processor-docker-latest
+  - get: notify-processor-master
     trigger: true
+    passed: [build-notify-processor-master]
+  - get: notify-processor-service-docker-image-gcr
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -656,20 +1644,23 @@ jobs:
       KUBERNETES_FILE_PREFIX: notify-processor
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
-      docker-image-resource: notify-processor-docker-latest,
+      docker-image-resource: notify-processor-service-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
   
 - name: "CI Deploy Notify Stub"
   serial: true
-  serial_groups: [ci-notify-stub]
+  serial_groups: [ci-deploy-infrastructure,
+                  ci-acceptance-tests]
   plan:
   - get: census-rm-terraform
     trigger: true
     passed: ["CI Deploy Infrastructure"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
-  - get: notify-stub-docker-latest
+  - get: notify-stub-master
     trigger: true
+    passed: [build-notify-stub-master]
+  - get: notify-stub-service-docker-image-gcr
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -686,20 +1677,23 @@ jobs:
       KUBERNETES_FILE_PREFIX: notify-stub
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
-      docker-image-resource: notify-stub-docker-latest,
+      docker-image-resource: notify-stub-service-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
   
 - name: "CI Deploy Exception Manager"
   serial: true
-  serial_groups: [ci-exception-manager]
+  serial_groups: [ci-deploy-infrastructure,
+                  ci-acceptance-tests]
   plan:
   - get: census-rm-terraform
     trigger: true
     passed: ["CI Deploy Infrastructure"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
-  - get: exception-manager-docker-latest
+  - get: exception-manager-master
     trigger: true
+    passed: [build-exception-manager-master]
+  - get: exception-manager-docker-image-gcr
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -716,20 +1710,23 @@ jobs:
       KUBERNETES_FILE_PREFIX: exception-manager
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
-      docker-image-resource: exception-manager-docker-latest,
+      docker-image-resource: exception-manager-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
 - name: "CI Deploy Toolbox"
   serial: true
-  serial_groups: [ci-toolbox]
+  serial_groups: [ci-deploy-infrastructure,
+                  ci-acceptance-tests]
   plan:
   - get: census-rm-terraform
     trigger: true
     passed: ["CI Deploy Infrastructure"]
   - get: census-rm-kubernetes-optional-repo
     trigger: true
-  - get: toolbox-docker-latest
+  - get: toolbox-master
     trigger: true
+    passed: [build-toolbox-master]
+  - get: toolbox-docker-image-gcr
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -746,20 +1743,23 @@ jobs:
       KUBERNETES_FILE_PREFIX: census-rm-toolbox-dev
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
-      docker-image-resource: toolbox-docker-latest,
+      docker-image-resource: toolbox-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-optional-repo}
 
 - name: "CI Deploy Event Latency Monitor"
   serial: true
-  serial_groups: [ci-eventlatencymonitor]
+  serial_groups: [ci-deploy-infrastructure,
+                  ci-acceptance-tests]
   plan:
   - get: census-rm-terraform
     trigger: true
     passed: ["CI Deploy Infrastructure"]
   - get: census-rm-kubernetes-optional-repo
     trigger: true
-  - get: toolbox-docker-latest
+  - get: toolbox-master
     trigger: true
+    passed: [build-toolbox-master]
+  - get: toolbox-docker-image-gcr
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -776,20 +1776,23 @@ jobs:
       KUBERNETES_FILE_PREFIX: eventlatencymonitor-dev
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
-      docker-image-resource: toolbox-docker-latest,
+      docker-image-resource: toolbox-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-optional-repo}
 
 - name: "CI Deploy Rabbit Monitor"
   serial: true
-  serial_groups: [ci-rabbitmonitor]
+  serial_groups: [ci-deploy-infrastructure,
+                  ci-acceptance-tests]
   plan:
   - get: census-rm-terraform
     trigger: true
     passed: ["CI Deploy Infrastructure"]
   - get: census-rm-kubernetes-optional-repo
     trigger: true
-  - get: toolbox-docker-latest
+  - get: toolbox-master
     trigger: true
+    passed: [build-toolbox-master]
+  - get: toolbox-docker-image-gcr
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -806,20 +1809,23 @@ jobs:
       KUBERNETES_FILE_PREFIX: census-rm-toolbox
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
-      docker-image-resource: toolbox-docker-latest,
+      docker-image-resource: toolbox-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-optional-repo}
 
 - name: "CI Deploy Regional Counts"
   serial: true
-  serial_groups: [ci-regionalcounts]
+  serial_groups: [ci-deploy-infrastructure,
+                  ci-acceptance-tests]
   plan:
   - get: census-rm-terraform
     trigger: true
     passed: ["CI Deploy Infrastructure"]
   - get: census-rm-kubernetes-optional-repo
     trigger: true
-  - get: toolbox-docker-latest
+  - get: toolbox-master
     trigger: true
+    passed: [build-toolbox-master]
+  - get: toolbox-docker-image-gcr
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -836,25 +1842,16 @@ jobs:
       KUBERNETES_FILE_PREFIX: regional-counts-dev
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
-      docker-image-resource: toolbox-docker-latest,
+      docker-image-resource: toolbox-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-optional-repo}
+
+
 
 - name: "CI Acceptance Tests"
   serial: true
-  serial_groups: [ci-action-scheduler, 
-                  ci-case-api,
-                  ci-case-processor, 
-                  ci-uac-qid-service, 
-                  ci-pubsubsvc, 
-                  ci-print-file-service, 
-                  ci-fieldwork-adapter, 
-                  ci-notify-processor, 
-                  ci-notify-stub,
-                  ci-exception-manager,
-                  ci-toolbox,
-                  ci-eventlatencymonitor,
-                  ci-rabbitmonitor,
-                  ci-regionalcounts]
+  serial_groups: [ci-deploy-infrastructure,
+                  ci-acceptance-tests,
+                  docker-builds]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -896,68 +1893,45 @@ jobs:
              "CI Deploy Event Latency Monitor",
              "CI Deploy Rabbit Monitor",
              "CI Deploy Regional Counts"]
-  - get: action-scheduler-docker-latest
+  - get: action-scheduler-master
     trigger: true
     passed: ["CI Deploy Action-Scheduler"]
     params:
-      skip_download: true
-  - get: case-api-docker-latest
+  - get: case-api-master
     trigger: true
     passed: ["CI Deploy Case-API"]
-    params:
-      skip_download: true
-  - get: case-processor-docker-latest
+  - get: case-processor-master
     trigger: true
     passed: ["CI Deploy Case-Processor"]
-    params:
-      skip_download: true
-  - get: uac-qid-service-docker-latest
+  - get: uac-qid-service-master
     trigger: true
     passed: ["CI Deploy UAC QID Service"]
-    params:
-      skip_download: true
-  - get: pubsubsvc-docker-latest
+  - get: pubsub-master
     trigger: true
     passed: ["CI Deploy PubSub Service"]
-    params:
-      skip_download: true
-  - get: qid-batch-runner-docker-latest
+  - get: qid-batch-runner-master
     trigger: true
-    params:
-      skip_download: true
-  - get: print-file-service-docker-latest
+  - get: print-file-service-master
     trigger: true
     passed: ["CI Deploy Print File Service"]
-    params:
-      skip_download: true
-  - get: fieldwork-adapter-docker-latest
+  - get: fieldwork-adapter-master
     trigger: true
     passed: ["CI Deploy Fieldwork Adapter"]
-    params:
-      skip_download: true
-  - get: notify-processor-docker-latest
+  - get: notify-processor-master
     trigger: true
     passed: ["CI Deploy Notify Processor"]
-    params:
-      skip_download: true
-  - get: notify-stub-docker-latest
+  - get: notify-stub-master
     trigger: true
     passed: ["CI Deploy Notify Stub"]
-    params:
-      skip_download: true
-  - get: exception-manager-docker-latest
+  - get: exception-manager-master
     trigger: true
     passed: ["CI Deploy Exception Manager"]
-    params:
-      skip_download: true
-  - get: toolbox-docker-latest
+  - get: toolbox-master
     trigger: true
     passed: ["CI Deploy Toolbox",
              "CI Deploy Event Latency Monitor",
              "CI Deploy Rabbit Monitor",
              "CI Deploy Regional Counts"]
-    params:
-      skip_download: true
   - task: "Run Acceptance Tests (in K8s)"
     file: acceptance-tests-repo/tasks/kubectl-run-acceptance-tests.yml
     on_failure: *slack_failure_alert_ci
@@ -970,7 +1944,7 @@ jobs:
     input_mapping: {acceptance-tests-repo: acceptance-tests-repo}
 
 
-# SIT 
+# SIT Deployments
 - name: "SIT Deploy Action-Scheduler"
   serial: true
   serial_groups: [sit-action-scheduler]
