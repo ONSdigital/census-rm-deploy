@@ -1330,7 +1330,23 @@ jobs:
 # CI Deployments
 - name: "CI Deploy Infrastructure"
   serial: true
-  serial_groups: [ci-deploy-infrastructure]
+  serial_groups: [ci-deploy-infrastructure,
+                  ci-acceptance-tests,
+                  action-scheduler-deploy,
+                  case-api-deploy,
+                  case-processor-deploy,
+                  uac-qid-service-deploy,
+                  pubsub-deploy,
+                  print-file-service-deploy,
+                  fieldwork-adapter-deploy,
+                  notify-processor-deploy,
+                  notify-stub-deploy,
+                  exception-manager-deploy,
+                  toolbox-deploy,
+                  eventlatencymonitor-deploy,
+                  rabbitmonitor-deploy,
+                  regional-counts-deploy,
+                  ops-deploy]
   max_in_flight: 1
   plan:
   - get: census-rm-terraform
@@ -1384,8 +1400,7 @@ jobs:
 
 - name: "CI Deploy Action-Scheduler"
   serial: true
-  serial_groups: [ci-deploy-infrastructure,
-                  action-scheduler-build,
+  serial_groups: [action-scheduler-build,
                   action-scheduler-deploy]
   plan:
   - get: census-rm-terraform
@@ -1418,8 +1433,7 @@ jobs:
 
 - name: "CI Deploy Case-API"
   serial: true
-  serial_groups: [ci-deploy-infrastructure,
-                  case-api-build,
+  serial_groups: [case-api-build,
                   case-api-deploy]
   plan:
   - get: census-rm-terraform
@@ -1452,8 +1466,7 @@ jobs:
 
 - name: "CI Deploy Case-Processor"
   serial: true
-  serial_groups: [ci-deploy-infrastructure,
-                  case-processor-build,
+  serial_groups: [case-processor-build,
                   case-processor-deploy]
   plan:
   - get: census-rm-terraform
@@ -1486,8 +1499,7 @@ jobs:
 
 - name: "CI Deploy UAC QID Service"
   serial: true
-  serial_groups: [ci-deploy-infrastructure,
-                  uac-qid-service-build,
+  serial_groups: [uac-qid-service-build,
                   uac-qid-service-deploy]
   plan:
   - get: census-rm-terraform
@@ -1520,8 +1532,7 @@ jobs:
 
 - name: "CI Deploy PubSub Service"
   serial: true
-  serial_groups: [ci-deploy-infrastructure,
-                  pubsub-build,
+  serial_groups: [pubsub-build,
                   pubsub-deploy]
   plan:
   - get: census-rm-terraform
@@ -1554,8 +1565,7 @@ jobs:
 
 - name: "CI Deploy Ops Tool"
   serial: true
-  serial_groups: [ci-deploy-infrastructure,
-                  ops-build,
+  serial_groups: [ops-build,
                   ops-deploy]
   plan:
   - get: census-rm-terraform
@@ -1588,8 +1598,7 @@ jobs:
 
 - name: "CI Deploy Print File Service"
   serial: true
-  serial_groups: [ci-deploy-infrastructure,
-                  print-file-service-build,
+  serial_groups: [print-file-service-build,
                   print-file-service-deploy]
   plan:
   - get: census-rm-terraform
@@ -1622,8 +1631,7 @@ jobs:
 
 - name: "CI Deploy Fieldwork Adapter"
   serial: true
-  serial_groups: [ci-deploy-infrastructure,
-                  fieldwork-adapter-build,
+  serial_groups: [fieldwork-adapter-build,
                   fieldwork-adapter-deploy]
   plan:
   - get: census-rm-terraform
@@ -1656,8 +1664,7 @@ jobs:
 
 - name: "CI Deploy Notify Processor"
   serial: true
-  serial_groups: [ci-deploy-infrastructure,
-                  notify-processor-build,
+  serial_groups: [notify-processor-build,
                   notify-processor-deploy]
   plan:
   - get: census-rm-terraform
@@ -1690,8 +1697,7 @@ jobs:
   
 - name: "CI Deploy Notify Stub"
   serial: true
-  serial_groups: [ci-deploy-infrastructure,
-                  notify-stub-build,
+  serial_groups: [notify-stub-build,
                   notify-stub-deploy]
   plan:
   - get: census-rm-terraform
@@ -1724,8 +1730,7 @@ jobs:
   
 - name: "CI Deploy Exception Manager"
   serial: true
-  serial_groups: [ci-deploy-infrastructure,
-                  exception-manager-build,
+  serial_groups: [exception-manager-build,
                   exception-manager-deploy]
   plan:
   - get: census-rm-terraform
@@ -1758,8 +1763,7 @@ jobs:
 
 - name: "CI Deploy Toolbox"
   serial: true
-  serial_groups: [ci-deploy-infrastructure,
-                  toolbox-build,
+  serial_groups: [toolbox-build,
                   toolbox-deploy]
   plan:
   - get: census-rm-terraform
@@ -1792,8 +1796,7 @@ jobs:
 
 - name: "CI Deploy Event Latency Monitor"
   serial: true
-  serial_groups: [ci-deploy-infrastructure,
-                  toolbox-build,
+  serial_groups: [toolbox-build,
                   eventlatencymonitor-deploy]
   plan:
   - get: census-rm-terraform
@@ -1826,8 +1829,7 @@ jobs:
 
 - name: "CI Deploy Rabbit Monitor"
   serial: true
-  serial_groups: [ci-deploy-infrastructure,
-                  toolbox-build,
+  serial_groups: [toolbox-build,
                   rabbitmonitor-deploy]
   plan:
   - get: census-rm-terraform
@@ -1860,8 +1862,7 @@ jobs:
 
 - name: "CI Deploy Regional Counts"
   serial: true
-  serial_groups: [ci-deploy-infrastructure,
-                  toolbox-build,
+  serial_groups: [toolbox-build,
                   regional-counts-deploy]
   plan:
   - get: census-rm-terraform
