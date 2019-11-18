@@ -2,23 +2,23 @@
 groups:
 - name: "Docker Builds"
   jobs:
-  - build-acceptance-tests-master
-  - build-action-scheduler-master
-  - build-batch-runner-master
-  - build-case-api-master
-  - build-case-processor-master
-  - build-data-exporter-master
-  - build-exception-manager-master
-  - build-fieldwork-adapter-master
-  - build-notify-processor-master 
-  - build-notify-stub-master
-  - build-ops-master
-  - build-performance-tests-master
-  - build-print-file-service-master
-  - build-pubsub-master
-  - build-sample-loader-master
-  - build-toolbox-master
-  - build-uac-qid-service-master
+  - "Build Acceptance Tests Latest"
+  - "Build Action Scheduler Latest"
+  - "Build QID Batch Runner Latest"
+  - "Build Case API Latest"
+  - "Build Case Processor Latest"
+  - "Build Data Exporter Latest"
+  - "Build Exception Manager Latest"
+  - "Build Fieldwork Adapter Latest"
+  - "Build Notify Processor Latest"
+  - "Build Notify Stub Latest"
+  - "Build Ops Latest"
+  - "Build Performance Tests Latest"
+  - "Build Print File Service Latest"
+  - "Build PubSub Latest"
+  - "Build Sample Loader Latest"
+  - "Build Toolbox Latest"
+  - "Build UAC QID Service Latest"
 
 - name: "CI Deployments"
   jobs:
@@ -39,46 +39,46 @@ groups:
   - "CI Deploy Rabbit Monitor"
   - "CI Deploy Regional Counts"
 
-- name: "Acceptance Tests"
+- name: "CI Acceptance Tests"
   jobs:
   - "CI Acceptance Tests"
 
 - name: "Whitelodge Deployments"
   jobs:
-  - "SIT Deploy Action-Scheduler"
-  - "SIT Deploy Case-API"
-  - "SIT Deploy Case-Processor"
-  - "SIT Deploy UAC QID Service"
-  - "SIT Deploy PubSub Service"
-  - "SIT Deploy Ops Tool"
-  - "SIT Deploy Print File Service"
-  - "SIT Deploy Fieldwork Adapter"
-  - "SIT Deploy Notify Processor"
-  - "SIT Deploy Exception Manager"
-  - "SIT Deploy Toolbox"
-  - "SIT Deploy Event Latency Monitor"
-  - "SIT Deploy Rabbit Monitor"
-  - "SIT Deploy Regional Counts"
+  - "WL Deploy Action-Scheduler"
+  - "WL Deploy Case-API"
+  - "WL Deploy Case-Processor"
+  - "WL Deploy UAC QID Service"
+  - "WL Deploy PubSub Service"
+  - "WL Deploy Ops Tool"
+  - "WL Deploy Print File Service"
+  - "WL Deploy Fieldwork Adapter"
+  - "WL Deploy Notify Processor"
+  - "WL Deploy Exception Manager"
+  - "WL Deploy Toolbox"
+  - "WL Deploy Event Latency Monitor"
+  - "WL Deploy Rabbit Monitor"
+  - "WL Deploy Regional Counts"
 
 - name: "Overview"
   jobs:
-  - build-acceptance-tests-master
-  - build-action-scheduler-master
-  - build-batch-runner-master
-  - build-case-api-master
-  - build-case-processor-master
-  - build-data-exporter-master
-  - build-exception-manager-master
-  - build-fieldwork-adapter-master
-  - build-notify-processor-master 
-  - build-notify-stub-master
-  - build-ops-master
-  - build-performance-tests-master
-  - build-print-file-service-master
-  - build-pubsub-master
-  - build-sample-loader-master
-  - build-toolbox-master
-  - build-uac-qid-service-master
+  - "Build Acceptance Tests Latest"
+  - "Build Action Scheduler Latest"
+  - "Build QID Batch Runner Latest"
+  - "Build Case API Latest"
+  - "Build Case Processor Latest"
+  - "Build Data Exporter Latest"
+  - "Build Exception Manager Latest"
+  - "Build Fieldwork Adapter Latest"
+  - "Build Notify Processor Latest"
+  - "Build Notify Stub Latest"
+  - "Build Ops Latest"
+  - "Build Performance Tests Latest"
+  - "Build Print File Service Latest"
+  - "Build PubSub Latest"
+  - "Build Sample Loader Latest"
+  - "Build Toolbox Latest"
+  - "Build UAC QID Service Latest"
   - "CI Deploy Infrastructure"
   - "CI Deploy Action-Scheduler"
   - "CI Deploy Case-API"
@@ -96,20 +96,20 @@ groups:
   - "CI Deploy Rabbit Monitor"
   - "CI Deploy Regional Counts"
   - "CI Acceptance Tests"
-  - "SIT Deploy Action-Scheduler"
-  - "SIT Deploy Case-API"
-  - "SIT Deploy Case-Processor"
-  - "SIT Deploy UAC QID Service"
-  - "SIT Deploy PubSub Service"
-  - "SIT Deploy Ops Tool"
-  - "SIT Deploy Print File Service"
-  - "SIT Deploy Fieldwork Adapter"
-  - "SIT Deploy Notify Processor"
-  - "SIT Deploy Exception Manager"
-  - "SIT Deploy Toolbox"
-  - "SIT Deploy Event Latency Monitor"
-  - "SIT Deploy Rabbit Monitor"
-  - "SIT Deploy Regional Counts"
+  - "WL Deploy Action-Scheduler"
+  - "WL Deploy Case-API"
+  - "WL Deploy Case-Processor"
+  - "WL Deploy UAC QID Service"
+  - "WL Deploy PubSub Service"
+  - "WL Deploy Ops Tool"
+  - "WL Deploy Print File Service"
+  - "WL Deploy Fieldwork Adapter"
+  - "WL Deploy Notify Processor"
+  - "WL Deploy Exception Manager"
+  - "WL Deploy Toolbox"
+  - "WL Deploy Event Latency Monitor"
+  - "WL Deploy Rabbit Monitor"
+  - "WL Deploy Regional Counts"
 
 resource_types:
 
@@ -760,7 +760,7 @@ templating:
 jobs:
 
 # Docker Builds
-- name: build-action-scheduler-master
+- name: "Build Action Scheduler Latest"
   serial_groups: [docker-builds]
   plan:
   - get: action-scheduler-master
@@ -807,7 +807,7 @@ jobs:
     get_params:
       skip_download: true
 
-- name: build-case-api-master
+- name: "Build Case API Latest"
   serial_groups: [docker-builds]
   plan:
   - get: case-api-master
@@ -853,7 +853,7 @@ jobs:
     get_params:
       skip_download: true
 
-- name: build-case-processor-master
+- name: "Build Case Processor Latest"
   serial_groups: [docker-builds]
   plan:
   - get: case-processor-master
@@ -900,7 +900,7 @@ jobs:
     get_params:
       skip_download: true
 
-- name: build-print-file-service-master
+- name: "Build Print File Service Latest"
   serial_groups: [docker-builds]
   plan:
   - get: print-file-service-master
@@ -924,7 +924,7 @@ jobs:
     get_params:
       skip_download: true
 
-- name: build-uac-qid-service-master
+- name: "Build UAC QID Service Latest"
   plan:
   - get: uac-qid-service-master
     trigger: true
@@ -969,7 +969,7 @@ jobs:
     get_params:
       skip_download: true
 
-- name: build-ops-master
+- name: "Build Ops Latest"
   serial_groups: [docker-builds]
   plan:
   - get: ops-master
@@ -993,7 +993,7 @@ jobs:
     get_params:
       skip_download: true
 
-- name: build-toolbox-master
+- name: "Build Toolbox Latest"
   serial_groups: [docker-builds]
   plan:
   - get: toolbox-master
@@ -1017,7 +1017,7 @@ jobs:
     get_params:
       skip_download: true
 
-- name: build-pubsub-master
+- name: "Build PubSub Latest"
   serial_groups: [docker-builds]
   plan:
   - get: pubsub-master
@@ -1041,7 +1041,7 @@ jobs:
     get_params:
       skip_download: true
 
-- name: build-batch-runner-master
+- name: "Build QID Batch Runner Latest"
   serial_groups: [docker-builds]
   plan:
   - get: qid-batch-runner-master
@@ -1065,7 +1065,7 @@ jobs:
     get_params:
       skip_download: true
 
-- name: build-sample-loader-master
+- name: "Build Sample Loader Latest"
   serial_groups: [docker-builds]
   plan:
   - get: sample-loader-master
@@ -1089,7 +1089,7 @@ jobs:
     get_params:
       skip_download: true
 
-- name: build-acceptance-tests-master
+- name: "Build Acceptance Tests Latest"
   serial_groups: [docker-builds]
   plan:
   - get: acceptance-tests-master
@@ -1113,7 +1113,7 @@ jobs:
     get_params:
       skip_download: true
 
-- name: build-fieldwork-adapter-master
+- name: "Build Fieldwork Adapter Latest"
   serial_groups: [docker-builds]
   plan:
   - get: fieldwork-adapter-master
@@ -1160,7 +1160,7 @@ jobs:
     get_params:
       skip_download: true
 
-- name: build-notify-processor-master
+- name: "Build Notify Processor Latest"
   serial_groups: [docker-builds]
   plan:
   - get: notify-processor-master
@@ -1207,7 +1207,7 @@ jobs:
     get_params:
       skip_download: true
 
-- name: build-notify-stub-master
+- name: "Build Notify Stub Latest"
   serial_groups: [docker-builds]
   plan:
   - get: notify-stub-master
@@ -1231,7 +1231,7 @@ jobs:
     get_params:
       skip_download: true
 
-- name: build-data-exporter-master
+- name: "Build Data Exporter Latest"
   serial_groups: [docker-builds]
   plan:
   - get: data-exporter-master
@@ -1255,7 +1255,7 @@ jobs:
     get_params:
       skip_download: true
 
-- name: build-exception-manager-master
+- name: "Build Exception Manager Latest"
   serial_groups: [docker-builds]
   plan:
   - get: exception-manager-master
@@ -1301,7 +1301,7 @@ jobs:
     get_params:
       skip_download: true
 
-- name: build-performance-tests-master
+- name: "Build Performance Tests Latest"
   serial_groups: [docker-builds]
   plan:
   - get: performance-tests-master
@@ -1393,7 +1393,7 @@ jobs:
     trigger: true
   - get: action-scheduler-master
     trigger: true
-    passed: [build-action-scheduler-master]
+    passed: ["Build Action Scheduler Latest"]
   - get: action-scheduler-docker-image-gcr
     params:
       skip_download: true
@@ -1426,7 +1426,7 @@ jobs:
     trigger: true
   - get: case-api-master
     trigger: true
-    passed: [build-case-api-master]
+    passed: ["Build Case API Latest"]
   - get: case-api-docker-image-gcr
     params:
       skip_download: true
@@ -1459,7 +1459,7 @@ jobs:
     trigger: true
   - get: case-processor-master
     trigger: true
-    passed: [build-case-processor-master]
+    passed: ["Build Case Processor Latest"]
   - get: case-processor-docker-image-gcr
     params:
       skip_download: true
@@ -1492,7 +1492,7 @@ jobs:
     trigger: true
   - get: uac-qid-service-master
     trigger: true
-    passed: [build-uac-qid-service-master]
+    passed: ["Build UAC QID Service Latest"]
   - get: uac-qid-service-docker-image-gcr
     params:
       skip_download: true
@@ -1525,7 +1525,7 @@ jobs:
     trigger: true
   - get: pubsub-master
     trigger: true
-    passed: [build-pubsub-master]
+    passed: ["Build PubSub Latest"]
   - get: pubsub-docker-image-gcr
     params:
       skip_download: true
@@ -1558,7 +1558,7 @@ jobs:
     trigger: true
   - get: ops-master
     trigger: true
-    passed: [build-ops-master]
+    passed: ["Build Ops Latest"]
   - get: ops-docker-image-gcr
     params:
       skip_download: true
@@ -1591,7 +1591,7 @@ jobs:
     trigger: true
   - get: print-file-service-master
     trigger: true
-    passed: [build-print-file-service-master]
+    passed: ["Build Print File Service Latest"]
   - get: print-file-service-docker-image-gcr
     params:
       skip_download: true
@@ -1624,7 +1624,7 @@ jobs:
     trigger: true
   - get: fieldwork-adapter-master
     trigger: true
-    passed: [build-fieldwork-adapter-master]
+    passed: ["Build Fieldwork Adapter Latest"]
   - get: fieldwork-adapter-docker-image-gcr
     params:
       skip_download: true
@@ -1657,7 +1657,7 @@ jobs:
     trigger: true
   - get: notify-processor-master
     trigger: true
-    passed: [build-notify-processor-master]
+    passed: ["Build Notify Processor Latest"]
   - get: notify-processor-docker-image-gcr
     params:
       skip_download: true
@@ -1690,7 +1690,7 @@ jobs:
     trigger: true
   - get: notify-stub-master
     trigger: true
-    passed: [build-notify-stub-master]
+    passed: ["Build Notify Stub Latest"]
   - get: notify-stub-docker-image-gcr
     params:
       skip_download: true
@@ -1723,7 +1723,7 @@ jobs:
     trigger: true
   - get: exception-manager-master
     trigger: true
-    passed: [build-exception-manager-master]
+    passed: ["Build Exception Manager Latest"]
   - get: exception-manager-docker-image-gcr
     params:
       skip_download: true
@@ -1756,7 +1756,7 @@ jobs:
     trigger: true
   - get: toolbox-master
     trigger: true
-    passed: [build-toolbox-master]
+    passed: ["Build Toolbox Latest"]
   - get: toolbox-docker-image-gcr
     params:
       skip_download: true
@@ -1789,7 +1789,7 @@ jobs:
     trigger: true
   - get: toolbox-master
     trigger: true
-    passed: [build-toolbox-master]
+    passed: ["Build Toolbox Latest"]
   - get: toolbox-docker-image-gcr
     params:
       skip_download: true
@@ -1822,7 +1822,7 @@ jobs:
     trigger: true
   - get: toolbox-master
     trigger: true
-    passed: [build-toolbox-master]
+    passed: ["Build Toolbox Latest"]
   - get: toolbox-docker-image-gcr
     params:
       skip_download: true
@@ -1855,7 +1855,7 @@ jobs:
     trigger: true
   - get: toolbox-master
     trigger: true
-    passed: [build-toolbox-master]
+    passed: ["Build Toolbox Latest"]
   - get: toolbox-docker-image-gcr
     params:
       skip_download: true
@@ -1974,8 +1974,8 @@ jobs:
     input_mapping: {acceptance-tests-repo: acceptance-tests-repo}
 
 
-# SIT Deployments
-- name: "SIT Deploy Action-Scheduler"
+# WL Deployments
+- name: "WL Deploy Action-Scheduler"
   serial: true
   serial_groups: [sit-action-scheduler]
   plan:
@@ -2008,7 +2008,7 @@ jobs:
       docker-image-resource: action-scheduler-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
-- name: "SIT Deploy Print File Service"
+- name: "WL Deploy Print File Service"
   serial: true
   serial_groups: [sit-print-file-service]
   plan:
@@ -2041,7 +2041,7 @@ jobs:
       docker-image-resource: print-file-service-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
-- name: "SIT Deploy Case-API"
+- name: "WL Deploy Case-API"
   serial: true
   serial_groups: [sit-case-api]
   plan:
@@ -2074,7 +2074,7 @@ jobs:
       docker-image-resource: case-api-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
-- name: "SIT Deploy Case-Processor"
+- name: "WL Deploy Case-Processor"
   serial: true
   serial_groups: [sit-case-processor]
   plan:
@@ -2107,7 +2107,7 @@ jobs:
       docker-image-resource: case-processor-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
-- name: "SIT Deploy UAC QID Service"
+- name: "WL Deploy UAC QID Service"
   serial: true
   serial_groups: [sit-uac-qid-service]
   plan:
@@ -2140,7 +2140,7 @@ jobs:
       docker-image-resource: uac-qid-service-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
-- name: "SIT Deploy PubSub Service"
+- name: "WL Deploy PubSub Service"
   serial: true
   serial_groups: [sit-pubsubsvc]
   plan:
@@ -2173,7 +2173,7 @@ jobs:
       docker-image-resource: pubsub-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
-- name: "SIT Deploy Ops Tool"
+- name: "WL Deploy Ops Tool"
   serial: true
   serial_groups: [sit-ops-tool]
   plan:
@@ -2204,7 +2204,7 @@ jobs:
       docker-image-resource: ops-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-ops-repo}
 
-- name: "SIT Deploy Fieldwork Adapter"
+- name: "WL Deploy Fieldwork Adapter"
   serial: true
   serial_groups: [sit-fieldwork-adapter]
   plan:
@@ -2237,7 +2237,7 @@ jobs:
       docker-image-resource: fieldwork-adapter-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
-- name: "SIT Deploy Notify Processor"
+- name: "WL Deploy Notify Processor"
   serial: true
   serial_groups: [sit-notify-processor]
   plan:
@@ -2270,7 +2270,7 @@ jobs:
       docker-image-resource: notify-processor-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
-- name: "SIT Deploy Exception Manager"
+- name: "WL Deploy Exception Manager"
   serial: true
   serial_groups: [sit-exception-manager]
   plan:
@@ -2303,7 +2303,7 @@ jobs:
       docker-image-resource: exception-manager-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
-- name: "SIT Deploy Toolbox"
+- name: "WL Deploy Toolbox"
   serial: true
   serial_groups: [sit-toolbox]
   plan:
@@ -2336,7 +2336,7 @@ jobs:
       docker-image-resource: toolbox-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-optional-repo}
 
-- name: "SIT Deploy Event Latency Monitor"
+- name: "WL Deploy Event Latency Monitor"
   serial: true
   serial_groups: [sit-event-latency-monitor]
   plan:
@@ -2369,7 +2369,7 @@ jobs:
       docker-image-resource: toolbox-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-optional-repo}
 
-- name: "SIT Deploy Rabbit Monitor"
+- name: "WL Deploy Rabbit Monitor"
   serial: true
   serial_groups: [sit-rabbitmonitor]
   plan:
@@ -2402,7 +2402,7 @@ jobs:
       docker-image-resource: toolbox-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-optional-repo}
 
-- name: "SIT Deploy Regional Counts"
+- name: "WL Deploy Regional Counts"
   serial: true
   serial_groups: [sit-regional-counts]
   plan:
