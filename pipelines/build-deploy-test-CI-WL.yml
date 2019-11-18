@@ -577,12 +577,12 @@ templating:
                     },
                     {
                         "title": "Environment",
-                        "value": "((sit-gcp-environment-name))",
+                        "value": "((wl-gcp-environment-name))",
                         "short": true
                     },
                     {
                         "title": "Project",
-                        "value": "((sit-gcp-project-name))",
+                        "value": "((wl-gcp-project-name))",
                         "short": true
                     },
                     {
@@ -761,7 +761,7 @@ jobs:
 
 # Docker Builds
 - name: "Build Action Scheduler Latest"
-  serial_groups: [docker-builds]
+  serial_groups: [action-scheduler-build]
   plan:
   - get: action-scheduler-master
     trigger: true
@@ -808,7 +808,7 @@ jobs:
       skip_download: true
 
 - name: "Build Case API Latest"
-  serial_groups: [docker-builds]
+  serial_groups: [case-api-build]
   plan:
   - get: case-api-master
     trigger: true
@@ -854,7 +854,7 @@ jobs:
       skip_download: true
 
 - name: "Build Case Processor Latest"
-  serial_groups: [docker-builds]
+  serial_groups: [case-processor-build]
   plan:
   - get: case-processor-master
     trigger: true
@@ -901,7 +901,7 @@ jobs:
       skip_download: true
 
 - name: "Build Print File Service Latest"
-  serial_groups: [docker-builds]
+  serial_groups: [print-file-service-build]
   plan:
   - get: print-file-service-master
     trigger: true
@@ -925,6 +925,7 @@ jobs:
       skip_download: true
 
 - name: "Build UAC QID Service Latest"
+  serial_groups: [uac-qid-service-build]
   plan:
   - get: uac-qid-service-master
     trigger: true
@@ -970,7 +971,7 @@ jobs:
       skip_download: true
 
 - name: "Build Ops Latest"
-  serial_groups: [docker-builds]
+  serial_groups: [ops-build]
   plan:
   - get: ops-master
     trigger: true
@@ -994,7 +995,7 @@ jobs:
       skip_download: true
 
 - name: "Build Toolbox Latest"
-  serial_groups: [docker-builds]
+  serial_groups: [toolbox-build]
   plan:
   - get: toolbox-master
     trigger: true
@@ -1018,7 +1019,7 @@ jobs:
       skip_download: true
 
 - name: "Build PubSub Latest"
-  serial_groups: [docker-builds]
+  serial_groups: [pubsub-build]
   plan:
   - get: pubsub-master
     trigger: true
@@ -1042,7 +1043,7 @@ jobs:
       skip_download: true
 
 - name: "Build QID Batch Runner Latest"
-  serial_groups: [docker-builds]
+  serial_groups: [qid-batch-runner-build]
   plan:
   - get: qid-batch-runner-master
     trigger: true
@@ -1066,7 +1067,7 @@ jobs:
       skip_download: true
 
 - name: "Build Sample Loader Latest"
-  serial_groups: [docker-builds]
+  serial_groups: [sample-loader-build]
   plan:
   - get: sample-loader-master
     trigger: true
@@ -1090,7 +1091,7 @@ jobs:
       skip_download: true
 
 - name: "Build Acceptance Tests Latest"
-  serial_groups: [docker-builds]
+  serial_groups: [acceptance-tests-build]
   plan:
   - get: acceptance-tests-master
     trigger: true
@@ -1114,7 +1115,7 @@ jobs:
       skip_download: true
 
 - name: "Build Fieldwork Adapter Latest"
-  serial_groups: [docker-builds]
+  serial_groups: [fieldwork-adapter-build]
   plan:
   - get: fieldwork-adapter-master
     trigger: true
@@ -1161,7 +1162,7 @@ jobs:
       skip_download: true
 
 - name: "Build Notify Processor Latest"
-  serial_groups: [docker-builds]
+  serial_groups: [notify-processor-build]
   plan:
   - get: notify-processor-master
     trigger: true
@@ -1208,7 +1209,7 @@ jobs:
       skip_download: true
 
 - name: "Build Notify Stub Latest"
-  serial_groups: [docker-builds]
+  serial_groups: [notify-stub-build]
   plan:
   - get: notify-stub-master
     trigger: true
@@ -1232,7 +1233,7 @@ jobs:
       skip_download: true
 
 - name: "Build Data Exporter Latest"
-  serial_groups: [docker-builds]
+  serial_groups: [data-exporter-build]
   plan:
   - get: data-exporter-master
     trigger: true
@@ -1256,7 +1257,7 @@ jobs:
       skip_download: true
 
 - name: "Build Exception Manager Latest"
-  serial_groups: [docker-builds]
+  serial_groups: [exception-manager-build]
   plan:
   - get: exception-manager-master
     trigger: true
@@ -1302,7 +1303,7 @@ jobs:
       skip_download: true
 
 - name: "Build Performance Tests Latest"
-  serial_groups: [docker-builds]
+  serial_groups: [performance-tests-build]
   plan:
   - get: performance-tests-master
     trigger: true
@@ -1384,7 +1385,8 @@ jobs:
 - name: "CI Deploy Action-Scheduler"
   serial: true
   serial_groups: [ci-deploy-infrastructure,
-                  ci-acceptance-tests]
+                  action-scheduler-build,
+                  action-scheduler-deploy]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -1417,7 +1419,8 @@ jobs:
 - name: "CI Deploy Case-API"
   serial: true
   serial_groups: [ci-deploy-infrastructure,
-                  ci-acceptance-tests]
+                  case-api-build,
+                  case-api-deploy]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -1450,7 +1453,8 @@ jobs:
 - name: "CI Deploy Case-Processor"
   serial: true
   serial_groups: [ci-deploy-infrastructure,
-                  ci-acceptance-tests]
+                  case-processor-build,
+                  case-processor-deploy]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -1483,7 +1487,8 @@ jobs:
 - name: "CI Deploy UAC QID Service"
   serial: true
   serial_groups: [ci-deploy-infrastructure,
-                  ci-acceptance-tests]
+                  uac-qid-service-build,
+                  uac-qid-service-deploy]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -1516,7 +1521,8 @@ jobs:
 - name: "CI Deploy PubSub Service"
   serial: true
   serial_groups: [ci-deploy-infrastructure,
-                  ci-acceptance-tests]
+                  pubsub-build,
+                  pubsub-deploy]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -1549,7 +1555,8 @@ jobs:
 - name: "CI Deploy Ops Tool"
   serial: true
   serial_groups: [ci-deploy-infrastructure,
-                  ci-acceptance-tests]
+                  ops-build,
+                  ops-deploy]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -1582,7 +1589,8 @@ jobs:
 - name: "CI Deploy Print File Service"
   serial: true
   serial_groups: [ci-deploy-infrastructure,
-                  ci-acceptance-tests]
+                  print-file-service-build,
+                  print-file-service-deploy]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -1615,7 +1623,8 @@ jobs:
 - name: "CI Deploy Fieldwork Adapter"
   serial: true
   serial_groups: [ci-deploy-infrastructure,
-                  ci-acceptance-tests]
+                  fieldwork-adapter-build,
+                  fieldwork-adapter-deploy]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -1648,7 +1657,8 @@ jobs:
 - name: "CI Deploy Notify Processor"
   serial: true
   serial_groups: [ci-deploy-infrastructure,
-                  ci-acceptance-tests]
+                  notify-processor-build,
+                  notify-processor-deploy]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -1681,7 +1691,8 @@ jobs:
 - name: "CI Deploy Notify Stub"
   serial: true
   serial_groups: [ci-deploy-infrastructure,
-                  ci-acceptance-tests]
+                  notify-stub-build,
+                  notify-stub-deploy]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -1714,7 +1725,8 @@ jobs:
 - name: "CI Deploy Exception Manager"
   serial: true
   serial_groups: [ci-deploy-infrastructure,
-                  ci-acceptance-tests]
+                  exception-manager-build,
+                  exception-manager-deploy]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -1747,7 +1759,8 @@ jobs:
 - name: "CI Deploy Toolbox"
   serial: true
   serial_groups: [ci-deploy-infrastructure,
-                  ci-acceptance-tests]
+                  toolbox-build,
+                  toolbox-deploy]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -1780,7 +1793,8 @@ jobs:
 - name: "CI Deploy Event Latency Monitor"
   serial: true
   serial_groups: [ci-deploy-infrastructure,
-                  ci-acceptance-tests]
+                  toolbox-build,
+                  eventlatencymonitor-deploy]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -1813,7 +1827,8 @@ jobs:
 - name: "CI Deploy Rabbit Monitor"
   serial: true
   serial_groups: [ci-deploy-infrastructure,
-                  ci-acceptance-tests]
+                  toolbox-build,
+                  rabbitmonitor-deploy]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -1846,7 +1861,8 @@ jobs:
 - name: "CI Deploy Regional Counts"
   serial: true
   serial_groups: [ci-deploy-infrastructure,
-                  ci-acceptance-tests]
+                  toolbox-build,
+                  regional-counts-deploy]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -1882,7 +1898,31 @@ jobs:
   serial: true
   serial_groups: [ci-deploy-infrastructure,
                   ci-acceptance-tests,
-                  docker-builds]
+                  action-scheduler-build,
+                  action-scheduler-deploy,
+                  case-api-build,
+                  case-api-deploy,
+                  case-processor-build,
+                  case-processor-deploy,
+                  uac-qid-service-build,
+                  uac-qid-service-deploy,
+                  pubsub-build,
+                  pubsub-deploy,
+                  print-file-service-build,
+                  print-file-service-deploy,
+                  fieldwork-adapter-build,
+                  fieldwork-adapter-deploy,
+                  notify-processor-build,
+                  notify-processor-deploy,
+                  notify-stub-build,
+                  notify-stub-deploy,
+                  exception-manager-build,
+                  exception-manager-deploy,
+                  toolbox-build,
+                  toolbox-deploy,
+                  eventlatencymonitor-deploy,
+                  rabbitmonitor-deploy,
+                  regional-counts-deploy]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -1977,7 +2017,7 @@ jobs:
 # WL Deployments
 - name: "WL Deploy Action-Scheduler"
   serial: true
-  serial_groups: [sit-action-scheduler]
+  serial_groups: [wl-action-scheduler]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -1997,8 +2037,8 @@ jobs:
     on_failure: *slack_failure_alert_sit
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-      GCP_PROJECT_NAME: ((sit-gcp-project-name))
-      KUBERNETES_CLUSTER: ((sit-kubernetes-cluster-name))
+      GCP_PROJECT_NAME: ((wl-gcp-project-name))
+      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: action-scheduler
       KUBERNETES_SELECTOR: app=action-scheduler
       KUBERNETES_FILE_PATH: kubernetes-repo/microservices
@@ -2010,7 +2050,7 @@ jobs:
 
 - name: "WL Deploy Print File Service"
   serial: true
-  serial_groups: [sit-print-file-service]
+  serial_groups: [wl-print-file-service]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -2030,8 +2070,8 @@ jobs:
     on_failure: *slack_failure_alert_sit
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-      GCP_PROJECT_NAME: ((sit-gcp-project-name))
-      KUBERNETES_CLUSTER: ((sit-kubernetes-cluster-name))
+      GCP_PROJECT_NAME: ((wl-gcp-project-name))
+      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
       KUBERNETES_STATEFULSET_NAME: printfilesvc
       KUBERNETES_SELECTOR: app=printfilesvc
       KUBERNETES_FILE_PATH: kubernetes-repo/microservices
@@ -2043,7 +2083,7 @@ jobs:
 
 - name: "WL Deploy Case-API"
   serial: true
-  serial_groups: [sit-case-api]
+  serial_groups: [wl-case-api]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -2063,8 +2103,8 @@ jobs:
     on_failure: *slack_failure_alert_sit
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-      GCP_PROJECT_NAME: ((sit-gcp-project-name))
-      KUBERNETES_CLUSTER: ((sit-kubernetes-cluster-name))
+      GCP_PROJECT_NAME: ((wl-gcp-project-name))
+      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: case-api
       KUBERNETES_SELECTOR: app=case-api
       KUBERNETES_FILE_PATH: kubernetes-repo/microservices
@@ -2076,7 +2116,7 @@ jobs:
 
 - name: "WL Deploy Case-Processor"
   serial: true
-  serial_groups: [sit-case-processor]
+  serial_groups: [wl-case-processor]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -2096,8 +2136,8 @@ jobs:
     on_failure: *slack_failure_alert_sit
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-      GCP_PROJECT_NAME: ((sit-gcp-project-name))
-      KUBERNETES_CLUSTER: ((sit-kubernetes-cluster-name))
+      GCP_PROJECT_NAME: ((wl-gcp-project-name))
+      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: case-processor
       KUBERNETES_SELECTOR: app=case-processor
       KUBERNETES_FILE_PATH: kubernetes-repo/microservices
@@ -2109,7 +2149,7 @@ jobs:
 
 - name: "WL Deploy UAC QID Service"
   serial: true
-  serial_groups: [sit-uac-qid-service]
+  serial_groups: [wl-uac-qid-service]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -2129,8 +2169,8 @@ jobs:
     on_failure: *slack_failure_alert_sit
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-      GCP_PROJECT_NAME: ((sit-gcp-project-name))
-      KUBERNETES_CLUSTER: ((sit-kubernetes-cluster-name))
+      GCP_PROJECT_NAME: ((wl-gcp-project-name))
+      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: uacqidservice
       KUBERNETES_SELECTOR: app=uacqidservice
       KUBERNETES_FILE_PATH: kubernetes-repo/microservices
@@ -2142,7 +2182,7 @@ jobs:
 
 - name: "WL Deploy PubSub Service"
   serial: true
-  serial_groups: [sit-pubsubsvc]
+  serial_groups: [wl-pubsubsvc]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -2162,8 +2202,8 @@ jobs:
     on_failure: *slack_failure_alert_sit
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-      GCP_PROJECT_NAME: ((sit-gcp-project-name))
-      KUBERNETES_CLUSTER: ((sit-kubernetes-cluster-name))
+      GCP_PROJECT_NAME: ((wl-gcp-project-name))
+      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: pubsubsvc
       KUBERNETES_SELECTOR: app=pubsubsvc
       KUBERNETES_FILE_PATH: kubernetes-repo/microservices
@@ -2175,7 +2215,7 @@ jobs:
 
 - name: "WL Deploy Ops Tool"
   serial: true
-  serial_groups: [sit-ops-tool]
+  serial_groups: [wl-ops-tool]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -2193,8 +2233,8 @@ jobs:
     on_failure: *slack_failure_alert_sit
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-      GCP_PROJECT_NAME: ((sit-gcp-project-name))
-      KUBERNETES_CLUSTER: ((sit-kubernetes-cluster-name))
+      GCP_PROJECT_NAME: ((wl-gcp-project-name))
+      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: ops
       KUBERNETES_SELECTOR: app=ops
       KUBERNETES_FILE_PATH: kubernetes-repo/optional
@@ -2206,7 +2246,7 @@ jobs:
 
 - name: "WL Deploy Fieldwork Adapter"
   serial: true
-  serial_groups: [sit-fieldwork-adapter]
+  serial_groups: [wl-fieldwork-adapter]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -2226,8 +2266,8 @@ jobs:
     on_failure: *slack_failure_alert_sit
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-      GCP_PROJECT_NAME: ((sit-gcp-project-name))
-      KUBERNETES_CLUSTER: ((sit-kubernetes-cluster-name))
+      GCP_PROJECT_NAME: ((wl-gcp-project-name))
+      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: fieldwork-adapter
       KUBERNETES_SELECTOR: app=fieldwork-adapter
       KUBERNETES_FILE_PATH: kubernetes-repo/microservices
@@ -2239,7 +2279,7 @@ jobs:
 
 - name: "WL Deploy Notify Processor"
   serial: true
-  serial_groups: [sit-notify-processor]
+  serial_groups: [wl-notify-processor]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -2259,8 +2299,8 @@ jobs:
     on_failure: *slack_failure_alert_sit
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-      GCP_PROJECT_NAME: ((sit-gcp-project-name))
-      KUBERNETES_CLUSTER: ((sit-kubernetes-cluster-name))
+      GCP_PROJECT_NAME: ((wl-gcp-project-name))
+      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: notify-processor
       KUBERNETES_SELECTOR: app=notify-processor
       KUBERNETES_FILE_PATH: kubernetes-repo/microservices
@@ -2272,7 +2312,7 @@ jobs:
 
 - name: "WL Deploy Exception Manager"
   serial: true
-  serial_groups: [sit-exception-manager]
+  serial_groups: [wl-exception-manager]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -2292,8 +2332,8 @@ jobs:
     on_failure: *slack_failure_alert_sit
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-      GCP_PROJECT_NAME: ((sit-gcp-project-name))
-      KUBERNETES_CLUSTER: ((sit-kubernetes-cluster-name))
+      GCP_PROJECT_NAME: ((wl-gcp-project-name))
+      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: exception-manager
       KUBERNETES_SELECTOR: app=exception-manager
       KUBERNETES_FILE_PATH: kubernetes-repo/microservices
@@ -2305,7 +2345,7 @@ jobs:
 
 - name: "WL Deploy Toolbox"
   serial: true
-  serial_groups: [sit-toolbox]
+  serial_groups: [wl-toolbox]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -2325,8 +2365,8 @@ jobs:
     on_failure: *slack_failure_alert_sit
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-      GCP_PROJECT_NAME: ((sit-gcp-project-name))
-      KUBERNETES_CLUSTER: ((sit-kubernetes-cluster-name))
+      GCP_PROJECT_NAME: ((wl-gcp-project-name))
+      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: census-rm-toolbox
       KUBERNETES_SELECTOR: app=census-rm-toolbox
       KUBERNETES_FILE_PATH: kubernetes-repo/optional
@@ -2338,7 +2378,7 @@ jobs:
 
 - name: "WL Deploy Event Latency Monitor"
   serial: true
-  serial_groups: [sit-event-latency-monitor]
+  serial_groups: [wl-event-latency-monitor]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -2358,8 +2398,8 @@ jobs:
     on_failure: *slack_failure_alert_sit
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-      GCP_PROJECT_NAME: ((sit-gcp-project-name))
-      KUBERNETES_CLUSTER: ((sit-kubernetes-cluster-name))
+      GCP_PROJECT_NAME: ((wl-gcp-project-name))
+      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: eventlatencymonitor
       KUBERNETES_SELECTOR: app=eventlatencymonitor
       KUBERNETES_FILE_PATH: kubernetes-repo/optional
@@ -2371,7 +2411,7 @@ jobs:
 
 - name: "WL Deploy Rabbit Monitor"
   serial: true
-  serial_groups: [sit-rabbitmonitor]
+  serial_groups: [wl-rabbitmonitor]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -2391,8 +2431,8 @@ jobs:
     on_failure: *slack_failure_alert_sit
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-      GCP_PROJECT_NAME: ((sit-gcp-project-name))
-      KUBERNETES_CLUSTER: ((sit-kubernetes-cluster-name))
+      GCP_PROJECT_NAME: ((wl-gcp-project-name))
+      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: rabbitmonitor
       KUBERNETES_SELECTOR: app=rabbitmonitor
       KUBERNETES_FILE_PATH: kubernetes-repo/optional
@@ -2404,7 +2444,7 @@ jobs:
 
 - name: "WL Deploy Regional Counts"
   serial: true
-  serial_groups: [sit-regional-counts]
+  serial_groups: [wl-regional-counts]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -2424,8 +2464,8 @@ jobs:
     on_failure: *slack_failure_alert_sit
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-      GCP_PROJECT_NAME: ((sit-gcp-project-name))
-      KUBERNETES_CLUSTER: ((sit-kubernetes-cluster-name))
+      GCP_PROJECT_NAME: ((wl-gcp-project-name))
+      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: regionalcounts
       KUBERNETES_SELECTOR: app=regionalcounts
       KUBERNETES_FILE_PATH: kubernetes-repo/optional
