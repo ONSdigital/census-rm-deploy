@@ -120,3 +120,5 @@ jobs:
             performance-gcp-project-name: census-rm-performance
             performance-kubernetes-cluster-name: rm-k8s-cluster
             performance-tests-image: eu.gcr.io/census-gcr-rm/rm/census-rm-performance-tests
+            case-processor-replicas: 4
+            uac-qid-replicas: 2

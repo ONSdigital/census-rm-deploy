@@ -1,5 +1,59 @@
 ---
+groups:
+- name: Deploy
+  jobs:
+  - Deploy
+  - Action Scheduler
+  - Case API
+  - Case Processor
+  - Event Latency Monitor
+  - Exception Manager
+  - Fieldwork Adapter
+  - Notify Processor
+  - Print File Service
+  - PubSub Service
+  - Rabbit Monitor
+  - Toolbox
+  - UAC QID Service
+  - Report Success
+- name: Performance Tests
+  jobs:
+  - Run Performance Tests
+  - Scale Apps
+  - Performance Tests
+
+resource_types:
+- name: slack-notification
+  type: docker-image
+  source:
+    repository: cfcommunity/slack-notification-resource
+
 resources:
+
+- name: slack-alert
+  type: slack-notification
+  source:
+    url: ((slack.webhook))
+
+- name: census-rm-deploy
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-deploy.git
+    private_key: ((github.service_account_private_key))
+
+- name: census-rm-kubernetes-release
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-kubernetes.git
+    private_key: ((github.service_account_private_key))
+    paths: [release/*]
+    tag_filter: v*.*.*
+    branch: master
+
+- name: every-minute
+  type: time
+  source:
+    interval: 1m
 
 - name: performance-tests-repo
   type: git
@@ -15,18 +69,675 @@ resources:
     username: _json_key
     password: ((gcp.service_account_json))
 
+templating:
+
+slack_release_failure: &slack_release_failure
+  put: slack-alert
+  params:
+    icon_emoji: ":concourse:"
+    username: Concourse
+    attachments: [
+          {
+              "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+              "title": "$BUILD_JOB_NAME failed",
+              "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+              "fields": [
+                  {
+                      "title": "Pipeline",
+                      "value": "$BUILD_PIPELINE_NAME",
+                      "short": true
+                  },
+                  {
+                      "title": "Project",
+                      "value": "((performance-gcp-project-name))",
+                      "short": true
+                  },
+                  {
+                      "title": "Build",
+                      "value": "#$BUILD_NAME",
+                      "short": true
+                  }
+              ],
+              "color": "#F35A00"
+          }
+      ]
+
+slack_release_success: &slack_release_success
+  put: slack-alert
+  params:
+    icon_emoji: ":concourse:"
+    username: Concourse
+    attachments: [
+          {
+              "fallback": "((performance-gcp-project-name)) release succeeded. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME",
+              "title": "((performance-gcp-project-name)) Release Succeeded",
+              "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME",
+              "fields": [
+                  {
+                      "title": "Pipeline",
+                      "value": "$BUILD_PIPELINE_NAME",
+                      "short": true
+                  }, 
+                  {
+                      "title": "Project",
+                      "value": "((performance-gcp-project-name))",
+                      "short": true
+                  },
+                  {
+                      "title": "Build",
+                      "value": "#$BUILD_NAME",
+                      "short": true
+                  }
+              ],
+              "color": "#36a64f"
+          }
+      ]
+
+slack_release_in_progress: &slack_release_in_progress
+  put: slack-alert
+  params:
+    icon_emoji: ":concourse:"
+    username: Concourse
+    attachments: [
+          {
+              "fallback": "((performance-gcp-project-name)) release started. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME",
+              "title": "((performance-gcp-project-name)) Release Started",
+              "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME",
+              "fields": [
+                  {
+                      "title": "Pipeline",
+                      "value": "$BUILD_PIPELINE_NAME",
+                      "short": true
+                  },  
+                  {
+                      "title": "Project",
+                      "value": "((performance-gcp-project-name))",
+                      "short": true
+                  },
+                  {
+                      "title": "Build",
+                      "value": "#$BUILD_NAME",
+                      "short": true
+                  }
+              ],
+              "color": "#ffe100"
+          }
+      ]
+
+slack_performance_tests_failure: &slack_performance_tests_failure
+  put: slack-alert
+  params:
+    icon_emoji: ":concourse:"
+    username: Concourse
+    attachments: [
+          {
+              "fallback": "Performance tests failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+              "title": "$BUILD_JOB_NAME failed",
+              "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+              "fields": [
+                  {
+                      "title": "Pipeline",
+                      "value": "$BUILD_PIPELINE_NAME",
+                      "short": true
+                  },
+                  {
+                      "title": "Project",
+                      "value": "((performance-gcp-project-name))",
+                      "short": true
+                  },
+                  {
+                      "title": "Build",
+                      "value": "#$BUILD_NAME",
+                      "short": true
+                  }
+              ],
+              "color": "#F35A00"
+          }
+      ]
+
+slack_performance_setup_failure: &slack_performance_setup_failure
+  put: slack-alert
+  params:
+    icon_emoji: ":concourse:"
+    username: Concourse
+    attachments: [
+          {
+              "fallback": "Performance tests setup failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+              "title": "$BUILD_JOB_NAME failed",
+              "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+              "fields": [
+                  {
+                      "title": "Pipeline",
+                      "value": "$BUILD_PIPELINE_NAME",
+                      "short": true
+                  },
+                  
+                  {
+                      "title": "Project",
+                      "value": "((performance-gcp-project-name))",
+                      "short": true
+                  },
+                  {
+                      "title": "Build",
+                      "value": "#$BUILD_NAME",
+                      "short": true
+                  }
+              ],
+              "color": "#F35A00"
+          }
+      ]
+
+slack_performance_tests_finished: &slack_performance_tests_finished
+  put: slack-alert
+  params:
+    icon_emoji: ":concourse:"
+    username: Concourse
+    attachments: [
+          {
+              "fallback": "Performance tests finished. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME",
+              "title": "Performance tests finished",
+              "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME",
+              "fields": [
+                  {
+                      "title": "Pipeline",
+                      "value": "$BUILD_PIPELINE_NAME",
+                      "short": true
+                  },
+                  {
+                      "title": "Project",
+                      "value": "((performance-gcp-project-name))",
+                      "short": true
+                  },
+                  {
+                      "title": "Build",
+                      "value": "#$BUILD_NAME",
+                      "short": true
+                  }
+              ],
+              "color": "#36a64f"
+          }
+      ]
+
+slack_performance_tests_started: &slack_performance_tests_started
+  put: slack-alert
+  params:
+    icon_emoji: ":concourse:"
+    username: Concourse
+    attachments: [
+          {
+              "fallback": "Performance tests run started. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME",
+              "title": "Performance Tests Started",
+              "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME",
+              "fields": [
+                  {
+                      "title": "Pipeline",
+                      "value": "$BUILD_PIPELINE_NAME",
+                      "short": true
+                  },
+                  {
+                      "title": "Project",
+                      "value": "((performance-gcp-project-name))",
+                      "short": true
+                  },
+                  {
+                      "title": "Build",
+                      "value": "#$BUILD_NAME",
+                      "short": true
+                  }
+              ],
+              "color": "#ffe100"
+          }
+      ]
+
+
 jobs:
 
-- name: "Performance Tests"
+- name: "Deploy"
   serial: true
-  serial_groups: ["Performance Tests"]
+  plan:
+    - get: every-minute
+    - get: census-rm-kubernetes-release
+  on_success: *slack_release_in_progress
+
+- name: "Action Scheduler"
+  disable_manual_trigger: true
+  serial: true
+  serial_groups: [action-scheduler]
+  plan:
+  - get: census-rm-kubernetes-release
+    trigger: true
+    passed: ["Deploy"]
+  - get: census-rm-deploy
+  - get: every-minute
+    trigger: true
+    passed: ["Deploy"]
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
+    on_failure: *slack_release_failure
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((performance-gcp-project-name))
+      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: action-scheduler
+      KUBERNETES_SELECTOR: app=action-scheduler
+      KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
+      KUBERNETES_FILE_PREFIX: action-scheduler
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
+
+- name: "Case API"
+  disable_manual_trigger: true
+  serial: true
+  serial_groups: [case-api]
+  plan:
+  - get: census-rm-kubernetes-release
+    trigger: true
+    passed: ["Deploy"]
+  - get: census-rm-deploy
+  - get: every-minute
+    trigger: true
+    passed: ["Deploy"]
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
+    on_failure: *slack_release_failure
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((performance-gcp-project-name))
+      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: case-api
+      KUBERNETES_SELECTOR: app=case-api
+      KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
+      KUBERNETES_FILE_PREFIX: case-api
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
+
+- name: "Case Processor"
+  disable_manual_trigger: true
+  serial: true
+  serial_groups: [case-processor]
+  plan:
+  - get: census-rm-kubernetes-release
+    trigger: true
+    passed: ["Deploy"]
+  - get: census-rm-deploy
+  - get: every-minute
+    trigger: true
+    passed: ["Deploy"]
+  - task: apply-deployment
+    file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
+    on_failure: *slack_release_failure
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((performance-gcp-project-name))
+      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: case-processor
+      KUBERNETES_SELECTOR: app=case-processor
+      KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
+      KUBERNETES_FILE_PREFIX: case-processor
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
+
+- name: "UAC QID Service"
+  disable_manual_trigger: true
+  serial: true
+  serial_groups: [uac-qid-service]
+  plan:
+  - get: census-rm-kubernetes-release
+    trigger: true
+    passed: ["Deploy"]
+  - get: census-rm-deploy
+  - get: every-minute
+    trigger: true
+    passed: ["Deploy"]
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
+    on_failure: *slack_release_failure
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((performance-gcp-project-name))
+      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: uacqidservice
+      KUBERNETES_SELECTOR: app=uacqidservice
+      KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
+      KUBERNETES_FILE_PREFIX: uac-qid-service
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
+
+- name: "PubSub Service"
+  disable_manual_trigger: true
+  serial: true
+  serial_groups: [pubsubsvc]
+  plan:
+  - get: census-rm-kubernetes-release
+    trigger: true
+    passed: ["Deploy"]
+  - get: census-rm-deploy
+  - get: every-minute
+    trigger: true
+    passed: ["Deploy"]
+  - task: apply-deployment
+    file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
+    on_failure: *slack_release_failure
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((performance-gcp-project-name))
+      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: pubsubsvc
+      KUBERNETES_SELECTOR: app=pubsubsvc
+      KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
+      KUBERNETES_FILE_PREFIX: pubsub
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
+
+- name: "Print File Service"
+  disable_manual_trigger: true
+  serial: true
+  serial_groups: [print-file-service]
+  plan:
+  - get: census-rm-kubernetes-release
+    trigger: true
+    passed: ["Deploy"]
+  - get: census-rm-deploy
+  - get: every-minute
+    trigger: true
+    passed: ["Deploy"]
+  - task: apply-deployment
+    file: census-rm-deploy/tasks/kubectl-apply-statefulset-no-patch.yml
+    on_failure: *slack_release_failure
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((performance-gcp-project-name))
+      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+      KUBERNETES_STATEFULSET_NAME: printfilesvc
+      KUBERNETES_SELECTOR: app=printfilesvc
+      KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
+      KUBERNETES_FILE_PREFIX: print-file-service
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
+
+- name: "Fieldwork Adapter"
+  disable_manual_trigger: true
+  serial: true
+  serial_groups: [fieldwork-adapter]
+  plan:
+  - get: census-rm-kubernetes-release
+    trigger: true
+    passed: ["Deploy"]
+  - get: census-rm-deploy
+  - get: every-minute
+    trigger: true
+    passed: ["Deploy"]
+  - task: apply-deployment
+    file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
+    on_failure: *slack_release_failure
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((performance-gcp-project-name))
+      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: fieldwork-adapter
+      KUBERNETES_SELECTOR: app=fieldwork-adapter
+      KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
+      KUBERNETES_FILE_PREFIX: fieldwork-adapter
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
+
+- name: "Notify Processor"
+  disable_manual_trigger: true
+  serial: true
+  serial_groups: [notify-processor]
+  plan:
+  - get: census-rm-kubernetes-release
+    trigger: true
+    passed: ["Deploy"]
+  - get: census-rm-deploy
+  - get: every-minute
+    trigger: true
+    passed: ["Deploy"]
+  - task: apply-deployment
+    file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
+    on_failure: *slack_release_failure
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((performance-gcp-project-name))
+      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: notify-processor
+      KUBERNETES_SELECTOR: app=notify-processor
+      KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
+      KUBERNETES_FILE_PREFIX: notify-processor
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
+
+- name: "Exception Manager"
+  disable_manual_trigger: true
+  serial: true
+  serial_groups: [exception-manager]
+  plan:
+  - get: census-rm-kubernetes-release
+    trigger: true
+    passed: ["Deploy"]
+  - get: census-rm-deploy
+  - get: every-minute
+    trigger: true
+    passed: ["Deploy"]
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
+    on_failure: *slack_release_failure
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((performance-gcp-project-name))
+      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: exception-manager
+      KUBERNETES_SELECTOR: app=exception-manager
+      KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
+      KUBERNETES_FILE_PREFIX: exception-manager
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
+
+- name: "Toolbox"
+  disable_manual_trigger: true
+  serial: true
+  serial_groups: [toolbox]
+  plan:
+  - get: census-rm-kubernetes-release
+    trigger: true
+    passed: ["Deploy"]
+  - get: census-rm-deploy
+  - get: every-minute
+    trigger: true
+    passed: ["Deploy"]
+  - task: apply-deployment
+    file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
+    on_failure: *slack_release_failure
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((performance-gcp-project-name))
+      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: census-rm-toolbox
+      KUBERNETES_SELECTOR: app=census-rm-toolbox
+      KUBERNETES_FILE_PATH: kubernetes-repo/release/optional
+      KUBERNETES_FILE_PREFIX: census-rm-toolbox
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
+
+- name: "Event Latency Monitor"
+  disable_manual_trigger: true
+  serial: true
+  serial_groups: [event-latency-monitor]
+  plan:
+  - get: census-rm-kubernetes-release
+    trigger: true
+    passed: ["Deploy"]
+  - get: census-rm-deploy
+  - get: every-minute
+    trigger: true
+    passed: ["Deploy"]
+  - task: apply-deployment
+    file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
+    on_failure: *slack_release_failure
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((performance-gcp-project-name))
+      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: eventlatencymonitor
+      KUBERNETES_SELECTOR: app=eventlatencymonitor
+      KUBERNETES_FILE_PATH: kubernetes-repo/release/optional
+      KUBERNETES_FILE_PREFIX: eventlatencymonitor
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
+
+- name: "Rabbit Monitor"
+  disable_manual_trigger: true
+  serial: true
+  serial_groups: [rabbitmonitor]
+  plan:
+  - get: census-rm-kubernetes-release
+    trigger: true
+    passed: ["Deploy"]
+  - get: census-rm-deploy
+  - get: every-minute
+    trigger: true
+    passed: ["Deploy"]
+  - task: apply-deployment
+    file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
+    on_failure: *slack_release_failure
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((performance-gcp-project-name))
+      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: rabbitmonitor
+      KUBERNETES_SELECTOR: app=rabbitmonitor
+      KUBERNETES_FILE_PATH: kubernetes-repo/release/optional
+      KUBERNETES_FILE_PREFIX: rabbitmonitor
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
+
+- name: "Report Success"
+  disable_manual_trigger: true
+  serial: true
+  plan:
+  - get: every-minute
+    trigger: true
+    passed: [
+      "Action Scheduler",
+      "Case API",
+      "Case Processor",
+      "UAC QID Service",
+      "PubSub Service",
+      "Print File Service",
+      "Fieldwork Adapter",
+      "Notify Processor",
+      "Exception Manager",
+      "Toolbox",
+      "Event Latency Monitor",
+      "Rabbit Monitor"]
+  - *slack_release_success
+
+- name: "Run Performance Tests"
+  serial: true
+  serial_groups: [
+    action-scheduler,
+    case-api,
+    case-processor,
+    fieldwork-adapter,
+    notify-processor,
+    uac-qid-service,
+    pubsubsvc,
+    print-file-service,
+    exception-manager,
+    toolbox,
+    event-latency-monitor,
+    rabbitmonitor]
   plan:
   - get: performance-tests-repo
   - get: performance-tests-docker-image
-    trigger: true
     params:
       skip_download: true
-  - task: "Run Performance Tests (in K8s)"  # TODO: what is deemed a failure?
+  - get: every-minute
+  - *slack_performance_tests_started
+
+- name: "Scale Apps"
+  disable_manual_trigger: true
+  serial: true
+  serial_groups: [
+    scale-apps,
+    action-scheduler,
+    case-api,
+    case-processor,
+    fieldwork-adapter,
+    notify-processor,
+    uac-qid-service,
+    pubsubsvc,
+    print-file-service,
+    exception-manager,
+    toolbox,
+    event-latency-monitor,
+    rabbitmonitor]
+  plan:
+  - get: performance-tests-repo
+  - get: performance-tests-docker-image
+    params:
+      skip_download: true
+  - get: every-minute
+    trigger: true
+    passed: ["Run Performance Tests"]
+  - task: "Scale apps"
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: eu.gcr.io/census-gcr/gcloud-kubectl
+      params:
+        SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+        KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+        GCP_PROJECT_NAME: ((performance-gcp-project-name))
+        CASE_PROCESSOR_REPLICAS: ((case-processor-replicas))
+        UAC_QID_REPLICAS: ((uac-qid-replicas))
+      run:
+        path: bash
+        args:
+          - -exc
+          - |
+            cat >~/gcloud-service-key.json <<EOL
+            $SERVICE_ACCOUNT_JSON
+            EOL
+
+            # Use gcloud service account to configure kubectl
+            gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
+            gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
+
+            # Scale apps up
+            kubectl scale deployment case-processor --replicas=$CASE_PROCESSOR_REPLICAS
+            kubectl scale deployment uacqidservice --replicas=$UAC_QID_REPLICAS
+  on_failure: *slack_performance_setup_failure
+
+- name: "Performance Tests"
+  disable_manual_trigger: true
+  serial: true
+  serial_groups: [
+    scale-apps,
+    performance-tests,
+    action-scheduler,
+    case-api,
+    case-processor,
+    fieldwork-adapter,
+    notify-processor,
+    uac-qid-service,
+    pubsubsvc,
+    print-file-service,
+    exception-manager,
+    toolbox,
+    event-latency-monitor,
+    rabbitmonitor]
+  plan:
+  - get: performance-tests-repo
+  - get: performance-tests-docker-image
+    params:
+      skip_download: true
+  - get: every-minute
+    trigger: true
+    passed: ["Scale Apps"]
+  - task: "Run Performance Tests (in K8s)"
     file: performance-tests-repo/tasks/kubectl-run-performance-tests.yml
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
@@ -34,3 +745,5 @@ jobs:
       KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
       PERFORMANCE_TESTS_IMAGE: ((performance-tests-image))
     input_mapping: {performance-tests-repo: performance-tests-repo}
+  on_failure: *slack_performance_tests_failure
+  on_success: *slack_performance_tests_finished
