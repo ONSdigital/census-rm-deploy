@@ -83,9 +83,9 @@ jobs:
             ci-gcp-environment-name: ci
             ci-gcp-project-name: census-rm-ci
             ci-kubernetes-cluster-name: rm-k8s-cluster
-            sit-gcp-environment-name: whitelodge
-            sit-gcp-project-name: census-rm-whitelodge
-            sit-kubernetes-cluster-name: rm-k8s-cluster
+            wl-gcp-environment-name: whitelodge
+            wl-gcp-project-name: census-rm-whitelodge
+            wl-kubernetes-cluster-name: rm-k8s-cluster
             terraform-branch: master
             docker-registry-ci: eu.gcr.io/census-rm-ci
             docker-registry-gcr: eu.gcr.io/census-gcr-rm
