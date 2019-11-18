@@ -45,7 +45,6 @@ groups:
 
 - name: "Whitelodge Deployments"
   jobs:
-  - "SIT Deploy Infrastructure"
   - "SIT Deploy Action-Scheduler"
   - "SIT Deploy Case-API"
   - "SIT Deploy Case-Processor"
@@ -55,14 +54,13 @@ groups:
   - "SIT Deploy Print File Service"
   - "SIT Deploy Fieldwork Adapter"
   - "SIT Deploy Notify Processor"
-  - "SIT Deploy Notify Stub"
   - "SIT Deploy Exception Manager"
   - "SIT Deploy Toolbox"
   - "SIT Deploy Event Latency Monitor"
   - "SIT Deploy Rabbit Monitor"
   - "SIT Deploy Regional Counts"
 
-- name: "All"
+- name: "Overview"
   jobs:
   - build-acceptance-tests-master
   - build-action-scheduler-master
@@ -98,7 +96,6 @@ groups:
   - "CI Deploy Rabbit Monitor"
   - "CI Deploy Regional Counts"
   - "CI Acceptance Tests"
-  - "SIT Deploy Infrastructure"
   - "SIT Deploy Action-Scheduler"
   - "SIT Deploy Case-API"
   - "SIT Deploy Case-Processor"
@@ -108,7 +105,6 @@ groups:
   - "SIT Deploy Print File Service"
   - "SIT Deploy Fieldwork Adapter"
   - "SIT Deploy Notify Processor"
-  - "SIT Deploy Notify Stub"
   - "SIT Deploy Exception Manager"
   - "SIT Deploy Toolbox"
   - "SIT Deploy Event Latency Monitor"
@@ -140,6 +136,41 @@ resources:
   source:
     uri: git@github.com:ONSdigital/census-rm-kubernetes.git
     private_key: ((github.service_account_private_key))
+
+- name: census-rm-kubernetes-microservices-repo
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-kubernetes.git
+    private_key: ((github.service_account_private_key))
+    paths: [microservices/*]
+
+- name: census-rm-kubernetes-ops-repo
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-kubernetes.git
+    private_key: ((github.service_account_private_key))
+    paths: [optional/ops-*]
+
+- name: census-rm-kubernetes-optional-repo
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-kubernetes.git
+    private_key: ((github.service_account_private_key))
+    paths: [optional/*]
+
+- name: census-rm-kubernetes-dependencies-repo
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-kubernetes.git
+    private_key: ((github.service_account_private_key))
+    paths: [dependencies/*, rabbitmq/*, setup-dependencies.sh]
+
+- name: acceptance-tests-repo
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-acceptance-tests.git
+    private_key: ((github.service_account_private_key))
+    paths: [kubernetes.env, tasks/*]
 
 - name: census-rm-terraform
   type: git
@@ -492,12 +523,156 @@ resources:
 
 templating:
 
-slack_failure_alert_ci: &slack_failure_alert_ci
-  put: slack-alert
-  params:
-    icon_emoji: ":concourse:"
-    username: Concourse
-    attachments: [
+  slack_failure_alert_ci: &slack_failure_alert_ci
+    put: slack-alert
+    params:
+      icon_emoji: ":concourse:"
+      username: Concourse
+      attachments: [
+            {
+                "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                "title": "$BUILD_JOB_NAME failed",
+                "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                "fields": [
+                    {
+                        "title": "Pipeline",
+                        "value": "$BUILD_PIPELINE_NAME",
+                        "short": true
+                    },
+                    {
+                        "title": "Environment",
+                        "value": "((ci-gcp-environment-name))",
+                        "short": true
+                    },
+                    {
+                        "title": "Project",
+                        "value": "((ci-gcp-project-name))",
+                        "short": true
+                    },
+                    {
+                        "title": "Build",
+                        "value": "#$BUILD_NAME",
+                        "short": true
+                    }
+                ],
+                "color": "#F35A00"
+            }
+        ]
+
+  slack_failure_alert_sit: &slack_failure_alert_sit
+    put: slack-alert
+    params:
+      icon_emoji: ":concourse:"
+      username: Concourse
+      attachments: [
+            {
+                "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                "title": "$BUILD_JOB_NAME failed",
+                "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                "fields": [
+                    {
+                        "title": "Pipeline",
+                        "value": "$BUILD_PIPELINE_NAME",
+                        "short": true
+                    },
+                    {
+                        "title": "Environment",
+                        "value": "((sit-gcp-environment-name))",
+                        "short": true
+                    },
+                    {
+                        "title": "Project",
+                        "value": "((sit-gcp-project-name))",
+                        "short": true
+                    },
+                    {
+                        "title": "Build",
+                        "value": "#$BUILD_NAME",
+                        "short": true
+                    }
+                ],
+                "color": "#F35A00"
+            }
+        ]
+
+  slack_success_alert_ci: &slack_success_alert_ci
+    put: slack-alert
+    params:
+      icon_emoji: ":concourse:"
+      username: Concourse
+      attachments: [
+            {
+                "fallback": "$BUILD_JOB_NAME succeeded. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                "title": "$BUILD_JOB_NAME succeeded",
+                "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                "fields": [
+                    {
+                        "title": "Pipeline",
+                        "value": "$BUILD_PIPELINE_NAME",
+                        "short": true
+                    },
+                    {
+                        "title": "Environment",
+                        "value": "((ci-gcp-environment-name))",
+                        "short": true
+                    },
+                    {
+                        "title": "Project",
+                        "value": "((ci-gcp-project-name))",
+                        "short": true
+                    },
+                    {
+                        "title": "Build",
+                        "value": "#$BUILD_NAME",
+                        "short": true
+                    }
+                ],
+                "color": "#36a64f"
+            }
+        ]
+
+  slack_started_alert_ci: &slack_started_alert_ci
+    put: slack-alert
+    params:
+      icon_emoji: ":concourse:"
+      username: Concourse
+      attachments: [
+            {
+                "fallback": "$BUILD_JOB_NAME started... See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                "title": "$BUILD_JOB_NAME started...",
+                "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                "fields": [
+                    {
+                        "title": "Pipeline",
+                        "value": "$BUILD_PIPELINE_NAME",
+                        "short": true
+                    },
+                    {
+                        "title": "Environment",
+                        "value": "((ci-gcp-environment-name))",
+                        "short": true
+                    },
+                    {
+                        "title": "Project",
+                        "value": "((ci-gcp-project-name))",
+                        "short": true
+                    },
+                    {
+                        "title": "Build",
+                        "value": "#$BUILD_NAME",
+                        "short": true
+                    }
+                ],
+                "color": "#36a64f"
+            }
+        ]
+
+  slack_failure_alert_prebuild: &slack_failure_alert_prebuild
+    put: slack-alert
+    params:
+      icon_emoji: ":concourse:"
+      username: Concourse
+      attachments: [
           {
               "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
               "title": "$BUILD_JOB_NAME failed",
@@ -506,16 +681,6 @@ slack_failure_alert_ci: &slack_failure_alert_ci
                   {
                       "title": "Pipeline",
                       "value": "$BUILD_PIPELINE_NAME",
-                      "short": true
-                  },
-                  {
-                      "title": "Environment",
-                      "value": "((ci-gcp-environment-name))",
-                      "short": true
-                  },
-                  {
-                      "title": "Project",
-                      "value": "((ci-gcp-project-name))",
                       "short": true
                   },
                   {
@@ -528,12 +693,12 @@ slack_failure_alert_ci: &slack_failure_alert_ci
           }
       ]
 
-slack_failure_alert_sit: &slack_failure_alert_sit
-  put: slack-alert
-  params:
-    icon_emoji: ":concourse:"
-    username: Concourse
-    attachments: [
+  slack_failure_alert_ci: &slack_failure_alert_ci
+    put: slack-alert
+    params:
+      icon_emoji: ":concourse:"
+      username: Concourse
+      attachments: [
           {
               "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
               "title": "$BUILD_JOB_NAME failed",
@@ -545,13 +710,8 @@ slack_failure_alert_sit: &slack_failure_alert_sit
                       "short": true
                   },
                   {
-                      "title": "Environment",
-                      "value": "((sit-gcp-environment-name))",
-                      "short": true
-                  },
-                  {
-                      "title": "Project",
-                      "value": "((sit-gcp-project-name))",
+                      "title": "Registry",
+                      "value": "((docker-registry-ci))",
                       "short": true
                   },
                   {
@@ -564,15 +724,15 @@ slack_failure_alert_sit: &slack_failure_alert_sit
           }
       ]
 
-slack_success_alert_ci: &slack_success_alert_ci
-  put: slack-alert
-  params:
-    icon_emoji: ":concourse:"
-    username: Concourse
-    attachments: [
+  slack_failure_alert_gcr: &slack_failure_alert_gcr
+    put: slack-alert
+    params:
+      icon_emoji: ":concourse:"
+      username: Concourse
+      attachments: [
           {
-              "fallback": "$BUILD_JOB_NAME succeeded. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-              "title": "$BUILD_JOB_NAME succeeded",
+              "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+              "title": "$BUILD_JOB_NAME failed",
               "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
               "fields": [
                   {
@@ -581,149 +741,20 @@ slack_success_alert_ci: &slack_success_alert_ci
                       "short": true
                   },
                   {
-                      "title": "Environment",
-                      "value": "((ci-gcp-environment-name))",
+                      "title": "Registry",
+                      "value": "((docker-registry-gcr))",
                       "short": true
                   },
-                  {
-                      "title": "Project",
-                      "value": "((ci-gcp-project-name))",
-                      "short": true
-                  },
+
                   {
                       "title": "Build",
                       "value": "#$BUILD_NAME",
                       "short": true
                   }
               ],
-              "color": "#36a64f"
+              "color": "#F35A00"
           }
       ]
-
-slack_started_alert_ci: &slack_started_alert_ci
-  put: slack-alert
-  params:
-    icon_emoji: ":concourse:"
-    username: Concourse
-    attachments: [
-          {
-              "fallback": "$BUILD_JOB_NAME started... See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-              "title": "$BUILD_JOB_NAME started...",
-              "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-              "fields": [
-                  {
-                      "title": "Pipeline",
-                      "value": "$BUILD_PIPELINE_NAME",
-                      "short": true
-                  },
-                  {
-                      "title": "Environment",
-                      "value": "((ci-gcp-environment-name))",
-                      "short": true
-                  },
-                  {
-                      "title": "Project",
-                      "value": "((ci-gcp-project-name))",
-                      "short": true
-                  },
-                  {
-                      "title": "Build",
-                      "value": "#$BUILD_NAME",
-                      "short": true
-                  }
-              ],
-              "color": "#36a64f"
-          }
-      ]
-
-slack_failure_alert_prebuild: &slack_failure_alert_prebuild
-  put: slack-alert
-  params:
-    icon_emoji: ":concourse:"
-    username: Concourse
-    attachments: [
-        {
-            "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-            "title": "$BUILD_JOB_NAME failed",
-            "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-            "fields": [
-                {
-                    "title": "Pipeline",
-                    "value": "$BUILD_PIPELINE_NAME",
-                    "short": true
-                },
-                {
-                    "title": "Build",
-                    "value": "#$BUILD_NAME",
-                    "short": true
-                }
-            ],
-            "color": "#F35A00"
-        }
-    ]
-
-slack_failure_alert_ci: &slack_failure_alert_ci
-  put: slack-alert
-  params:
-    icon_emoji: ":concourse:"
-    username: Concourse
-    attachments: [
-        {
-            "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-            "title": "$BUILD_JOB_NAME failed",
-            "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-            "fields": [
-                {
-                    "title": "Pipeline",
-                    "value": "$BUILD_PIPELINE_NAME",
-                    "short": true
-                },
-                {
-                    "title": "Registry",
-                    "value": "((docker-registry-ci))",
-                    "short": true
-                },
-                {
-                    "title": "Build",
-                    "value": "#$BUILD_NAME",
-                    "short": true
-                }
-            ],
-            "color": "#F35A00"
-        }
-    ]
-
-slack_failure_alert_gcr: &slack_failure_alert_gcr
-  put: slack-alert
-  params:
-    icon_emoji: ":concourse:"
-    username: Concourse
-    attachments: [
-        {
-            "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-            "title": "$BUILD_JOB_NAME failed",
-            "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-            "fields": [
-                {
-                    "title": "Pipeline",
-                    "value": "$BUILD_PIPELINE_NAME",
-                    "short": true
-                },
-                {
-                    "title": "Registry",
-                    "value": "((docker-registry-gcr))",
-                    "short": true
-                },
-
-                {
-                    "title": "Build",
-                    "value": "#$BUILD_NAME",
-                    "short": true
-                }
-            ],
-            "color": "#F35A00"
-        }
-    ]
 
 
 jobs:
@@ -1594,7 +1625,7 @@ jobs:
   - get: fieldwork-adapter-master
     trigger: true
     passed: [build-fieldwork-adapter-master]
-  - get: fieldwork-adapter-service-docker-image-gcr
+  - get: fieldwork-adapter-docker-image-gcr
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -1611,7 +1642,7 @@ jobs:
       KUBERNETES_FILE_PREFIX: fieldwork-adapter
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
-      docker-image-resource: fieldwork-adapter-service-docker-image-gcr,
+      docker-image-resource: fieldwork-adapter-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
 - name: "CI Deploy Notify Processor"
@@ -1627,7 +1658,7 @@ jobs:
   - get: notify-processor-master
     trigger: true
     passed: [build-notify-processor-master]
-  - get: notify-processor-service-docker-image-gcr
+  - get: notify-processor-docker-image-gcr
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -1644,7 +1675,7 @@ jobs:
       KUBERNETES_FILE_PREFIX: notify-processor
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
-      docker-image-resource: notify-processor-service-docker-image-gcr,
+      docker-image-resource: notify-processor-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
   
 - name: "CI Deploy Notify Stub"
@@ -1660,7 +1691,7 @@ jobs:
   - get: notify-stub-master
     trigger: true
     passed: [build-notify-stub-master]
-  - get: notify-stub-service-docker-image-gcr
+  - get: notify-stub-docker-image-gcr
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -1677,7 +1708,7 @@ jobs:
       KUBERNETES_FILE_PREFIX: notify-stub
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
-      docker-image-resource: notify-stub-service-docker-image-gcr,
+      docker-image-resource: notify-stub-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
   
 - name: "CI Deploy Exception Manager"
@@ -1870,8 +1901,7 @@ jobs:
              "CI Deploy Rabbit Monitor",
              "CI Deploy Regional Counts"]
   - get: acceptance-tests-repo
-  - get: batch-runner-repo
-  - get: acceptance-tests-docker-image
+  - get: acceptance-tests-docker-image-gcr
     trigger: true
     params:
       skip_download: true
@@ -1940,7 +1970,7 @@ jobs:
       GCP_PROJECT_NAME: ((ci-gcp-project-name))
       KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
       ACCEPTANCE_TESTS_IMAGE: ((acceptance-tests-image))
-      BATCH_RUNNER_CONFIG: batch-runner-repo/qid-batch-runner.yml
+      BATCH_RUNNER_CONFIG: qid-batch-runner-repo/qid-batch-runner.yml
     input_mapping: {acceptance-tests-repo: acceptance-tests-repo}
 
 
@@ -1955,9 +1985,10 @@ jobs:
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
-  - get: action-scheduler-docker-latest
+  - get: action-scheduler-master
     trigger: true
     passed: ["CI Acceptance Tests"]
+  - get: action-scheduler-docker-image-gcr
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -1974,7 +2005,7 @@ jobs:
       KUBERNETES_FILE_PREFIX: action-scheduler
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
-      docker-image-resource: action-scheduler-docker-latest,
+      docker-image-resource: action-scheduler-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
 - name: "SIT Deploy Print File Service"
@@ -1987,9 +2018,10 @@ jobs:
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
-  - get: print-file-service-docker-latest
+  - get: print-file-service-master
     trigger: true
     passed: ["CI Acceptance Tests"]
+  - get: print-file-service-docker-image-gcr
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -2006,7 +2038,7 @@ jobs:
       KUBERNETES_FILE_PREFIX: print-file-service
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
-      docker-image-resource: print-file-service-docker-latest,
+      docker-image-resource: print-file-service-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
 - name: "SIT Deploy Case-API"
@@ -2019,9 +2051,10 @@ jobs:
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
-  - get: case-api-docker-latest
+  - get: case-api-master
     trigger: true
     passed: ["CI Acceptance Tests"]
+  - get: case-api-docker-image-gcr
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -2038,7 +2071,7 @@ jobs:
       KUBERNETES_FILE_PREFIX: case-api
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
-      docker-image-resource: case-api-docker-latest,
+      docker-image-resource: case-api-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
 - name: "SIT Deploy Case-Processor"
@@ -2051,9 +2084,10 @@ jobs:
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
-  - get: case-processor-docker-latest
+  - get: case-processor-master
     trigger: true
     passed: ["CI Acceptance Tests"]
+  - get: case-processor-docker-image-gcr
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -2070,7 +2104,7 @@ jobs:
       KUBERNETES_FILE_PREFIX: case-processor
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
-      docker-image-resource: case-processor-docker-latest,
+      docker-image-resource: case-processor-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
 - name: "SIT Deploy UAC QID Service"
@@ -2083,9 +2117,10 @@ jobs:
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
-  - get: uac-qid-service-docker-latest
+  - get: uac-qid-service-master
     trigger: true
     passed: ["CI Acceptance Tests"]
+  - get: uac-qid-service-docker-image-gcr
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -2102,7 +2137,7 @@ jobs:
       KUBERNETES_FILE_PREFIX: uac-qid-service
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
-      docker-image-resource: uac-qid-service-docker-latest,
+      docker-image-resource: uac-qid-service-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
 - name: "SIT Deploy PubSub Service"
@@ -2115,9 +2150,10 @@ jobs:
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
-  - get: pubsubsvc-docker-latest
+  - get: pubsub-master
     trigger: true
     passed: ["CI Acceptance Tests"]
+  - get: pubsub-docker-image-gcr
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -2134,7 +2170,7 @@ jobs:
       KUBERNETES_FILE_PREFIX: pubsub
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
-      docker-image-resource: pubsubsvc-docker-latest,
+      docker-image-resource: pubsub-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
 - name: "SIT Deploy Ops Tool"
@@ -2146,8 +2182,9 @@ jobs:
     passed: ["CI Acceptance Tests"]
   - get: census-rm-kubernetes-ops-repo
     trigger: true
-  - get: ops-docker-latest
+  - get: ops-master
     trigger: true
+  - get: ops-docker-image-gcr
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -2164,7 +2201,7 @@ jobs:
       KUBERNETES_FILE_PREFIX: ops
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
-      docker-image-resource: ops-docker-latest,
+      docker-image-resource: ops-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-ops-repo}
 
 - name: "SIT Deploy Fieldwork Adapter"
@@ -2177,9 +2214,10 @@ jobs:
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
-  - get: fieldwork-adapter-docker-latest
+  - get: fieldwork-adapter-master
     trigger: true
     passed: ["CI Acceptance Tests"]
+  - get: fieldwork-adapter-docker-image-gcr
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -2196,7 +2234,7 @@ jobs:
       KUBERNETES_FILE_PREFIX: fieldwork-adapter
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
-      docker-image-resource: fieldwork-adapter-docker-latest,
+      docker-image-resource: fieldwork-adapter-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
 - name: "SIT Deploy Notify Processor"
@@ -2209,9 +2247,10 @@ jobs:
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
-  - get: notify-processor-docker-latest
+  - get: notify-processor-master
     trigger: true
     passed: ["CI Acceptance Tests"]
+  - get: notify-processor-docker-image-gcr
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -2228,7 +2267,7 @@ jobs:
       KUBERNETES_FILE_PREFIX: notify-processor
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
-      docker-image-resource: notify-processor-docker-latest,
+      docker-image-resource: notify-processor-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
 - name: "SIT Deploy Exception Manager"
@@ -2241,9 +2280,10 @@ jobs:
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
-  - get: exception-manager-docker-latest
+  - get: exception-manager-master
     trigger: true
     passed: ["CI Acceptance Tests"]
+  - get: exception-manager-docker-image-gcr
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -2260,7 +2300,7 @@ jobs:
       KUBERNETES_FILE_PREFIX: exception-manager
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
-      docker-image-resource: exception-manager-docker-latest,
+      docker-image-resource: exception-manager-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
 - name: "SIT Deploy Toolbox"
@@ -2273,9 +2313,10 @@ jobs:
   - get: census-rm-kubernetes-optional-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
-  - get: toolbox-docker-latest
+  - get: toolbox-master
     trigger: true
     passed: ["CI Acceptance Tests"]
+  - get: toolbox-docker-image-gcr
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -2292,7 +2333,7 @@ jobs:
       KUBERNETES_FILE_PREFIX: census-rm-toolbox
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
-      docker-image-resource: toolbox-docker-latest,
+      docker-image-resource: toolbox-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-optional-repo}
 
 - name: "SIT Deploy Event Latency Monitor"
@@ -2305,9 +2346,10 @@ jobs:
   - get: census-rm-kubernetes-optional-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
-  - get: toolbox-docker-latest
+  - get: toolbox-master
     trigger: true
     passed: ["CI Acceptance Tests"]
+  - get: toolbox-docker-image-gcr
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -2324,7 +2366,7 @@ jobs:
       KUBERNETES_FILE_PREFIX: eventlatencymonitor
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
-      docker-image-resource: toolbox-docker-latest,
+      docker-image-resource: toolbox-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-optional-repo}
 
 - name: "SIT Deploy Rabbit Monitor"
@@ -2337,9 +2379,10 @@ jobs:
   - get: census-rm-kubernetes-optional-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
-  - get: toolbox-docker-latest
+  - get: toolbox-master
     trigger: true
     passed: ["CI Acceptance Tests"]
+  - get: toolbox-docker-image-gcr
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -2356,7 +2399,7 @@ jobs:
       KUBERNETES_FILE_PREFIX: rabbitmonitor
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
-      docker-image-resource: toolbox-docker-latest,
+      docker-image-resource: toolbox-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-optional-repo}
 
 - name: "SIT Deploy Regional Counts"
@@ -2369,9 +2412,10 @@ jobs:
   - get: census-rm-kubernetes-optional-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
-  - get: toolbox-docker-latest
+  - get: toolbox-master
     trigger: true
     passed: ["CI Acceptance Tests"]
+  - get: toolbox-docker-image-gcr
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -2388,5 +2432,5 @@ jobs:
       KUBERNETES_FILE_PREFIX: regional-counts
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
-      docker-image-resource: toolbox-docker-latest,
+      docker-image-resource: toolbox-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-optional-repo}
