@@ -1560,7 +1560,7 @@ jobs:
       KUBERNETES_FILE_PREFIX: pubsub
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
-      docker-image-resource: pubsubsvc-docker-image-gcr,
+      docker-image-resource: pubsub-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
 - name: "CI Deploy Ops Tool"
@@ -1593,7 +1593,7 @@ jobs:
       KUBERNETES_FILE_PREFIX: ops
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
-      docker-image-resource: ops-docker-image-gc,
+      docker-image-resource: ops-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-ops-repo}
 
 - name: "CI Deploy Print File Service"
