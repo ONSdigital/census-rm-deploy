@@ -2012,7 +2012,8 @@ jobs:
       KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
       ACCEPTANCE_TESTS_IMAGE: ((acceptance-tests-image))
       BATCH_RUNNER_CONFIG: qid-batch-runner-master/qid-batch-runner.yml
-    input_mapping: {acceptance-tests-repo: acceptance-tests-repo}
+    input_mapping: {acceptance-tests-repo: acceptance-tests-repo,
+                    batch-runner-repo: qid-batch-runner-master}
 
 
 # WL Deployments
