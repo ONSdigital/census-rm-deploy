@@ -2011,7 +2011,7 @@ jobs:
       GCP_PROJECT_NAME: ((ci-gcp-project-name))
       KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
       ACCEPTANCE_TESTS_IMAGE: ((acceptance-tests-image))
-      BATCH_RUNNER_CONFIG: qid-batch-runner-repo/qid-batch-runner.yml
+      BATCH_RUNNER_CONFIG: qid-batch-runner-master/qid-batch-runner.yml
     input_mapping: {acceptance-tests-repo: acceptance-tests-repo}
 
 
