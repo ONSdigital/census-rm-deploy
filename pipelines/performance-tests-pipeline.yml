@@ -49,7 +49,6 @@ resources:
     uri: git@github.com:ONSdigital/census-rm-kubernetes.git
     private_key: ((github.service_account_private_key))
     paths: [release/*]
-    tag_filter: v*.*.*
     branch: master
 
 - name: every-minute
