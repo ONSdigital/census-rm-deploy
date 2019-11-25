@@ -765,7 +765,7 @@ jobs:
             gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
 
             # Wipe and rebuild database
-            kubectl exec `kubectl get pods -o name | grep -m1 census-rm-toolbox | cut -d'/' -f 2` -- /bin/bash /app/groundzero/rebuild_from_ground_zero.sh
+            kubectl exec $(kubectl get pods --selector=app=census-rm-toolbox -o jsonpath='{.items[*].metadata.name}') -- /bin/bash /app/groundzero/rebuild_from_ground_zero.sh
   on_failure: *slack_performance_setup_failure
 
 - name: "Scale Apps"
