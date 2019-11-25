@@ -19,6 +19,8 @@ groups:
 - name: Performance Tests
   jobs:
   - Run Performance Tests
+  - Scale Down Pre Ground Zero
+  - Wipe And Rebuild From Ground Zero
   - Scale Apps
   - Performance Tests
 
@@ -655,10 +657,11 @@ jobs:
   - get: every-minute
   - *slack_performance_tests_started
 
-- name: "Scale Apps"
+- name: "Scale Down Pre Ground Zero"
   disable_manual_trigger: true
   serial: true
   serial_groups: [
+    scale-down,
     scale-apps,
     action-scheduler,
     case-api,
@@ -680,6 +683,117 @@ jobs:
   - get: every-minute
     trigger: true
     passed: ["Run Performance Tests"]
+  - task: "Scale down pre ground zero"
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: eu.gcr.io/census-gcr/gcloud-kubectl
+      params:
+        SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+        KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+        GCP_PROJECT_NAME: ((performance-gcp-project-name))
+        CASE_PROCESSOR_REPLICAS: ((case-processor-replicas))
+        UAC_QID_REPLICAS: ((uac-qid-replicas))
+      run:
+        path: bash
+        args:
+          - -exc
+          - |
+            cat >~/gcloud-service-key.json <<EOL
+            $SERVICE_ACCOUNT_JSON
+            EOL
+
+            # Use gcloud service account to configure kubectl
+            gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
+            gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
+
+            # Scale apps down
+            kubectl scale deployment action-scheduler --replicas=0
+            kubectl scale deployment case-api --replicas=0
+            kubectl scale deployment case-processor --replicas=0
+            kubectl scale deployment uacqidservice --replicas=0
+  on_failure: *slack_performance_setup_failure
+
+- name: "Wipe And Rebuild From Ground Zero"
+  disable_manual_trigger: true
+  serial: true
+  serial_groups: [
+    scale-down,
+    scale-apps,
+    action-scheduler,
+    case-api,
+    case-processor,
+    fieldwork-adapter,
+    notify-processor,
+    uac-qid-service,
+    pubsubsvc,
+    print-file-service,
+    exception-manager,
+    toolbox,
+    event-latency-monitor,
+    rabbitmonitor]
+  plan:
+  - get: every-minute
+    trigger: true
+    passed: ["Scale Down Pre Ground Zero"]
+  - task: "Wipe DB and rebuild from ground zero"
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: eu.gcr.io/census-gcr/gcloud-kubectl
+      params:
+        SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+        KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+        GCP_PROJECT_NAME: ((performance-gcp-project-name))
+        CASE_PROCESSOR_REPLICAS: ((case-processor-replicas))
+        UAC_QID_REPLICAS: ((uac-qid-replicas))
+      run:
+        path: bash
+        args:
+          - -exc
+          - |
+            cat >~/gcloud-service-key.json <<EOL
+            $SERVICE_ACCOUNT_JSON
+            EOL
+
+            # Use gcloud service account to configure kubectl
+            gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
+            gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
+
+            # Wipe and rebuild database
+            kubectl exec $(kubectl get pods --selector=app=census-rm-toolbox -o jsonpath='{.items[*].metadata.name}') -- /bin/bash /app/groundzero/rebuild_from_ground_zero.sh
+  on_failure: *slack_performance_setup_failure
+
+- name: "Scale Apps"
+  disable_manual_trigger: true
+  serial: true
+  serial_groups: [
+    scale-down,
+    scale-apps,
+    action-scheduler,
+    case-api,
+    case-processor,
+    fieldwork-adapter,
+    notify-processor,
+    uac-qid-service,
+    pubsubsvc,
+    print-file-service,
+    exception-manager,
+    toolbox,
+    event-latency-monitor,
+    rabbitmonitor]
+  plan:
+  - get: performance-tests-repo
+  - get: performance-tests-docker-image
+    params:
+      skip_download: true
+  - get: every-minute
+    trigger: true
+    passed: ["Wipe And Rebuild From Ground Zero"]
   - task: "Scale apps"
     config:
       platform: linux
@@ -707,14 +821,24 @@ jobs:
             gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
 
             # Scale apps up
+            kubectl scale deployment action-scheduler --replicas=1
+            kubectl scale deployment case-api --replicas=1
             kubectl scale deployment case-processor --replicas=$CASE_PROCESSOR_REPLICAS
             kubectl scale deployment uacqidservice --replicas=$UAC_QID_REPLICAS
+
+            # Wait for rollout to finish
+            kubectl rollout status deploy action-scheduler --watch=true --timeout=200s
+            kubectl rollout status deploy case-api --watch=true --timeout=200s
+            kubectl rollout status deploy case-processor --watch=true --timeout=200s
+            kubectl rollout status deploy uacqidservice --watch=true --timeout=200s
+
   on_failure: *slack_performance_setup_failure
 
 - name: "Performance Tests"
   disable_manual_trigger: true
   serial: true
   serial_groups: [
+    scale-down,
     scale-apps,
     performance-tests,
     action-scheduler,
