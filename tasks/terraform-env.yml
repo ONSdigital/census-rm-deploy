@@ -6,7 +6,6 @@ image_resource:
 params:
   ENV:
   ADMIN_SERVICE_ACCOUNT_JSON:
-  GOOGLE_APPLICATION_CREDENTIALS:
   VAR_FILE:
 inputs:
   - name: census-rm-terraform
@@ -15,6 +14,7 @@ run:
   args:
     - -exc
     - |
+      export GOOGLE_APPLICATION_CREDENTIALS=/root/gcloud-service-key.json
       apt-get install -y unzip procps  # NB: procps is used by Helm
       git clone https://github.com/kamatama41/tfenv.git ~/.tfenv
       ln -s /root/.tfenv/bin/* /usr/local/bin
