@@ -21,7 +21,7 @@ run:
       cat > /root/gcloud-service-key.json <<EOL
       $SERVICE_ACCOUNT_JSON
       EOL
-      gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
+      gcloud auth activate-service-account --key-file /root/gcloud-service-key.json
       cp -R census-rm-kubernetes-repo/ census-rm-terraform/tmp_rm_kube
       cd census-rm-terraform
       tfenv install
