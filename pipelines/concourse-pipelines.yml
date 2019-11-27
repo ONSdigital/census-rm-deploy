@@ -23,6 +23,7 @@ resources:
       uri: git@github.com:ONSdigital/census-rm-deploy.git
       paths:
       - "pipelines"
+      - "tasks"
       private_key: ((github.service_account_private_key))
 
   - name: pipelines
