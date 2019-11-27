@@ -26,10 +26,6 @@ run:
       cd census-rm-terraform
       tfenv install
 
-      DB_USER_PASSWORD = $(kubectl get secret db-credentials -o=jsonpath="{.data.password}" | base64 --decode)
-      SFTP_USER_NAME = $(kubectl get secret sftp-ssh-credentials -o=jsonpath="{.data.username}" | base64 --decode)
-      SFTP_USER_PASSWORD = $(kubectl get secret sftp-ssh-credentials -o=jsonpath="{.data.passphrase}" | base64 --decode)
-
       echo 'db_user_password = $(kubectl get secret db-credentials -o=jsonpath="{.data.password}" | base64 --decode)' >> $VAR_FILE
       echo 'sftp_user_name = $(kubectl get secret sftp-ssh-credentials -o=jsonpath="{.data.username}" | base64 --decode)' >> $VAR_FILE
       echo 'sftp_user_password = $(kubectl get secret sftp-ssh-credentials -o=jsonpath="{.data.passphrase}" | base64 --decode)' >> $VAR_FILE
