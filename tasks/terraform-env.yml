@@ -5,7 +5,8 @@ image_resource:
     repository: google/cloud-sdk
 params:
   ENV:
-  SERVICE_ACCOUNT_JSON:
+  ADMIN_SERVICE_ACCOUNT_JSON:
+  GOOGLE_APPLICATION_CREDENTIALS:
   VAR_FILE:
 inputs:
   - name: census-rm-terraform
@@ -17,10 +18,10 @@ run:
       apt-get install -y unzip procps  # NB: procps is used by Helm
       git clone https://github.com/kamatama41/tfenv.git ~/.tfenv
       ln -s /root/.tfenv/bin/* /usr/local/bin
-      cat > /root/gcloud-service-key.json <<EOL
-      $SERVICE_ACCOUNT_JSON
+      cat >$GOOGLE_APPLICATION_CREDENTIALS <<EOL
+      $ADMIN_SERVICE_ACCOUNT_JSON
       EOL
-      gcloud auth activate-service-account --key-file /root/gcloud-service-key.json
+      gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
       cd census-rm-terraform
       tfenv install
       SKIP_REPLICA_DB_SSL_RESET=true SKIP_DB_SSL_RESET=true AUTO_APPLY=true ./apply-prod.sh 

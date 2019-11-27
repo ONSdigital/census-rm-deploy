@@ -21,7 +21,8 @@ jobs:
       - task: "Terraform Nick Grant 11 Environment"
         file: census-rm-deploy/tasks/terraform-env.yml
         params:
-          SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+          ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+          GOOGLE_APPLICATION_CREDENTIALS: /root/gcloud-service-key.json
           ENV: nickgrant11
           VAR_FILE: ./tfvars/census-rm-nickgrant11.tfvars
         input_mapping: {census-rm-terraform: census-rm-terraform}
