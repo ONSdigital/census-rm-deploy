@@ -13,6 +13,13 @@ resources:
     private_key: ((github.service_account_private_key))
     branch: terraform-env-task
 
+- name: census-rm-kubernetes-dependencies-repo
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-kubernetes.git
+    private_key: ((github.service_account_private_key))
+    paths: [dependencies/*, rabbitmq/*, setup-dependencies.sh]
+
 jobs:
   - name: terraform-nickgrant11
     plan:
@@ -25,3 +32,14 @@ jobs:
           ENV: nickgrant11
           VAR_FILE: ./tfvars/census-rm-nickgrant11.tfvars
         input_mapping: {census-rm-terraform: census-rm-terraform}
+  - name: splat-rabbit-nickgrant11
+    plan:
+      - get: census-rm-terraform
+      - get: census-rm-deploy
+      - task: "Rabbit Splatter Nick Grant 11 Environment"
+        file: census-rm-deploy/tasks/helm-rabbit.yml
+        params:
+          ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+          ENV: nickgrant11
+          KUBERNETES_CLUSTER: rm-k8s-cluster
+        input_mapping: {census-rm-kubernetes-dependencies-repo: census-rm-kubernetes-dependencies-repo}
