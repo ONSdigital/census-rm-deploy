@@ -2048,6 +2048,7 @@ jobs:
         ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
         ENV: whitelodge
         VAR_FILE: ./tfvars/census-rm-whitelodge.tfvars
+        KUBERNETES_CLUSTER: rm-k8s-cluster
       input_mapping: {census-rm-terraform: census-rm-terraform}
 
 # WL Rabbit Helm
