@@ -45,6 +45,8 @@ groups:
 
 - name: "Whitelodge Deployments"
   jobs:
+  - "WL Terraform"
+  - "WL Rabbit Helm"
   - "WL Deploy Action-Scheduler"
   - "WL Deploy Case-API"
   - "WL Deploy Case-Processor"
@@ -96,6 +98,8 @@ groups:
   - "CI Deploy Rabbit Monitor"
   - "CI Deploy Regional Counts"
   - "CI Acceptance Tests"
+  - "WL Terraform"
+  - "WL Rabbit Helm"
   - "WL Deploy Action-Scheduler"
   - "WL Deploy Case-API"
   - "WL Deploy Case-Processor"
@@ -1946,6 +1950,7 @@ jobs:
     trigger: true
     params:
       skip_download: true
+  - get: census-rm-kubernetes-dependencies-repo
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
     passed: ["CI Deploy Action-Scheduler", 
@@ -2015,6 +2020,65 @@ jobs:
     input_mapping: {acceptance-tests-repo: acceptance-tests-repo,
                     batch-runner-repo: qid-batch-runner-master}
 
+# WL Terraform
+- name: "WL Terraform"
+  serial: true
+  serial_groups: [wl-terraform,
+                  wl-action-scheduler,
+                  wl-case-api,
+                  wl-case-processor,
+                  wl-uac-qid-service,
+                  wl-pubsub,
+                  wl-print-file-service,
+                  wl-fieldwork-adapter,
+                  wl-notify-processor,
+                  wl-exception-manager,
+                  wl-toolbox,
+                  wl-eventlatencymonitor,
+                  wl-rabbitmonitor,
+                  wl-regional-counts]
+  plan:
+    - get: census-rm-terraform
+      trigger: true
+      passed: ["CI Acceptance Tests"]
+    - get: census-rm-deploy
+    - task: "WL Terraform"
+      file: census-rm-deploy/tasks/terraform-env.yml
+      params:
+        ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+        ENV: whitelodge
+        VAR_FILE: ./tfvars/census-rm-whitelodge.tfvars
+      input_mapping: {census-rm-terraform: census-rm-terraform}
+
+# WL Rabbit Helm
+- name: "WL Rabbit Helm"
+  serial: true
+  serial_groups: [wl-terraform,
+                  wl-action-scheduler,
+                  wl-case-api,
+                  wl-case-processor,
+                  wl-uac-qid-service,
+                  wl-pubsub,
+                  wl-print-file-service,
+                  wl-fieldwork-adapter,
+                  wl-notify-processor,
+                  wl-exception-manager,
+                  wl-toolbox,
+                  wl-eventlatencymonitor,
+                  wl-rabbitmonitor,
+                  wl-regional-counts]
+  plan:
+    - get: census-rm-kubernetes-dependencies-repo
+      trigger: true
+      passed: ["CI Acceptance Tests"]
+    - get: census-rm-deploy
+    - task: "WL Rabbit Helm"
+      file: census-rm-deploy/tasks/helm-rabbit.yml
+      params:
+        ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+        ENV: whitelogde
+        KUBERNETES_CLUSTER: rm-k8s-cluster
+      input_mapping: {census-rm-kubernetes-dependencies-repo: census-rm-kubernetes-dependencies-repo}
 
 # WL Deployments
 - name: "WL Deploy Action-Scheduler"
@@ -2023,7 +2087,10 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Acceptance Tests"]
+    passed: ["WL Terraform"]
+  - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["WL Rabbit Helm"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
@@ -2056,7 +2123,10 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Acceptance Tests"]
+    passed: ["WL Terraform"]
+  - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["WL Rabbit Helm"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
@@ -2089,7 +2159,10 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Acceptance Tests"]
+    passed: ["WL Terraform"]
+  - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["WL Rabbit Helm"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
@@ -2122,7 +2195,10 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Acceptance Tests"]
+    passed: ["WL Terraform"]
+  - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["WL Rabbit Helm"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
@@ -2155,7 +2231,10 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Acceptance Tests"]
+    passed: ["WL Terraform"]
+  - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["WL Rabbit Helm"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
@@ -2188,7 +2267,10 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Acceptance Tests"]
+    passed: ["WL Terraform"]
+  - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["WL Rabbit Helm"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
@@ -2221,7 +2303,10 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Acceptance Tests"]
+    passed: ["WL Terraform"]
+  - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["WL Rabbit Helm"]
   - get: census-rm-kubernetes-ops-repo
     trigger: true
   - get: ops-master
@@ -2252,7 +2337,10 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Acceptance Tests"]
+    passed: ["WL Terraform"]
+  - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["WL Rabbit Helm"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
@@ -2285,7 +2373,10 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Acceptance Tests"]
+    passed: ["WL Terraform"]
+  - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["WL Rabbit Helm"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
@@ -2318,7 +2409,10 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Acceptance Tests"]
+    passed: ["WL Terraform"]
+  - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["WL Rabbit Helm"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
@@ -2351,7 +2445,10 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Acceptance Tests"]
+    passed: ["WL Terraform"]
+  - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["WL Rabbit Helm"]
   - get: census-rm-kubernetes-optional-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
@@ -2384,7 +2481,10 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Acceptance Tests"]
+    passed: ["WL Terraform"]
+  - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["WL Rabbit Helm"]
   - get: census-rm-kubernetes-optional-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
@@ -2417,7 +2517,10 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Acceptance Tests"]
+    passed: ["WL Terraform"]
+  - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["WL Rabbit Helm"]
   - get: census-rm-kubernetes-optional-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
@@ -2450,7 +2553,10 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Acceptance Tests"]
+    passed: ["WL Terraform"]
+  - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["WL Rabbit Helm"]
   - get: census-rm-kubernetes-optional-repo
     trigger: true
     passed: ["CI Acceptance Tests"]

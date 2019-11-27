@@ -1,0 +1,26 @@
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: google/cloud-sdk
+params:
+  ENV:
+  ADMIN_SERVICE_ACCOUNT_JSON:
+  VAR_FILE:
+inputs:
+  - name: census-rm-terraform
+run:
+  path: bash
+  args:
+    - -exc
+    - |
+      export GOOGLE_APPLICATION_CREDENTIALS=/root/gcloud-service-key.json
+      git clone https://github.com/kamatama41/tfenv.git ~/.tfenv
+      ln -s /root/.tfenv/bin/* /usr/local/bin
+      cat >$GOOGLE_APPLICATION_CREDENTIALS <<EOL
+      $ADMIN_SERVICE_ACCOUNT_JSON
+      EOL
+      gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
+      cd census-rm-terraform
+      tfenv install
+      SKIP_REPLICA_DB_SSL_RESET=true SKIP_DB_SSL_RESET=true AUTO_APPLY=true ./apply-prod.sh 
