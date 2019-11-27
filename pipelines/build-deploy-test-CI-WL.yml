@@ -98,6 +98,8 @@ groups:
   - "CI Deploy Rabbit Monitor"
   - "CI Deploy Regional Counts"
   - "CI Acceptance Tests"
+  - "WL Terraform"
+  - "WL Rabbit Helm"
   - "WL Deploy Action-Scheduler"
   - "WL Deploy Case-API"
   - "WL Deploy Case-Processor"
