@@ -1,0 +1,42 @@
+resources:
+- name: census-rm-kubernetes-repo
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-kubernetes.git
+    private_key: ((github.service_account_private_key))
+
+- name: census-rm-kubernetes-dependencies-repo
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-kubernetes.git
+    private_key: ((github.service_account_private_key))
+    paths: [dependencies/*, rabbitmq/*, setup-dependencies.sh]
+
+- name: census-rm-terraform
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-terraform.git
+    private_key: ((github.service_account_private_key))
+    branch: automation-experiment
+
+- name: census-rm-deploy
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-deploy.git
+    private_key: ((github.service_account_private_key))
+    branch: terraform-env-task
+
+jobs:
+  - name: terraform-nickgrant11
+    plan:
+      - get: census-rm-terraform
+      - get: census-rm-kubernetes-dependencies-repo
+      - get: census-rm-kubernetes-repo
+      - get: census-rm-deploy
+      - task: "Terraform Nick Grant 11 Environment"
+        file: census-rm-deploy/tasks/terraform-env.yml
+        params:
+          SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+          ENV: nickgrant11
+          VAR_FILE: ./tfvars/census-rm-nickgrant11.tfvars
+        input_mapping: {census-rm-kubernetes-repo: census-rm-kubernetes-repo, census-rm-terraform: census-rm-terraform}

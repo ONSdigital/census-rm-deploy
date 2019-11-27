@@ -1,0 +1,31 @@
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: google/cloud-sdk
+params:
+  ENV:
+  SERVICE_ACCOUNT_JSON:
+  VAR_FILE:
+inputs:
+  - name: census-rm-terraform
+  - name: census-rm-kubernetes-repo
+run:
+  path: bash
+  args:
+    - -exc
+    - |
+      apt-get install -y unzip procps  # NB: procps is used by Helm
+      git clone https://github.com/kamatama41/tfenv.git ~/.tfenv
+      ln -s /root/.tfenv/bin/* /usr/local/bin
+      cat > /root/gcloud-service-key.json <<EOL
+      $SERVICE_ACCOUNT_JSON
+      EOL
+      gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
+      cp -R census-rm-kubernetes-repo/ census-rm-terraform/tmp_rm_kube
+      cd census-rm-terraform
+      tfenv install
+      curl -L https://git.io/get_helm.sh | bash
+      helm init --client-only
+      helm plugin install https://github.com/rimusz/helm-tiller
+      SKIP_REPLICA_DB_SSL_RESET=true SKIP_DB_SSL_RESET=true KEEP_TMP_K8S=true DISABLE_CI_BINDING=true DEV_PUBSUB=true DEV_DUMMY_PGP=true AUTO_APPLY=true SKIP_DEPLOYMENTS=true ./apply-prod.sh 
