@@ -9,7 +9,6 @@ params:
   VAR_FILE:
 inputs:
   - name: census-rm-terraform
-  - name: census-rm-kubernetes-repo
 run:
   path: bash
   args:
@@ -22,10 +21,6 @@ run:
       $SERVICE_ACCOUNT_JSON
       EOL
       gcloud auth activate-service-account --key-file /root/gcloud-service-key.json
-      cp -R census-rm-kubernetes-repo/ census-rm-terraform/tmp_rm_kube
       cd census-rm-terraform
       tfenv install
-      curl -L https://git.io/get_helm.sh | bash
-      helm init --client-only
-      helm plugin install https://github.com/rimusz/helm-tiller
-      SKIP_REPLICA_DB_SSL_RESET=true SKIP_DB_SSL_RESET=true KEEP_TMP_K8S=true DISABLE_CI_BINDING=true DEV_PUBSUB=true DEV_DUMMY_PGP=true AUTO_APPLY=true SKIP_DEPLOYMENTS=true ./apply-prod.sh 
+      SKIP_REPLICA_DB_SSL_RESET=true SKIP_DB_SSL_RESET=true AUTO_APPLY=true ./apply-prod.sh 
