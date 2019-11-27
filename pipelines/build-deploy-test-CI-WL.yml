@@ -45,6 +45,8 @@ groups:
 
 - name: "Whitelodge Deployments"
   jobs:
+  - "WL Terraform"
+  - "WL Rabbit Helm"
   - "WL Deploy Action-Scheduler"
   - "WL Deploy Case-API"
   - "WL Deploy Case-Processor"
