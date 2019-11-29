@@ -563,42 +563,6 @@ templating:
             }
         ]
 
-  slack_failure_alert_sit: &slack_failure_alert_sit
-    put: slack-alert
-    params:
-      icon_emoji: ":concourse:"
-      username: Concourse
-      attachments: [
-            {
-                "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "title": "$BUILD_JOB_NAME failed",
-                "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "fields": [
-                    {
-                        "title": "Pipeline",
-                        "value": "$BUILD_PIPELINE_NAME",
-                        "short": true
-                    },
-                    {
-                        "title": "Environment",
-                        "value": "((wl-gcp-environment-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Project",
-                        "value": "((wl-gcp-project-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Build",
-                        "value": "#$BUILD_NAME",
-                        "short": true
-                    }
-                ],
-                "color": "#F35A00"
-            }
-        ]
-
   slack_success_alert_ci: &slack_success_alert_ci
     put: slack-alert
     params:
@@ -760,6 +724,99 @@ templating:
           }
       ]
 
+  slack_failure_alert_wl: &slack_failure_alert_wl
+    put: slack-alert
+    params:
+      icon_emoji: ":concourse:"
+      username: Concourse
+      attachments: [
+            {
+                "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                "title": "$BUILD_JOB_NAME failed",
+                "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                "fields": [
+                    {
+                        "title": "Pipeline",
+                        "value": "$BUILD_PIPELINE_NAME",
+                        "short": true
+                    },
+                    {
+                        "title": "Project",
+                        "value": "((wl-gcp-project-name))",
+                        "short": true
+                    },
+                    {
+                        "title": "Build",
+                        "value": "#$BUILD_NAME",
+                        "short": true
+                    }
+                ],
+                "color": "#F35A00"
+            }
+        ]
+
+  slack_success_alert_wl: &slack_success_alert_wl
+    put: slack-alert
+    params:
+      icon_emoji: ":concourse:"
+      username: Concourse
+      attachments: [
+            {
+                "fallback": "$BUILD_JOB_NAME succeeded. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                "title": "$BUILD_JOB_NAME succeeded",
+                "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                "fields": [
+                    {
+                        "title": "Pipeline",
+                        "value": "$BUILD_PIPELINE_NAME",
+                        "short": true
+                    },
+                    {
+                        "title": "Project",
+                        "value": "((wl-gcp-project-name))",
+                        "short": true
+                    },
+                    {
+                        "title": "Build",
+                        "value": "#$BUILD_NAME",
+                        "short": true
+                    }
+                ],
+                "color": "#36a64f"
+            }
+        ]
+
+  slack_started_alert_wl: &slack_started_alert_wl
+    put: slack-alert
+    params:
+      icon_emoji: ":concourse:"
+      username: Concourse
+      attachments: [
+            {
+                "fallback": "$BUILD_JOB_NAME started... See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                "title": "$BUILD_JOB_NAME started...",
+                "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+                "fields": [
+                    {
+                        "title": "Pipeline",
+                        "value": "$BUILD_PIPELINE_NAME",
+                        "short": true
+                    },
+                    {
+                        "title": "Project",
+                        "value": "((wl-gcp-project-name))",
+                        "short": true
+                    },
+                    {
+                        "title": "Build",
+                        "value": "#$BUILD_NAME",
+                        "short": true
+                    }
+                ],
+                "color": "#36a64f"
+            }
+        ]
+
 
 jobs:
 
@@ -792,7 +849,7 @@ jobs:
             cp target/census-rm-*.jar ../build/target
             cp Dockerfile ../build
             cp healthcheck.sh ../build
-  - put: action-scheduler-docker-image-ci
+  - put: action-scheduler-docker-image-wl
     on_failure: *slack_failure_alert_ci
     params:
       build: build
@@ -2037,11 +2094,14 @@ jobs:
                   wl-eventlatencymonitor,
                   wl-rabbitmonitor,
                   wl-regional-counts]
+  on_success: *slack_success_alert_wl
+  on_failure: *slack_failure_alert_wl
   plan:
     - get: census-rm-terraform
       trigger: true
       passed: ["CI Acceptance Tests"]
     - get: census-rm-deploy
+    - *slack_started_alert_wl
     - task: "WL Terraform"
       file: census-rm-deploy/tasks/terraform-env.yml
       params:
@@ -2068,11 +2128,14 @@ jobs:
                   wl-eventlatencymonitor,
                   wl-rabbitmonitor,
                   wl-regional-counts]
+  on_success: *slack_success_alert_wl
+  on_failure: *slack_failure_alert_wl
   plan:
     - get: census-rm-kubernetes-dependencies-repo
       trigger: true
       passed: ["CI Acceptance Tests"]
     - get: census-rm-deploy
+    - *slack_started_alert_wl
     - task: "WL Rabbit Helm"
       file: census-rm-deploy/tasks/helm-rabbit.yml
       params:
@@ -2104,7 +2167,7 @@ jobs:
   - get: census-rm-deploy
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
-    on_failure: *slack_failure_alert_sit
+    on_failure: *slack_failure_alert_wl
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((wl-gcp-project-name))
@@ -2140,7 +2203,7 @@ jobs:
   - get: census-rm-deploy
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-statefulset.yml
-    on_failure: *slack_failure_alert_sit
+    on_failure: *slack_failure_alert_wl
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((wl-gcp-project-name))
@@ -2176,7 +2239,7 @@ jobs:
   - get: census-rm-deploy
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
-    on_failure: *slack_failure_alert_sit
+    on_failure: *slack_failure_alert_wl
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((wl-gcp-project-name))
@@ -2212,7 +2275,7 @@ jobs:
   - get: census-rm-deploy
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
-    on_failure: *slack_failure_alert_sit
+    on_failure: *slack_failure_alert_wl
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((wl-gcp-project-name))
@@ -2248,7 +2311,7 @@ jobs:
   - get: census-rm-deploy
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
-    on_failure: *slack_failure_alert_sit
+    on_failure: *slack_failure_alert_wl
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((wl-gcp-project-name))
@@ -2284,7 +2347,7 @@ jobs:
   - get: census-rm-deploy
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
-    on_failure: *slack_failure_alert_sit
+    on_failure: *slack_failure_alert_wl
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((wl-gcp-project-name))
@@ -2318,7 +2381,7 @@ jobs:
   - get: census-rm-deploy
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
-    on_failure: *slack_failure_alert_sit
+    on_failure: *slack_failure_alert_wl
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((wl-gcp-project-name))
@@ -2354,7 +2417,7 @@ jobs:
   - get: census-rm-deploy
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
-    on_failure: *slack_failure_alert_sit
+    on_failure: *slack_failure_alert_wl
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((wl-gcp-project-name))
@@ -2390,7 +2453,7 @@ jobs:
   - get: census-rm-deploy
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
-    on_failure: *slack_failure_alert_sit
+    on_failure: *slack_failure_alert_wl
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((wl-gcp-project-name))
@@ -2426,7 +2489,7 @@ jobs:
   - get: census-rm-deploy
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
-    on_failure: *slack_failure_alert_sit
+    on_failure: *slack_failure_alert_wl
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((wl-gcp-project-name))
@@ -2462,7 +2525,7 @@ jobs:
   - get: census-rm-deploy
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
-    on_failure: *slack_failure_alert_sit
+    on_failure: *slack_failure_alert_wl
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((wl-gcp-project-name))
@@ -2498,7 +2561,7 @@ jobs:
   - get: census-rm-deploy
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
-    on_failure: *slack_failure_alert_sit
+    on_failure: *slack_failure_alert_wl
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((wl-gcp-project-name))
@@ -2534,7 +2597,7 @@ jobs:
   - get: census-rm-deploy
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
-    on_failure: *slack_failure_alert_sit
+    on_failure: *slack_failure_alert_wl
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((wl-gcp-project-name))
@@ -2570,7 +2633,7 @@ jobs:
   - get: census-rm-deploy
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
-    on_failure: *slack_failure_alert_sit
+    on_failure: *slack_failure_alert_wl
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((wl-gcp-project-name))
