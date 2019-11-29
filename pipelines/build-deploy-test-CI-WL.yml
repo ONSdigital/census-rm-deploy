@@ -73,7 +73,7 @@ groups:
   - "Build Toolbox Latest"
   - "Build UAC QID Service Latest"
 
-- name: "CI Deployments"
+- name: "CI"
   jobs:
   - "CI Deploy Infrastructure"
   - "CI Deploy Action-Scheduler"
@@ -91,12 +91,9 @@ groups:
   - "CI Deploy Event Latency Monitor"
   - "CI Deploy Rabbit Monitor"
   - "CI Deploy Regional Counts"
-
-- name: "CI Acceptance Tests"
-  jobs:
   - "CI Acceptance Tests"
 
-- name: "Whitelodge Deployments"
+- name: "Whitelodge"
   jobs:
   - "WL Terraform"
   - "WL Rabbit Helm"
