@@ -28,8 +28,10 @@ run:
       cd census-rm-terraform
       tfenv install
 
-      DB_PASSWORD=$(kubectl get secret db-credentials -o=jsonpath="{.data.password}" | base64 --decode)
-      SFTP_USER_NAME=$(kubectl get secret sftp-ssh-credentials -o=jsonpath="{.data.username}" | base64 --decode)
-      SFTP_PASSPHRASE=$(kubectl get secret sftp-ssh-credentials -o=jsonpath="{.data.passphrase}" | base64 --decode)
-
-      SKIP_REPLICA_DB_SSL_RESET=true SKIP_DB_SSL_RESET=true AUTO_APPLY=true ./apply-prod.sh "db_user_password=$DB_PASSWORD" "sftp_user_name=$SFTP_USER_NAME" "sftp_user_password=$SFTP_PASSPHRASE"
+      set +x
+      echo "db_user_password = \"$(kubectl get secret db-credentials -o=jsonpath='{.data.password}' | base64 --decode)\"" >> secret.tfvars
+      echo "sftp_user_name = \"$(kubectl get secret sftp-ssh-credentials -o=jsonpath='{.data.username}' | base64 --decode)\"" >>  secret.tfvars
+      echo "sftp_user_password = \"$(kubectl get secret sftp-ssh-credentials -o=jsonpath='{.data.passphrase}' | base64 --decode)\"" >> secret.tfvars
+      set -x
+      
+      SKIP_REPLICA_DB_SSL_RESET=true SKIP_DB_SSL_RESET=true SECRETS_VAR_FILE=./secret.tfvars AUTO_APPLY=true ./apply-prod.sh
