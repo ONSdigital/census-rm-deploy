@@ -1,8 +1,8 @@
 ---
 groups:
-- name: Deploy
+- name: Overview
   jobs:
-  - Deploy
+  - Trigger Deployment
   - Action Scheduler
   - Case API
   - Case Processor
@@ -15,14 +15,42 @@ groups:
   - Rabbit Monitor
   - Toolbox
   - UAC QID Service
-  - Report Success
+  - Report Deployment Success
+  - Trigger Performance Tests
+  - Scale Down Apps
+  - Reset DB
+  - Scale Up Apps
+  - Performance Tests
+
+- name: Deployments
+  jobs:
+  - Trigger Deployment
+  - Action Scheduler
+  - Case API
+  - Case Processor
+  - Event Latency Monitor
+  - Exception Manager
+  - Fieldwork Adapter
+  - Notify Processor
+  - Print File Service
+  - PubSub Service
+  - Rabbit Monitor
+  - Toolbox
+  - UAC QID Service
+  - Report Deployment Success
+  
 - name: Performance Tests
   jobs:
-  - Run Performance Tests
-  - Scale Down Pre Ground Zero
-  - Wipe And Rebuild From Ground Zero
-  - Scale Apps
+  - Trigger Performance Tests
+  - Scale Down Apps
+  - Reset DB
+  - Scale Up Apps
   - Performance Tests
+
+- name: Manual Triggers
+  jobs:
+  - Trigger Deployment
+  - Trigger Performance Tests
 
 resource_types:
 - name: slack-notification
@@ -293,7 +321,7 @@ slack_performance_tests_started: &slack_performance_tests_started
 
 jobs:
 
-- name: "Deploy"
+- name: "Trigger Deployment"
   serial: true
   plan:
     - get: every-minute
@@ -307,11 +335,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
     on_failure: *slack_release_failure
@@ -333,11 +361,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
     on_failure: *slack_release_failure
@@ -359,11 +387,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_release_failure
@@ -385,11 +413,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
     on_failure: *slack_release_failure
@@ -411,11 +439,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_release_failure
@@ -437,11 +465,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-statefulset-no-patch.yml
     on_failure: *slack_release_failure
@@ -463,11 +491,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_release_failure
@@ -489,11 +517,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_release_failure
@@ -515,11 +543,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
     on_failure: *slack_release_failure
@@ -541,11 +569,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_release_failure
@@ -567,11 +595,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_release_failure
@@ -593,11 +621,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_release_failure
@@ -612,7 +640,7 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
 
-- name: "Report Success"
+- name: "Report Deployment Success"
   disable_manual_trigger: true
   serial: true
   plan:
@@ -633,7 +661,7 @@ jobs:
       "Rabbit Monitor"]
   - *slack_release_success
 
-- name: "Run Performance Tests"
+- name: "Trigger Performance Tests"
   serial: true
   serial_groups: [
     action-scheduler,
@@ -656,7 +684,7 @@ jobs:
   - get: every-minute
   - *slack_performance_tests_started
 
-- name: "Scale Down Pre Ground Zero"
+- name: "Scale Down Apps"
   disable_manual_trigger: true
   serial: true
   serial_groups: [
@@ -681,7 +709,7 @@ jobs:
       skip_download: true
   - get: every-minute
     trigger: true
-    passed: ["Run Performance Tests"]
+    passed: ["Trigger Performance Tests"]
   - task: "Scale down pre ground zero"
     config:
       platform: linux
@@ -715,7 +743,7 @@ jobs:
             kubectl scale deployment uacqidservice --replicas=0
   on_failure: *slack_performance_setup_failure
 
-- name: "Wipe And Rebuild From Ground Zero"
+- name: "Reset DB"
   disable_manual_trigger: true
   serial: true
   serial_groups: [
@@ -734,9 +762,13 @@ jobs:
     event-latency-monitor,
     rabbitmonitor]
   plan:
+  - get: performance-tests-repo
+  - get: performance-tests-docker-image
+    params:
+      skip_download: true
   - get: every-minute
     trigger: true
-    passed: ["Scale Down Pre Ground Zero"]
+    passed: ["Scale Down Apps"]
   - task: "Wipe DB and rebuild from ground zero"
     config:
       platform: linux
@@ -767,7 +799,7 @@ jobs:
             kubectl exec $(kubectl get pods --selector=app=census-rm-toolbox -o jsonpath='{.items[*].metadata.name}') -- /bin/bash /app/groundzero/rebuild_from_ground_zero.sh
   on_failure: *slack_performance_setup_failure
 
-- name: "Scale Apps"
+- name: "Scale Up Apps"
   disable_manual_trigger: true
   serial: true
   serial_groups: [
@@ -792,7 +824,7 @@ jobs:
       skip_download: true
   - get: every-minute
     trigger: true
-    passed: ["Wipe And Rebuild From Ground Zero"]
+    passed: ["Reset DB"]
   - task: "Scale apps"
     config:
       platform: linux
@@ -859,7 +891,7 @@ jobs:
       skip_download: true
   - get: every-minute
     trigger: true
-    passed: ["Scale Apps"]
+    passed: ["Scale Up Apps"]
   - task: "Run Performance Tests (in K8s)"
     file: performance-tests-repo/tasks/kubectl-run-performance-tests.yml
     params:
