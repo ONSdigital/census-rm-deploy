@@ -849,7 +849,7 @@ jobs:
             cp target/census-rm-*.jar ../build/target
             cp Dockerfile ../build
             cp healthcheck.sh ../build
-  - put: action-scheduler-docker-image-wl
+  - put: action-scheduler-docker-image-ci
     on_failure: *slack_failure_alert_ci
     params:
       build: build
