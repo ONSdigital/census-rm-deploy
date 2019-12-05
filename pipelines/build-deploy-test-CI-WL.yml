@@ -2000,8 +2000,9 @@ jobs:
              "CI Deploy Rabbit Monitor",
              "CI Deploy Regional Counts"]
   - get: acceptance-tests-repo
-  - get: acceptance-tests-docker-image-gcr
     trigger: true
+    passed: ["Build Acceptance Tests Latest"]
+  - get: acceptance-tests-docker-image-gcr
     params:
       skip_download: true
   - get: census-rm-kubernetes-dependencies-repo
