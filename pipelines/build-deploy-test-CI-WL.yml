@@ -172,13 +172,6 @@ resources:
     private_key: ((github.service_account_private_key))
     paths: [dependencies/*, rabbitmq/*, setup-dependencies.sh]
 
-- name: acceptance-tests-repo
-  type: git
-  source:
-    uri: git@github.com:ONSdigital/census-rm-acceptance-tests.git
-    private_key: ((github.service_account_private_key))
-    paths: [kubernetes.env, tasks/*]
-
 - name: census-rm-terraform
   type: git
   source:
@@ -2109,9 +2102,10 @@ jobs:
              "CI Deploy Event Latency Monitor",
              "CI Deploy Rabbit Monitor",
              "CI Deploy Regional Counts"]
-  - get: acceptance-tests-repo
-  - get: acceptance-tests-docker-image-gcr
+  - get: acceptance-tests-master
     trigger: true
+    passed: ["Build Acceptance Tests Latest"]
+  - get: acceptance-tests-docker-image-gcr
     params:
       skip_download: true
   - get: census-rm-kubernetes-dependencies-repo
@@ -2178,7 +2172,7 @@ jobs:
              "CI Deploy Rabbit Monitor",
              "CI Deploy Regional Counts"]
   - task: "Run Acceptance Tests (in K8s)"
-    file: acceptance-tests-repo/tasks/kubectl-run-acceptance-tests.yml
+    file: acceptance-tests-master/tasks/kubectl-run-acceptance-tests.yml
     on_failure: *slack_failure_alert_ci
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
@@ -2186,7 +2180,7 @@ jobs:
       KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
       ACCEPTANCE_TESTS_IMAGE: ((acceptance-tests-image))
       BATCH_RUNNER_CONFIG: batch-runner-repo/qid-batch-runner.yml
-    input_mapping: {acceptance-tests-repo: acceptance-tests-repo,
+    input_mapping: {acceptance-tests-repo: acceptance-tests-master,
                     batch-runner-repo: qid-batch-runner-master}
 
 # WL Terraform
