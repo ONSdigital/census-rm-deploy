@@ -116,4 +116,5 @@ jobs:
             performance-kubernetes-cluster-name: rm-k8s-cluster
             performance-tests-image: eu.gcr.io/census-gcr-rm/rm/census-rm-performance-tests
             case-processor-replicas: 4
+            action-worker-replicas: 1
             uac-qid-replicas: 2
