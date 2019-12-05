@@ -1574,7 +1574,7 @@ jobs:
       skip_download: true
   - get: census-rm-deploy
   - task: apply-service-and-deploy
-    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
+    file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
     on_failure: *slack_failure_alert_ci
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
@@ -2310,7 +2310,7 @@ jobs:
       skip_download: true
   - get: census-rm-deploy
   - task: apply-service-and-deploy
-    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
+    file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
     on_failure: *slack_failure_alert_wl
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))

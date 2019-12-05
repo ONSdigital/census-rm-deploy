@@ -181,7 +181,7 @@ jobs:
     trigger: true
     passed: ["Deploy"]
   - task: apply-service-and-deploy
-    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
+    file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_failure_alert
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
