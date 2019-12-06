@@ -677,7 +677,7 @@ templating:
           }
       ]
 
-  slack_failure_alert_ci: &slack_failure_alert_ci
+  slack_docker_build_failure_ci: &slack_docker_build_failure_ci
     put: slack-alert
     params:
       icon_emoji: ":concourse:"
@@ -708,7 +708,7 @@ templating:
           }
       ]
 
-  slack_failure_alert_gcr: &slack_failure_alert_gcr
+  slack_docker_build_failure_gcr: &slack_docker_build_failure_gcr
     put: slack-alert
     params:
       icon_emoji: ":concourse:"
@@ -866,7 +866,7 @@ jobs:
             cp Dockerfile ../build
             cp healthcheck.sh ../build
   - put: action-scheduler-docker-image-ci
-    on_failure: *slack_failure_alert_ci
+    on_failure: *slack_docker_build_failure_ci
     params:
       build: build
       tag_file: action-scheduler-master/.git/ref
@@ -874,7 +874,7 @@ jobs:
     get_params:
       save: true
   - put: action-scheduler-docker-image-gcr
-    on_failure: *slack_failure_alert_gcr
+    on_failure: *slack_docker_build_failure_gcr
     params:
       build: build
       cache_from:
@@ -913,7 +913,7 @@ jobs:
             cp Dockerfile ../build
             cp healthcheck.sh ../build
   - put: action-worker-docker-image-ci
-    on_failure: *slack_failure_alert_ci
+    on_failure: *slack_docker_build_failure_ci
     params:
       build: build
       tag_file: action-worker-master/.git/ref
@@ -921,7 +921,7 @@ jobs:
     get_params:
       save: true
   - put: action-worker-docker-image-gcr
-    on_failure: *slack_failure_alert_gcr
+    on_failure: *slack_docker_build_failure_gcr
     params:
       build: build
       cache_from:
@@ -959,7 +959,7 @@ jobs:
             cp target/census-rm-*.jar ../build/target
             cp Dockerfile ../build
   - put: case-api-docker-image-ci
-    on_failure: *slack_failure_alert_ci
+    on_failure: *slack_docker_build_failure_ci
     params:
       build: build
       tag_file: case-api-master/.git/ref
@@ -967,7 +967,7 @@ jobs:
     get_params:
       save: true
   - put: case-api-docker-image-gcr
-    on_failure: *slack_failure_alert_gcr
+    on_failure: *slack_docker_build_failure_gcr
     params:
       build: build
       cache_from:
@@ -1006,7 +1006,7 @@ jobs:
             cp Dockerfile ../build
             cp healthcheck.sh ../build
   - put: case-processor-docker-image-ci
-    on_failure: *slack_failure_alert_ci
+    on_failure: *slack_docker_build_failure_ci
     params:
       build: build
       tag_file: case-processor-master/.git/ref
@@ -1014,7 +1014,7 @@ jobs:
     get_params:
       save: true
   - put: case-processor-docker-image-gcr
-    on_failure: *slack_failure_alert_gcr
+    on_failure: *slack_docker_build_failure_gcr
     params:
       build: build
       cache_from:
@@ -1030,7 +1030,7 @@ jobs:
   - get: print-file-service-master
     trigger: true
   - put: print-file-service-docker-image-ci
-    on_failure: *slack_failure_alert_ci
+    on_failure: *slack_docker_build_failure_ci
     params:
       build: print-file-service-master
       tag_file: print-file-service-master/.git/ref
@@ -1038,7 +1038,7 @@ jobs:
     get_params:
       save: true
   - put: print-file-service-docker-image-gcr
-    on_failure: *slack_failure_alert_gcr
+    on_failure: *slack_docker_build_failure_gcr
     params:
       build: print-file-service-master
       cache_from:
@@ -1076,7 +1076,7 @@ jobs:
             cp target/*.jar ../build/target
             cp Dockerfile ../build
   - put: uac-qid-service-docker-image-ci
-    on_failure: *slack_failure_alert_ci
+    on_failure: *slack_docker_build_failure_ci
     params:
       build: build
       tag_file: uac-qid-service-master/.git/ref
@@ -1084,7 +1084,7 @@ jobs:
     get_params:
       save: true
   - put: uac-qid-service-docker-image-gcr
-    on_failure: *slack_failure_alert_gcr
+    on_failure: *slack_docker_build_failure_gcr
     params:
       build: build
       cache_from:
@@ -1100,7 +1100,7 @@ jobs:
   - get: ops-master
     trigger: true
   - put: ops-docker-image-ci
-    on_failure: *slack_failure_alert_ci
+    on_failure: *slack_docker_build_failure_ci
     params:
       build: ops-master
       tag_file: ops-master/.git/ref
@@ -1108,7 +1108,7 @@ jobs:
     get_params:
       save: true
   - put: ops-docker-image-gcr
-    on_failure: *slack_failure_alert_gcr
+    on_failure: *slack_docker_build_failure_gcr
     params:
       build: ops-master
       cache_from:
@@ -1124,7 +1124,7 @@ jobs:
   - get: toolbox-master
     trigger: true
   - put: toolbox-docker-image-ci
-    on_failure: *slack_failure_alert_ci
+    on_failure: *slack_docker_build_failure_ci
     params:
       build: toolbox-master
       tag_file: toolbox-master/.git/ref
@@ -1132,7 +1132,7 @@ jobs:
     get_params:
       save: true
   - put: toolbox-docker-image-gcr
-    on_failure: *slack_failure_alert_gcr
+    on_failure: *slack_docker_build_failure_gcr
     params:
       build: toolbox-master
       cache_from:
@@ -1148,7 +1148,7 @@ jobs:
   - get: pubsub-master
     trigger: true
   - put: pubsub-docker-image-ci
-    on_failure: *slack_failure_alert_ci
+    on_failure: *slack_docker_build_failure_ci
     params:
       build: pubsub-master
       tag_file: pubsub-master/.git/ref
@@ -1156,7 +1156,7 @@ jobs:
     get_params:
       save: true
   - put: pubsub-docker-image-gcr
-    on_failure: *slack_failure_alert_gcr
+    on_failure: *slack_docker_build_failure_gcr
     params:
       build: pubsub-master
       cache_from:
@@ -1172,7 +1172,7 @@ jobs:
   - get: qid-batch-runner-master
     trigger: true
   - put: qid-batch-runner-docker-image-ci
-    on_failure: *slack_failure_alert_ci
+    on_failure: *slack_docker_build_failure_ci
     params:
       build: qid-batch-runner-master
       tag_file: qid-batch-runner-master/.git/ref
@@ -1180,7 +1180,7 @@ jobs:
     get_params:
       save: true
   - put: qid-batch-runner-docker-image-gcr
-    on_failure: *slack_failure_alert_gcr
+    on_failure: *slack_docker_build_failure_gcr
     params:
       build: qid-batch-runner-master
       cache_from:
@@ -1196,7 +1196,7 @@ jobs:
   - get: sample-loader-master
     trigger: true
   - put: sample-loader-docker-image-ci
-    on_failure: *slack_failure_alert_ci
+    on_failure: *slack_docker_build_failure_ci
     params:
       build: sample-loader-master
       tag_file: sample-loader-master/.git/ref
@@ -1204,7 +1204,7 @@ jobs:
     get_params:
       save: true
   - put: sample-loader-docker-image-gcr
-    on_failure: *slack_failure_alert_gcr
+    on_failure: *slack_docker_build_failure_gcr
     params:
       build: sample-loader-master
       cache_from:
@@ -1220,7 +1220,7 @@ jobs:
   - get: acceptance-tests-master
     trigger: true
   - put: acceptance-tests-docker-image-ci
-    on_failure: *slack_failure_alert_ci
+    on_failure: *slack_docker_build_failure_ci
     params:
       build: acceptance-tests-master
       tag_file: acceptance-tests-master/.git/ref
@@ -1228,7 +1228,7 @@ jobs:
     get_params:
       save: true
   - put: acceptance-tests-docker-image-gcr
-    on_failure: *slack_failure_alert_gcr
+    on_failure: *slack_docker_build_failure_gcr
     params:
       build: acceptance-tests-master
       cache_from:
@@ -1267,7 +1267,7 @@ jobs:
             cp Dockerfile ../build
             cp healthcheck.sh ../build
   - put: fieldwork-adapter-docker-image-ci
-    on_failure: *slack_failure_alert_ci
+    on_failure: *slack_docker_build_failure_ci
     params:
       build: build
       tag_file: fieldwork-adapter-master/.git/ref
@@ -1275,7 +1275,7 @@ jobs:
     get_params:
       save: true
   - put: fieldwork-adapter-docker-image-gcr
-    on_failure: *slack_failure_alert_gcr
+    on_failure: *slack_docker_build_failure_gcr
     params:
       build: build
       cache_from:
@@ -1314,7 +1314,7 @@ jobs:
             cp Dockerfile ../build
             cp healthcheck.sh ../build
   - put: notify-processor-docker-image-ci
-    on_failure: *slack_failure_alert_ci
+    on_failure: *slack_docker_build_failure_ci
     params:
       build: build
       tag_file: notify-processor-master/.git/ref
@@ -1322,7 +1322,7 @@ jobs:
     get_params:
       save: true
   - put: notify-processor-docker-image-gcr
-    on_failure: *slack_failure_alert_gcr
+    on_failure: *slack_docker_build_failure_gcr
     params:
       build: build
       cache_from:
@@ -1338,7 +1338,7 @@ jobs:
   - get: notify-stub-master
     trigger: true
   - put: notify-stub-docker-image-ci
-    on_failure: *slack_failure_alert_ci
+    on_failure: *slack_docker_build_failure_ci
     params:
       build: notify-stub-master
       tag_file: notify-stub-master/.git/ref
@@ -1346,7 +1346,7 @@ jobs:
     get_params:
       save: true
   - put: notify-stub-docker-image-gcr
-    on_failure: *slack_failure_alert_gcr
+    on_failure: *slack_docker_build_failure_gcr
     params:
       build: notify-stub-master
       cache_from:
@@ -1362,7 +1362,7 @@ jobs:
   - get: data-exporter-master
     trigger: true
   - put: data-exporter-docker-image-ci
-    on_failure: *slack_failure_alert_ci
+    on_failure: *slack_docker_build_failure_ci
     params:
       build: data-exporter-master/docker
       tag_file: data-exporter-master/.git/ref
@@ -1370,7 +1370,7 @@ jobs:
     get_params:
       save: true
   - put: data-exporter-docker-image-gcr
-    on_failure: *slack_failure_alert_gcr
+    on_failure: *slack_docker_build_failure_gcr
     params:
       build: data-exporter-master/docker
       cache_from:
@@ -1408,7 +1408,7 @@ jobs:
             cp target/census-rm-*.jar ../build/target
             cp Dockerfile ../build
   - put: exception-manager-docker-image-ci
-    on_failure: *slack_failure_alert_ci
+    on_failure: *slack_docker_build_failure_ci
     params:
       build: build
       tag_file: exception-manager-master/.git/ref
@@ -1416,7 +1416,7 @@ jobs:
     get_params:
       save: true
   - put: exception-manager-docker-image-gcr
-    on_failure: *slack_failure_alert_gcr
+    on_failure: *slack_docker_build_failure_gcr
     params:
       build: build
       cache_from:
@@ -1432,7 +1432,7 @@ jobs:
   - get: performance-tests-master
     trigger: true
   - put: performance-tests-docker-image-ci
-    on_failure: *slack_failure_alert_ci
+    on_failure: *slack_docker_build_failure_ci
     params:
       build: performance-tests-master
       tag_file: performance-tests-master/.git/ref
@@ -1440,7 +1440,7 @@ jobs:
     get_params:
       save: true
   - put: performance-tests-docker-image-gcr
-    on_failure: *slack_failure_alert_gcr
+    on_failure: *slack_docker_build_failure_gcr
     params:
       build: performance-tests-master
       cache_from:
