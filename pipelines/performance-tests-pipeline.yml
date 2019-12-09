@@ -1077,7 +1077,6 @@ jobs:
       trigger: true
       passed: ["Run Terraform"]
     - get: census-rm-kubernetes-dependencies-repo
-      trigger: true
     - get: census-rm-deploy
     - task: "Run Rabbit Helm"
       file: census-rm-deploy/tasks/helm-rabbit.yml
