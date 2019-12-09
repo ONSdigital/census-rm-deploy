@@ -1087,6 +1087,7 @@ jobs:
         ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
         ENV: performance
         KUBERNETES_CLUSTER: rm-k8s-cluster
+        RABBITMQ_CONFIG_VALUES_FILE: release/rabbitmq/values_prod.yml
       input_mapping: {census-rm-kubernetes-dependencies-repo: census-rm-kubernetes-dependencies-repo}
 
 - name: "Report Terraform Success"
