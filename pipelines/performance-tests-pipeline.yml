@@ -23,6 +23,22 @@ groups:
   - Scale Up Apps
   - Performance Tests
   - Trigger Terraform
+  - Run Terraform
+  - Run Rabbit Helm
+  - Report Terraform Success
+
+- name: Manual Triggers
+  jobs:
+  - Trigger Deployment
+  - Trigger Performance Tests
+  - Trigger Terraform
+
+- name: Terraform
+  jobs:
+  - Trigger Terraform
+  - Run Terraform
+  - Run Rabbit Helm
+  - Report Terraform Success
 
 - name: Deployments
   jobs:
@@ -49,19 +65,6 @@ groups:
   - Reset DB
   - Scale Up Apps
   - Performance Tests
-
-- name: Terraform
-  jobs:
-  - Trigger Terraform
-  - Run Terraform
-  - Run Rabbit Helm
-  - Report Terraform Success
-
-- name: Manual Triggers
-  jobs:
-  - Trigger Deployment
-  - Trigger Performance Tests
-  - Trigger Terraform
 
 resource_types:
 - name: slack-notification
