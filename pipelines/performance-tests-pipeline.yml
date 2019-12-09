@@ -109,6 +109,20 @@ resources:
     username: _json_key
     password: ((gcp.service_account_json))
 
+- name: census-rm-terraform
+  type: git
+  source:
+    branch: ((terraform-branch))
+    uri: git@github.com:ONSdigital/census-rm-terraform.git
+    private_key: ((github.service_account_private_key))
+
+- name: census-rm-kubernetes-dependencies-repo
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-kubernetes.git
+    private_key: ((github.service_account_private_key))
+    paths: [dependencies/*, rabbitmq/*, setup-dependencies.sh]
+
 templating:
 
 slack_release_failure: &slack_release_failure
