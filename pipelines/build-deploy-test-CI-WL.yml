@@ -140,12 +140,6 @@ resources:
     uri: git@github.com:ONSdigital/census-rm-deploy.git
     private_key: ((github.service_account_private_key))
 
-- name: census-rm-kubernetes-repo
-  type: git
-  source:
-    uri: git@github.com:ONSdigital/census-rm-kubernetes.git
-    private_key: ((github.service_account_private_key))
-
 - name: census-rm-kubernetes-microservices-repo
   type: git
   source:
