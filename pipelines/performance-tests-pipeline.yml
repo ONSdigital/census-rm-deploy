@@ -22,6 +22,7 @@ groups:
   - Reset DB
   - Scale Up Apps
   - Performance Tests
+  - Trigger Terraform
 
 - name: Deployments
   jobs:
@@ -49,10 +50,18 @@ groups:
   - Scale Up Apps
   - Performance Tests
 
+- name: Terraform
+  jobs:
+  - Trigger Terraform
+  - Run Terraform
+  - Run Rabbit Helm
+  - Report Terraform Success
+
 - name: Manual Triggers
   jobs:
   - Trigger Deployment
   - Trigger Performance Tests
+  - Trigger Terraform
 
 resource_types:
 - name: slack-notification
@@ -317,6 +326,37 @@ slack_performance_tests_started: &slack_performance_tests_started
                   }
               ],
               "color": "#ffe100"
+          }
+      ]
+
+slack_terraform_success: &slack_terraform_success
+  put: slack-alert
+  params:
+    icon_emoji: ":concourse:"
+    username: Concourse
+    attachments: [
+          {
+              "fallback": "((performance-gcp-project-name)) Terraform succeeded. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME",
+              "title": "((performance-gcp-project-name)) Terraform Succeeded",
+              "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME",
+              "fields": [
+                  {
+                      "title": "Pipeline",
+                      "value": "$BUILD_PIPELINE_NAME",
+                      "short": true
+                  },
+                  {
+                      "title": "Project",
+                      "value": "((performance-gcp-project-name))",
+                      "short": true
+                  },
+                  {
+                      "title": "Build",
+                      "value": "#$BUILD_NAME",
+                      "short": true
+                  }
+              ],
+              "color": "#36a64f"
           }
       ]
 
@@ -940,3 +980,106 @@ jobs:
     input_mapping: {performance-tests-repo: performance-tests-repo}
   on_failure: *slack_performance_tests_failure
   on_success: *slack_performance_tests_finished
+
+- name: "Trigger Terraform"
+  serial: true
+  serial_groups: [
+    scale-down,
+    scale-apps,
+    performance-tests,
+    action-scheduler,
+    action-worker,
+    case-api,
+    case-processor,
+    fieldwork-adapter,
+    notify-processor,
+    uac-qid-service,
+    pubsubsvc,
+    print-file-service,
+    exception-manager,
+    toolbox,
+    event-latency-monitor,
+    rabbitmonitor]
+  plan:
+    - get: every-minute
+
+# Run Terraform
+- name: "Run Terraform"
+  disable_manual_trigger: true
+  serial: true
+  serial_groups: [scale-down,
+                  scale-apps,
+                  performance-tests,
+                  action-scheduler,
+                  action-worker,
+                  case-api,
+                  case-processor,
+                  fieldwork-adapter,
+                  notify-processor,
+                  uac-qid-service,
+                  pubsubsvc,
+                  print-file-service,
+                  exception-manager,
+                  toolbox,
+                  event-latency-monitor,
+                  rabbitmonitor]
+  plan:
+    - get: every-minute
+      trigger: true
+      passed: ["Trigger Terraform"]
+    - get: census-rm-terraform
+    - get: census-rm-deploy
+    - task: "Run Terraform"
+      file: census-rm-deploy/tasks/terraform-env.yml
+      params:
+        ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+        ENV: performance
+        VAR_FILE: ./tfvars/census-rm-performance.tfvars
+        KUBERNETES_CLUSTER: rm-k8s-cluster
+      input_mapping: {census-rm-terraform: census-rm-terraform}
+
+# Run Rabbit Helm
+- name: "Run Rabbit Helm"
+  disable_manual_trigger: true
+  serial: true
+  serial_groups: [scale-down,
+                  scale-apps,
+                  performance-tests,
+                  action-scheduler,
+                  action-worker,
+                  case-api,
+                  case-processor,
+                  fieldwork-adapter,
+                  notify-processor,
+                  uac-qid-service,
+                  pubsubsvc,
+                  print-file-service,
+                  exception-manager,
+                  toolbox,
+                  event-latency-monitor,
+                  rabbitmonitor]
+  plan:
+    - get: every-minute
+      trigger: true
+      passed: ["Run Terraform"]
+    - get: census-rm-kubernetes-dependencies-repo
+      trigger: true
+    - get: census-rm-deploy
+    - task: "Run Rabbit Helm"
+      file: census-rm-deploy/tasks/helm-rabbit.yml
+      params:
+        ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+        ENV: performance
+        KUBERNETES_CLUSTER: rm-k8s-cluster
+      input_mapping: {census-rm-kubernetes-dependencies-repo: census-rm-kubernetes-dependencies-repo}
+
+- name: "Report Terraform Success"
+  disable_manual_trigger: true
+  serial: true
+  plan:
+  - get: every-minute
+    trigger: true
+    passed: [
+      "Run Terraform",
+      "Run Rabbit Helm"]
+  - *slack_terraform_success
