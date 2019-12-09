@@ -1475,18 +1475,18 @@ jobs:
   on_success: *slack_success_alert_ci
   on_failure: *slack_failure_alert_ci
   plan:
-    - get: census-rm-terraform
+  - get: census-rm-terraform
     trigger: true
   - get: census-rm-deploy
   - *slack_started_alert_ci
   - task: "CI Terraform"
     file: census-rm-deploy/tasks/terraform-env.yml
-      params:
-        ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-        ENV: ci
-        VAR_FILE: ./tfvars/census-rm-ci.tfvars
-        KUBERNETES_CLUSTER: rm-k8s-cluster
-      input_mapping: {census-rm-terraform: census-rm-terraform}
+    params:
+      ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      ENV: ci
+      VAR_FILE: ./tfvars/census-rm-ci.tfvars
+      KUBERNETES_CLUSTER: rm-k8s-cluster
+    input_mapping: {census-rm-terraform: census-rm-terraform}
 
 - name: "CI Rabbit Helm"
   serial: true
