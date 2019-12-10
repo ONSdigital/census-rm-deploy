@@ -1485,6 +1485,7 @@ jobs:
 - name: "CI Rabbit Helm"
   serial: true
   serial_groups: [ci-terraform,
+                  ci-acceptance-tests,
                   action-scheduler-deploy,
                   action-worker-deploy,
                   case-api-deploy,
