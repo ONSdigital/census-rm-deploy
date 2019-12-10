@@ -20,7 +20,8 @@ groups:
   - "Build Sample Loader Latest"
   - "Build Toolbox Latest"
   - "Build UAC QID Service Latest"
-  - "CI Deploy Infrastructure"
+  - "CI Terraform"
+  - "CI Rabbit Helm"
   - "CI Deploy Action-Scheduler"
   - "CI Deploy Action-Worker"
   - "CI Deploy Case-API"
@@ -79,7 +80,8 @@ groups:
 
 - name: "CI"
   jobs:
-  - "CI Deploy Infrastructure"
+  - "CI Terraform"
+  - "CI Rabbit Helm"
   - "CI Deploy Action-Scheduler"
   - "CI Deploy Action-Worker"
   - "CI Deploy Case-API"
@@ -136,12 +138,6 @@ resources:
   type: git
   source:
     uri: git@github.com:ONSdigital/census-rm-deploy.git
-    private_key: ((github.service_account_private_key))
-
-- name: census-rm-kubernetes-repo
-  type: git
-  source:
-    uri: git@github.com:ONSdigital/census-rm-kubernetes.git
     private_key: ((github.service_account_private_key))
 
 - name: census-rm-kubernetes-microservices-repo
@@ -1450,11 +1446,9 @@ jobs:
     get_params:
       skip_download: true
 
-
-# CI Deployments
-- name: "CI Deploy Infrastructure"
+- name: "CI Terraform"
   serial: true
-  serial_groups: [ci-deploy-infrastructure,
+  serial_groups: [ci-terraform,
                   ci-acceptance-tests,
                   action-scheduler-deploy,
                   action-worker-deploy,
@@ -1472,57 +1466,58 @@ jobs:
                   rabbitmonitor-deploy,
                   regional-counts-deploy,
                   ops-deploy]
-  max_in_flight: 1
+  on_success: *slack_success_alert_ci
+  on_failure: *slack_failure_alert_ci
   plan:
   - get: census-rm-terraform
     trigger: true
-  - get: census-rm-kubernetes-dependencies-repo
-    trigger: true
-  - get: census-rm-kubernetes-repo
+  - get: census-rm-deploy
   - *slack_started_alert_ci
-  - task: "Build & Deploy Infrastructure"
-    on_success: *slack_success_alert_ci
-    on_failure: *slack_failure_alert_ci
-    config:
-      platform: linux
-      image_resource:
-        type: docker-image
-        source:
-          repository: google/cloud-sdk
+  - task: "CI Terraform"
+    file: census-rm-deploy/tasks/terraform-env.yml
+    params:
+      ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      ENV: ci
+      VAR_FILE: ./tfvars/census-rm-ci.tfvars
+      KUBERNETES_CLUSTER: rm-k8s-cluster
+    input_mapping: {census-rm-terraform: census-rm-terraform}
+
+- name: "CI Rabbit Helm"
+  serial: true
+  serial_groups: [ci-terraform,
+                  ci-acceptance-tests,
+                  action-scheduler-deploy,
+                  action-worker-deploy,
+                  case-api-deploy,
+                  case-processor-deploy,
+                  uac-qid-service-deploy,
+                  pubsub-deploy,
+                  print-file-service-deploy,
+                  fieldwork-adapter-deploy,
+                  notify-processor-deploy,
+                  notify-stub-deploy,
+                  exception-manager-deploy,
+                  toolbox-deploy,
+                  eventlatencymonitor-deploy,
+                  rabbitmonitor-deploy,
+                  regional-counts-deploy]
+  on_success: *slack_success_alert_ci
+  on_failure: *slack_failure_alert_ci
+  plan:
+    - get: census-rm-kubernetes-dependencies-repo
+      trigger: true
+      passed: ["CI Acceptance Tests"]
+    - get: census-rm-deploy
+    - *slack_started_alert_ci
+    - task: "CI Rabbit Helm"
+      file: census-rm-deploy/tasks/helm-rabbit.yml
       params:
         ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-        AUTO_APPLY: true
-        DEV_DUMMY_PGP: true
-        DEV_PUBSUB: true
-        DISABLE_CI_BINDING: true
-        ENV: ((ci-gcp-environment-name))
-        GOOGLE_APPLICATION_CREDENTIALS: /root/gcloud-service-key.json
-        KEEP_TMP_K8S: true
-        SKIP_DEPLOYMENTS: true
-      inputs:
-        - name: census-rm-terraform
-        - name: census-rm-kubernetes-repo
-      run:
-        path: bash
-        args:
-          - -exc
-          - |
-            apt-get install -y unzip procps  # NB: procps is used by Helm
-            git clone https://github.com/kamatama41/tfenv.git ~/.tfenv && \
-            ln -s /root/.tfenv/bin/* /usr/local/bin
-            cat >$GOOGLE_APPLICATION_CREDENTIALS <<EOL
-            $ADMIN_SERVICE_ACCOUNT_JSON
-            EOL
-            gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
-            cp -R census-rm-kubernetes-repo/ census-rm-terraform/tmp_rm_kube
-            cd census-rm-terraform
-            tfenv install
-            curl -L https://git.io/get_helm.sh | bash && \
-            helm init --client-only && \
-            helm plugin install https://github.com/rimusz/helm-tiller
-            ./apply.sh
+        ENV: ci
+        KUBERNETES_CLUSTER: rm-k8s-cluster
+      input_mapping: {census-rm-kubernetes-dependencies-repo: census-rm-kubernetes-dependencies-repo}
 
-
+# CI Deployments
 - name: "CI Deploy Action-Scheduler"
   serial: true
   serial_groups: [action-scheduler-build,
@@ -1530,7 +1525,10 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Deploy Infrastructure"]
+    passed: ["CI Terraform"]
+  - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["CI Rabbit Helm"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
   - get: action-scheduler-master
@@ -1563,7 +1561,10 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Deploy Infrastructure"]
+    passed: ["CI Terraform"]
+  - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["CI Rabbit Helm"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
   - get: action-worker-master
@@ -1596,7 +1597,10 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Deploy Infrastructure"]
+    passed: ["CI Terraform"]
+  - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["CI Rabbit Helm"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
   - get: case-api-master
@@ -1629,7 +1633,10 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Deploy Infrastructure"]
+    passed: ["CI Terraform"]
+  - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["CI Rabbit Helm"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
   - get: case-processor-master
@@ -1662,7 +1669,10 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Deploy Infrastructure"]
+    passed: ["CI Terraform"]
+  - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["CI Rabbit Helm"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
   - get: uac-qid-service-master
@@ -1695,7 +1705,10 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Deploy Infrastructure"]
+    passed: ["CI Terraform"]
+  - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["CI Rabbit Helm"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
   - get: pubsub-master
@@ -1728,7 +1741,10 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Deploy Infrastructure"]
+    passed: ["CI Terraform"]
+  - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["CI Rabbit Helm"]
   - get: census-rm-kubernetes-ops-repo
     trigger: true
   - get: ops-master
@@ -1761,7 +1777,10 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Deploy Infrastructure"]
+    passed: ["CI Terraform"]
+  - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["CI Rabbit Helm"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
   - get: print-file-service-master
@@ -1794,7 +1813,10 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Deploy Infrastructure"]
+    passed: ["CI Terraform"]
+  - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["CI Rabbit Helm"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
   - get: fieldwork-adapter-master
@@ -1827,7 +1849,10 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Deploy Infrastructure"]
+    passed: ["CI Terraform"]
+  - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["CI Rabbit Helm"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
   - get: notify-processor-master
@@ -1860,7 +1885,10 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Deploy Infrastructure"]
+    passed: ["CI Terraform"]
+  - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["CI Rabbit Helm"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
   - get: notify-stub-master
@@ -1893,7 +1921,10 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Deploy Infrastructure"]
+    passed: ["CI Terraform"]
+  - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["CI Rabbit Helm"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
   - get: exception-manager-master
@@ -1926,7 +1957,10 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Deploy Infrastructure"]
+    passed: ["CI Terraform"]
+  - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["CI Rabbit Helm"]
   - get: census-rm-kubernetes-optional-repo
     trigger: true
   - get: toolbox-master
@@ -1959,7 +1993,10 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Deploy Infrastructure"]
+    passed: ["CI Terraform"]
+  - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["CI Rabbit Helm"]
   - get: census-rm-kubernetes-optional-repo
     trigger: true
   - get: toolbox-master
@@ -1992,7 +2029,10 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Deploy Infrastructure"]
+    passed: ["CI Terraform"]
+  - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["CI Rabbit Helm"]
   - get: census-rm-kubernetes-optional-repo
     trigger: true
   - get: toolbox-master
@@ -2025,7 +2065,10 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Deploy Infrastructure"]
+    passed: ["CI Terraform"]
+  - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["CI Rabbit Helm"]
   - get: census-rm-kubernetes-optional-repo
     trigger: true
   - get: toolbox-master
