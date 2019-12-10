@@ -1506,8 +1506,9 @@ jobs:
   plan:
     - get: census-rm-kubernetes-dependencies-repo
       trigger: true
-      passed: ["CI Acceptance Tests"]
     - get: census-rm-deploy
+    - get: census-rm-terraform
+      passed: ["CI Terraform"]
     - *slack_started_alert_ci
     - task: "CI Rabbit Helm"
       file: census-rm-deploy/tasks/helm-rabbit.yml
