@@ -608,7 +608,7 @@ jobs:
       file: census-rm-deploy/tasks/terraform-env.yml
       params:
         ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-        ENV: blacklodge
+        ENV: ((gcp-environment-name))
         VAR_FILE: ./tfvars/census-rm-blacklodge.tfvars
         KUBERNETES_CLUSTER: rm-k8s-cluster
       input_mapping: {census-rm-terraform: census-rm-terraform-release}
@@ -639,7 +639,7 @@ jobs:
       file: census-rm-deploy/tasks/helm-rabbit.yml
       params:
         ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-        ENV: blacklodge
+        ENV: ((gcp-environment-name))
         KUBERNETES_CLUSTER: rm-k8s-cluster
         RABBITMQ_CONFIG_VALUES_FILE: release/rabbitmq/values.yml
       input_mapping: {census-rm-kubernetes-dependencies-repo: census-rm-kubernetes-release}
