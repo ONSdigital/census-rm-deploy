@@ -34,7 +34,6 @@ fly -t <target> set-pipeline -p <pipeline-name> -c pipelines/ci-kubernetes-pipel
 ```
 This should give you a diff view of the proposed pipeline changes, check the changes and accept if they are correct.
 
-# TODO: update this bit for the infrastructure bits
 ### [Manual Release Pipeline](pipelines/manual-release-pipeline.yml)
 This pipeline is designed for deploying release-tagged versions of following:
  * Infrastructure
