@@ -683,6 +683,7 @@ jobs:
                   toolbox,
                   event-latency-monitor,
                   rabbitmonitor]
+  on_failure: *slack_failure_alert
   plan:
     - get: every-minute
       trigger: true
