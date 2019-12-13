@@ -1,4 +1,56 @@
 ---
+groups:
+- name: "Overview"
+  jobs:
+  - "Trigger Deployment"
+  - "Action Scheduler"
+  - "Action Worker"
+  - "Case API"
+  - "Case Processor"
+  - "UAC QID Service"
+  - "PubSub Service"
+  - "Ops Tool"
+  - "Print File Service"
+  - "Fieldwork Adapter"
+  - "Notify Processor"
+  - "Exception Manager"
+  - "Toolbox"
+  - "Event Latency Monitor"
+  - "Rabbit Monitor"
+  - "Regional Counts"
+  - "Report Deployment Success"
+  - "Trigger Terraform"
+  - "Run Terraform"
+  - "Run Rabbit Helm"
+  - "Report Terraform Success"
+
+- name: "Infrastructure"
+  jobs:
+  - "Trigger Terraform"
+  - "Run Terraform"
+  - "Run Rabbit Helm"
+  - "Report Terraform Success"
+
+- name: "App Deployment"
+  jobs:
+  - "Trigger Deployment"
+  - "Action Scheduler"
+  - "Action Worker"
+  - "Case API"
+  - "Case Processor"
+  - "UAC QID Service"
+  - "PubSub Service"
+  - "Ops Tool"
+  - "Print File Service"
+  - "Fieldwork Adapter"
+  - "Notify Processor"
+  - "Exception Manager"
+  - "Toolbox"
+  - "Event Latency Monitor"
+  - "Rabbit Monitor"
+  - "Regional Counts"
+  - "Report Deployment Success"
+
 resource_types:
 - name: slack-notification
   type: docker-image
