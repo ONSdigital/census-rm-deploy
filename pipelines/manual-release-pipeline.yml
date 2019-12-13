@@ -15,7 +15,7 @@ groups:
   - "Notify Processor"
   - "Exception Manager"
   - "Toolbox"
-  - "Event Latency Monitor"
+  - "Database Monitor"
   - "Rabbit Monitor"
   - "Regional Counts"
   - "Report Deployment Success"
@@ -46,7 +46,7 @@ groups:
   - "Notify Processor"
   - "Exception Manager"
   - "Toolbox"
-  - "Event Latency Monitor"
+  - "Database Monitor"
   - "Rabbit Monitor"
   - "Regional Counts"
   - "Report Deployment Success"
@@ -514,10 +514,10 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
 
-- name: "Event Latency Monitor"
+- name: "Database Monitor"
   disable_manual_trigger: true
   serial: true
-  serial_groups: [event-latency-monitor]
+  serial_groups: [database-monitor]
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
@@ -533,10 +533,10 @@ jobs:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((gcp-project-name))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
-      KUBERNETES_DEPLOYMENT_NAME: eventlatencymonitor
-      KUBERNETES_SELECTOR: app=eventlatencymonitor
+      KUBERNETES_DEPLOYMENT_NAME: database-monitor
+      KUBERNETES_SELECTOR: app=database-monitor
       KUBERNETES_FILE_PATH: kubernetes-repo/release/optional
-      KUBERNETES_FILE_PREFIX: eventlatencymonitor
+      KUBERNETES_FILE_PREFIX: database-monitor
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
 
@@ -605,13 +605,13 @@ jobs:
     "PubSub Service",
     "Print File Service", 
     "Ops Tool",
-    "Fieldwork Adapter",
-    "Notify Processor",
-    "Exception Manager",
-    "Toolbox",
-    "Event Latency Monitor",
-    "Rabbit Monitor",
-    "Regional Counts"]
+     "Fieldwork Adapter", 
+     "Notify Processor", 
+     "Exception Manager", 
+     "Toolbox", 
+     "Database Monitor",
+     "Rabbit Monitor", 
+     "Regional Counts"]
   - *slack_success_alert
 
 # Infrastructure
