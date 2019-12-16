@@ -1,4 +1,56 @@
 ---
+groups:
+- name: "Overview"
+  jobs:
+  - "Trigger Deployment"
+  - "Action Scheduler"
+  - "Action Worker"
+  - "Case API"
+  - "Case Processor"
+  - "UAC QID Service"
+  - "PubSub Service"
+  - "Ops Tool"
+  - "Print File Service"
+  - "Fieldwork Adapter"
+  - "Notify Processor"
+  - "Exception Manager"
+  - "Toolbox"
+  - "Database Monitor"
+  - "Rabbit Monitor"
+  - "Regional Counts"
+  - "Report Deployment Success"
+  - "Trigger Terraform"
+  - "Run Terraform"
+  - "Run Rabbit Helm"
+  - "Report Terraform Success"
+
+- name: "Infrastructure"
+  jobs:
+  - "Trigger Terraform"
+  - "Run Terraform"
+  - "Run Rabbit Helm"
+  - "Report Terraform Success"
+
+- name: "App Deployment"
+  jobs:
+  - "Trigger Deployment"
+  - "Action Scheduler"
+  - "Action Worker"
+  - "Case API"
+  - "Case Processor"
+  - "UAC QID Service"
+  - "PubSub Service"
+  - "Ops Tool"
+  - "Print File Service"
+  - "Fieldwork Adapter"
+  - "Notify Processor"
+  - "Exception Manager"
+  - "Toolbox"
+  - "Database Monitor"
+  - "Rabbit Monitor"
+  - "Regional Counts"
+  - "Report Deployment Success"
+
 resource_types:
 - name: slack-notification
   type: docker-image
@@ -17,6 +69,14 @@ resources:
   source:
     uri: git@github.com:ONSdigital/census-rm-deploy.git
     private_key: ((github.service_account_private_key))
+
+- name: census-rm-terraform-release
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-terraform.git
+    private_key: ((github.service_account_private_key))
+    tag_filter: v*.*.*
+    branch: master
 
 - name: census-rm-kubernetes-release
   type: git
@@ -135,7 +195,7 @@ slack_in_progress_alert: &slack_in_progress_alert
 
 jobs:
 
-- name: "Deploy"
+- name: "Trigger Deployment"
   serial: true
   plan:
     - get: every-minute
@@ -149,11 +209,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
     on_failure: *slack_failure_alert
@@ -175,11 +235,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_failure_alert
@@ -201,11 +261,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
     on_failure: *slack_failure_alert
@@ -227,11 +287,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_failure_alert
@@ -253,11 +313,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
     on_failure: *slack_failure_alert
@@ -279,11 +339,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_failure_alert
@@ -305,11 +365,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
     on_failure: *slack_failure_alert
@@ -331,11 +391,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-statefulset-no-patch.yml
     on_failure: *slack_failure_alert
@@ -357,11 +417,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_failure_alert
@@ -383,11 +443,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_failure_alert
@@ -409,11 +469,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
     on_failure: *slack_failure_alert
@@ -435,11 +495,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_failure_alert
@@ -454,18 +514,18 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
 
-- name: "Event Latency Monitor"
+- name: "Database Monitor"
   disable_manual_trigger: true
   serial: true
-  serial_groups: [event-latency-monitor]
+  serial_groups: [database-monitor]
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_failure_alert
@@ -473,10 +533,10 @@ jobs:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((gcp-project-name))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
-      KUBERNETES_DEPLOYMENT_NAME: eventlatencymonitor
-      KUBERNETES_SELECTOR: app=eventlatencymonitor
+      KUBERNETES_DEPLOYMENT_NAME: database-monitor
+      KUBERNETES_SELECTOR: app=database-monitor
       KUBERNETES_FILE_PATH: kubernetes-repo/release/optional
-      KUBERNETES_FILE_PREFIX: eventlatencymonitor
+      KUBERNETES_FILE_PREFIX: database-monitor
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
 
@@ -487,11 +547,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_failure_alert
@@ -513,11 +573,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Deploy"]
+    passed: ["Trigger Deployment"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_failure_alert
@@ -532,7 +592,7 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
 
-- name: "Report Success"
+- name: "Report Deployment Success"
   disable_manual_trigger: true
   serial: true
   plan:
@@ -549,7 +609,103 @@ jobs:
      "Notify Processor", 
      "Exception Manager", 
      "Toolbox", 
-     "Event Latency Monitor", 
+     "Database Monitor",
      "Rabbit Monitor", 
      "Regional Counts"]
+  - *slack_success_alert
+
+# Infrastructure
+- name: "Trigger Terraform"
+  serial: true
+  serial_groups: [
+    action-scheduler,
+    action-worker,
+    case-api,
+    case-processor,
+    fieldwork-adapter,
+    notify-processor,
+    uac-qid-service,
+    pubsubsvc,
+    print-file-service,
+    exception-manager,
+    toolbox,
+    event-latency-monitor,
+    rabbitmonitor]
+  on_failure: *slack_failure_alert
+  plan:
+    - get: every-minute
+
+- name: "Run Terraform"
+  disable_manual_trigger: true
+  serial: true
+  serial_groups: [action-scheduler,
+                  action-worker,
+                  case-api,
+                  case-processor,
+                  fieldwork-adapter,
+                  notify-processor,
+                  uac-qid-service,
+                  pubsubsvc,
+                  print-file-service,
+                  exception-manager,
+                  toolbox,
+                  event-latency-monitor,
+                  rabbitmonitor]
+  on_failure: *slack_failure_alert
+  plan:
+    - get: every-minute
+      trigger: true
+      passed: ["Trigger Terraform"]
+    - get: census-rm-terraform-release
+    - get: census-rm-deploy
+    - task: "Run Terraform"
+      file: census-rm-deploy/tasks/terraform-env.yml
+      params:
+        ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+        ENV: ((gcp-environment-name))
+        VAR_FILE: ./tfvars/census-rm-blacklodge.tfvars
+        KUBERNETES_CLUSTER: rm-k8s-cluster
+      input_mapping: {census-rm-terraform: census-rm-terraform-release}
+
+- name: "Run Rabbit Helm"
+  disable_manual_trigger: true
+  serial: true
+  serial_groups: [action-scheduler,
+                  action-worker,
+                  case-api,
+                  case-processor,
+                  fieldwork-adapter,
+                  notify-processor,
+                  uac-qid-service,
+                  pubsubsvc,
+                  print-file-service,
+                  exception-manager,
+                  toolbox,
+                  event-latency-monitor,
+                  rabbitmonitor]
+  on_failure: *slack_failure_alert
+  plan:
+    - get: every-minute
+      trigger: true
+      passed: ["Run Terraform"]
+    - get: census-rm-kubernetes-release
+    - get: census-rm-deploy
+    - task: "Run Rabbit Helm"
+      file: census-rm-deploy/tasks/helm-rabbit.yml
+      params:
+        ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+        ENV: ((gcp-environment-name))
+        KUBERNETES_CLUSTER: rm-k8s-cluster
+        RABBITMQ_CONFIG_VALUES_FILE: release/rabbitmq/values.yml
+      input_mapping: {census-rm-kubernetes-dependencies-repo: census-rm-kubernetes-release}
+
+- name: "Report Terraform Success"
+  disable_manual_trigger: true
+  serial: true
+  plan:
+  - get: every-minute
+    trigger: true
+    passed: [
+      "Run Terraform",
+      "Run Rabbit Helm"]
   - *slack_success_alert

@@ -35,7 +35,7 @@ groups:
   - "CI Deploy Notify Stub"
   - "CI Deploy Exception Manager"
   - "CI Deploy Toolbox"
-  - "CI Deploy Event Latency Monitor"
+  - "CI Deploy Database Monitor"
   - "CI Deploy Rabbit Monitor"
   - "CI Deploy Regional Counts"
   - "CI Acceptance Tests"
@@ -53,7 +53,7 @@ groups:
   - "WL Deploy Notify Processor"
   - "WL Deploy Exception Manager"
   - "WL Deploy Toolbox"
-  - "WL Deploy Event Latency Monitor"
+  - "WL Deploy Database Monitor"
   - "WL Deploy Rabbit Monitor"
   - "WL Deploy Regional Counts"
 
@@ -95,7 +95,7 @@ groups:
   - "CI Deploy Notify Stub"
   - "CI Deploy Exception Manager"
   - "CI Deploy Toolbox"
-  - "CI Deploy Event Latency Monitor"
+  - "CI Deploy Database Monitor"
   - "CI Deploy Rabbit Monitor"
   - "CI Deploy Regional Counts"
   - "CI Acceptance Tests"
@@ -116,7 +116,7 @@ groups:
   - "WL Deploy Notify Processor"
   - "WL Deploy Exception Manager"
   - "WL Deploy Toolbox"
-  - "WL Deploy Event Latency Monitor"
+  - "WL Deploy Database Monitor"
   - "WL Deploy Rabbit Monitor"
   - "WL Deploy Regional Counts"
 
@@ -1462,7 +1462,7 @@ jobs:
                   notify-stub-deploy,
                   exception-manager-deploy,
                   toolbox-deploy,
-                  eventlatencymonitor-deploy,
+                  database-monitor-deploy,
                   rabbitmonitor-deploy,
                   regional-counts-deploy,
                   ops-deploy]
@@ -1498,7 +1498,7 @@ jobs:
                   notify-stub-deploy,
                   exception-manager-deploy,
                   toolbox-deploy,
-                  eventlatencymonitor-deploy,
+                  database-monitor-deploy,
                   rabbitmonitor-deploy,
                   regional-counts-deploy]
   on_success: *slack_success_alert_ci
@@ -1988,10 +1988,10 @@ jobs:
       docker-image-resource: toolbox-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-optional-repo}
 
-- name: "CI Deploy Event Latency Monitor"
+- name: "CI Deploy Database Monitor"
   serial: true
   serial_groups: [toolbox-build,
-                  eventlatencymonitor-deploy]
+                  database-monitor-deploy]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -2015,10 +2015,10 @@ jobs:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((ci-gcp-project-name))
       KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
-      KUBERNETES_DEPLOYMENT_NAME: eventlatencymonitor
-      KUBERNETES_SELECTOR: app=eventlatencymonitor
+      KUBERNETES_DEPLOYMENT_NAME: database-monitor
+      KUBERNETES_SELECTOR: app=database-monitor
       KUBERNETES_FILE_PATH: kubernetes-repo/optional
-      KUBERNETES_FILE_PREFIX: eventlatencymonitor-dev
+      KUBERNETES_FILE_PREFIX: database-monitor-dev
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
       docker-image-resource: toolbox-docker-image-gcr,
@@ -2126,7 +2126,7 @@ jobs:
                   exception-manager-deploy,
                   toolbox-build,
                   toolbox-deploy,
-                  eventlatencymonitor-deploy,
+                  database-monitor-deploy,
                   rabbitmonitor-deploy,
                   regional-counts-deploy]
   plan:
@@ -2144,7 +2144,7 @@ jobs:
              "CI Deploy Notify Stub",
              "CI Deploy Exception Manager",
              "CI Deploy Toolbox",
-             "CI Deploy Event Latency Monitor",
+             "CI Deploy Database Monitor",
              "CI Deploy Rabbit Monitor",
              "CI Deploy Regional Counts"]
   - get: acceptance-tests-master
@@ -2170,7 +2170,7 @@ jobs:
   - get: census-rm-kubernetes-optional-repo
     trigger: true
     passed: ["CI Deploy Toolbox",
-             "CI Deploy Event Latency Monitor",
+             "CI Deploy Database Monitor",
              "CI Deploy Rabbit Monitor",
              "CI Deploy Regional Counts"]
   - get: action-scheduler-master
@@ -2213,7 +2213,7 @@ jobs:
   - get: toolbox-master
     trigger: true
     passed: ["CI Deploy Toolbox",
-             "CI Deploy Event Latency Monitor",
+             "CI Deploy Database Monitor",
              "CI Deploy Rabbit Monitor",
              "CI Deploy Regional Counts"]
   - task: "Run Acceptance Tests (in K8s)"
@@ -2243,7 +2243,7 @@ jobs:
                   wl-notify-processor,
                   wl-exception-manager,
                   wl-toolbox,
-                  wl-eventlatencymonitor,
+                  wl-database-monitor,
                   wl-rabbitmonitor,
                   wl-regional-counts]
   on_success: *slack_success_alert_wl
@@ -2278,7 +2278,7 @@ jobs:
                   wl-notify-processor,
                   wl-exception-manager,
                   wl-toolbox,
-                  wl-eventlatencymonitor,
+                  wl-database-monitor,
                   wl-rabbitmonitor,
                   wl-regional-counts]
   on_success: *slack_success_alert_wl
@@ -2729,9 +2729,9 @@ jobs:
       docker-image-resource: toolbox-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-optional-repo}
 
-- name: "WL Deploy Event Latency Monitor"
+- name: "WL Deploy Database Monitor"
   serial: true
-  serial_groups: [wl-event-latency-monitor]
+  serial_groups: [wl-database-monitor]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -2756,10 +2756,10 @@ jobs:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((wl-gcp-project-name))
       KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
-      KUBERNETES_DEPLOYMENT_NAME: eventlatencymonitor
-      KUBERNETES_SELECTOR: app=eventlatencymonitor
+      KUBERNETES_DEPLOYMENT_NAME: database-monitor
+      KUBERNETES_SELECTOR: app=database-monitor
       KUBERNETES_FILE_PATH: kubernetes-repo/optional
-      KUBERNETES_FILE_PREFIX: eventlatencymonitor
+      KUBERNETES_FILE_PREFIX: database-monitor
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
       docker-image-resource: toolbox-docker-image-gcr,

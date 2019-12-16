@@ -35,8 +35,12 @@ fly -t <target> set-pipeline -p <pipeline-name> -c pipelines/ci-kubernetes-pipel
 This should give you a diff view of the proposed pipeline changes, check the changes and accept if they are correct.
 
 ### [Manual Release Pipeline](pipelines/manual-release-pipeline.yml)
-This pipeline is designed for deploying release tagged versions of the docker images, but not necessarily as soon as they're built. It fetches only commits with tags matching `v*.*.*`. The `Deploy` job is what should be triggered manually by the user to deploy the active version. This works by acting as a gate on the `every-minute` resource. All the individual service deploy jobs are set to trigger off the `every-minute` resource but require the `Deploy` job to have passed, which is only triggered manually. This allows all the services to be deployed with one manual trigger of the `Deploy` job, once every minute. The version to be deployed can be changed by selectively enabling only the desired version ref in the resource UI.
- To deploy a specific version, disable all versions above it on the resource UI, then trigger the `Deploy` job. See https://concourse-ci.org/manual-trigger-example.html
+This pipeline is designed for deploying release-tagged versions of following:
+ * Infrastructure
+ * Docker images for RM apps
+ 
+ It fetches only commits with tags matching `v*.*.*`. The `Trigger Terraform` and `Trigger Deployment` jobs should be triggered manually by the user to deploy the active version. These jobs work by acting as a gate on the `every-minute` resource. The Terraform job and all of the individual service deploy jobs are set to trigger off the `every-minute` resource, but require the `Trigger Terraform` / `Trigger Deployment` jobs to have passed, which are only triggered manually. This allows the infrastructure and all the services to be deployed with one manual trigger of the `Trigger Terraform` / `Trigger Deployment` jobs, once every minute. The version to be deployed can be changed by selectively enabling only the desired version ref in the resource UI.
+ To deploy a specific version, disable all versions above it on the resource UI, then trigger the `Trigger Terraform` / `Trigger Deployment` job. See https://concourse-ci.org/manual-trigger-example.html
 
 #### How to fly manually
 Create a config YAML file containing the required configuration:
