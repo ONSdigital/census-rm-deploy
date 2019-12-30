@@ -752,7 +752,6 @@ jobs:
     params:
       skip_download: true
   - get: every-minute
-  - get: performance-tests-repo
   - task: start-infrastructure
     file: performance-tests-repo/tasks/start-performance-infrastructure.yml
     params:
@@ -985,7 +984,6 @@ jobs:
       KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
       PERFORMANCE_TESTS_IMAGE: ((performance-tests-image))
     input_mapping: {performance-tests-repo: performance-tests-repo}
-  - get: performance-tests-repo
   - task: stop-infrastructure
     file: performance-tests-repo/tasks/stop-performance-infrastructure.yml
     params:
