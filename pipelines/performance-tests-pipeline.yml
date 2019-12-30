@@ -65,7 +65,7 @@ groups:
   - Reset DB
   - Scale Up Apps
   - Performance Tests
-
+  
 resource_types:
 - name: slack-notification
   type: docker-image
@@ -354,6 +354,13 @@ jobs:
   plan:
     - get: every-minute
     - get: census-rm-kubernetes-release
+    - get: performance-tests-repo
+    - task: start-infrastructure
+      file: performance-tests-repo/tasks/start-performance-infrastructure.yml
+      params:
+        SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+        KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+        GCP_PROJECT_NAME: ((performance-gcp-project-name))
   on_success: *slack_release_in_progress
 
 - name: "Action Scheduler"
@@ -714,6 +721,13 @@ jobs:
       "Toolbox",
       "Database Monitor",
       "Rabbit Monitor"]
+  - get: performance-tests-repo
+  - task: stop-infrastructure
+    file: performance-tests-repo/tasks/stop-performance-infrastructure.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+      GCP_PROJECT_NAME: ((performance-gcp-project-name))
   - *slack_release_success
 
 - name: "Trigger Performance Tests"
@@ -738,6 +752,13 @@ jobs:
     params:
       skip_download: true
   - get: every-minute
+  - get: performance-tests-repo
+  - task: start-infrastructure
+    file: performance-tests-repo/tasks/start-performance-infrastructure.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+      GCP_PROJECT_NAME: ((performance-gcp-project-name))
   - *slack_performance_tests_started
 
 - name: "Scale Down Apps"
@@ -964,6 +985,13 @@ jobs:
       KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
       PERFORMANCE_TESTS_IMAGE: ((performance-tests-image))
     input_mapping: {performance-tests-repo: performance-tests-repo}
+  - get: performance-tests-repo
+  - task: stop-infrastructure
+    file: performance-tests-repo/tasks/stop-performance-infrastructure.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+      GCP_PROJECT_NAME: ((performance-gcp-project-name))
   on_failure: *slack_failure_alert
   on_success: *slack_performance_tests_finished
 
@@ -988,6 +1016,13 @@ jobs:
     rabbitmonitor]
   plan:
     - get: every-minute
+    - get: performance-tests-repo
+    - task: start-infrastructure
+      file: performance-tests-repo/tasks/start-performance-infrastructure.yml
+      params:
+        SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+        KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+        GCP_PROJECT_NAME: ((performance-gcp-project-name))
 
 # Run Terraform
 - name: "Run Terraform"
@@ -1070,4 +1105,11 @@ jobs:
     passed: [
       "Run Terraform",
       "Run Rabbit Helm"]
+  - get: performance-tests-repo
+  - task: stop-infrastructure
+    file: performance-tests-repo/tasks/stop-performance-infrastructure.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+      GCP_PROJECT_NAME: ((performance-gcp-project-name))
   - *slack_terraform_success
