@@ -290,7 +290,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Terraform"]
+    passed: ["Reset DB"]
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
     on_failure: *slack_failure_alert
@@ -313,7 +313,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Terraform"]
+    passed: ["Reset DB"]
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_failure_alert
@@ -336,7 +336,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Terraform"]
+    passed: ["Reset DB"]
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
     on_failure: *slack_failure_alert
@@ -359,7 +359,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Terraform"]
+    passed: ["Reset DB"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_failure_alert
@@ -382,7 +382,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Terraform"]
+    passed: ["Reset DB"]
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
     on_failure: *slack_failure_alert
@@ -405,7 +405,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Terraform"]
+    passed: ["Reset DB"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_failure_alert
@@ -428,7 +428,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Terraform"]
+    passed: ["Reset DB"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-statefulset-no-patch.yml
     on_failure: *slack_failure_alert
@@ -451,7 +451,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Terraform"]
+    passed: ["Reset DB"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_failure_alert
@@ -474,7 +474,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Terraform"]
+    passed: ["Reset DB"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_failure_alert
@@ -497,7 +497,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Terraform"]
+    passed: ["Reset DB"]
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
     on_failure: *slack_failure_alert
@@ -520,7 +520,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Terraform"]
+    passed: ["Reset DB"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_failure_alert
@@ -543,7 +543,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Terraform"]
+    passed: ["Reset DB"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_failure_alert
@@ -566,7 +566,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Terraform"]
+    passed: ["Reset DB"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_failure_alert
@@ -637,21 +637,7 @@ jobs:
       skip_download: true
   - get: every-minute
     trigger: true
-    passed: [
-      "Action Scheduler",
-      "Action Worker",
-      "Case API",
-      "Case Processor",
-      "UAC QID Service",
-      "PubSub Service",
-      "Print File Service",
-      "Fieldwork Adapter",
-      "Notify Processor",
-      "Exception Manager",
-      "Toolbox",
-      "Database Monitor",
-      "Run Rabbit Helm",
-      "Rabbit Monitor"]
+    passed: ["Run Terraform"]
   - task: "Scale down pre ground zero"
     config:
       platform: linux
@@ -769,7 +755,21 @@ jobs:
       skip_download: true
   - get: every-minute
     trigger: true
-    passed: ["Reset DB"]
+    passed: [
+      "Action Scheduler",
+      "Action Worker",
+      "Case API",
+      "Case Processor",
+      "UAC QID Service",
+      "PubSub Service",
+      "Print File Service",
+      "Fieldwork Adapter",
+      "Notify Processor",
+      "Exception Manager",
+      "Toolbox",
+      "Database Monitor",
+      "Run Rabbit Helm",
+      "Rabbit Monitor"]
   - task: "Scale apps"
     config:
       platform: linux
@@ -918,7 +918,7 @@ jobs:
   plan:
     - get: every-minute
       trigger: true
-      passed: ["Run Terraform"]
+      passed: ["Reset DB"]
     - get: census-rm-kubernetes-dependencies-repo
     - get: census-rm-deploy
     - task: "Run Rabbit Helm"
