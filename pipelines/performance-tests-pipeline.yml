@@ -5,6 +5,14 @@ resource_types:
   source:
     repository: cfcommunity/slack-notification-resource
 
+- name: census-rm-kubernetes-release	
+  type: git	
+  source:
+    uri: git@github.com:ONSdigital/census-rm-kubernetes.git	
+    private_key: ((github.service_account_private_key))	
+    paths: [release/*]
+    branch: master
+
 resources:
 
 - name: slack-alert
@@ -31,7 +39,7 @@ resources:
     private_key: ((github.service_account_private_key))
 
 - name: performance-tests-docker-image
-  type: docker-imagex
+  type: docker-image
   source:
     repository: ((performance-tests-image))
     username: _json_key
