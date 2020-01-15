@@ -380,8 +380,6 @@ jobs:
         SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
         KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
         GCP_PROJECT_NAME: ((performance-gcp-project-name))
-        CASE_PROCESSOR_REPLICAS: ((case-processor-replicas))
-        UAC_QID_REPLICAS: ((uac-qid-replicas))
       run:
         path: bash
         args:
