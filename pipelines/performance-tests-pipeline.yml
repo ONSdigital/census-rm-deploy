@@ -872,12 +872,6 @@ jobs:
       KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
       PERFORMANCE_TESTS_IMAGE: ((performance-tests-image))
     input_mapping: {performance-tests-repo: performance-tests-repo}
-  - task: stop-infrastructure
-    file: performance-tests-repo/tasks/stop-performance-infrastructure.yml
-    params:
-      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
-      GCP_PROJECT_NAME: ((performance-gcp-project-name))
   on_failure: *slack_failure_alert
 
 - name: "Remove Cluster Nodes"
