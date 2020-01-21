@@ -921,6 +921,7 @@ jobs:
             gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
             
             # Legacy workaround for 403 access denied when doing node pool work
+            gcloud services enable container.googleapis.com
             gcloud config set container/use_client_certificate True
 
 
