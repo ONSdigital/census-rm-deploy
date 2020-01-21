@@ -404,295 +404,7 @@ jobs:
             kubectl exec $(kubectl get pods --selector=app=census-rm-toolbox -o jsonpath='{.items[*].metadata.name}') -- /bin/bash /app/groundzero/rebuild_from_ground_zero.sh
   on_failure: *slack_performance_setup_failure
 
-- name: "Action Scheduler"
-  disable_manual_trigger: true
-  serial: true
-  serial_groups: [action-scheduler]
-  plan:
-  - get: census-rm-kubernetes-release
-  - get: census-rm-deploy
-  - get: every-minute
-    trigger: true
-    passed: ["Scale Down Apps and Reset DB"]
-  - task: apply-service-and-deploy
-    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
-    on_failure: *slack_failure_alert
-    params:
-      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-      GCP_PROJECT_NAME: ((performance-gcp-project-name))
-      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
-      KUBERNETES_DEPLOYMENT_NAME: action-scheduler
-      KUBERNETES_SELECTOR: app=action-scheduler
-      KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
-      KUBERNETES_FILE_PREFIX: action-scheduler
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
-
-- name: "Action Worker"
-  disable_manual_trigger: true
-  serial: true
-  serial_groups: [action-worker]
-  plan:
-  - get: census-rm-kubernetes-release
-  - get: census-rm-deploy
-  - get: every-minute
-    trigger: true
-    passed: ["Scale Down Apps and Reset DB"]
-  - task: apply-service-and-deploy
-    file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
-    on_failure: *slack_failure_alert
-    params:
-      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-      GCP_PROJECT_NAME: ((performance-gcp-project-name))
-      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
-      KUBERNETES_DEPLOYMENT_NAME: action-worker
-      KUBERNETES_SELECTOR: app=action-worker
-      KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
-      KUBERNETES_FILE_PREFIX: action-worker
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
-
-- name: "Case API"
-  disable_manual_trigger: true
-  serial: true
-  serial_groups: [case-api]
-  plan:
-  - get: census-rm-kubernetes-release
-  - get: census-rm-deploy
-  - get: every-minute
-    trigger: true
-    passed: ["Scale Down Apps and Reset DB"]
-  - task: apply-service-and-deploy
-    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
-    on_failure: *slack_failure_alert
-    params:
-      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-      GCP_PROJECT_NAME: ((performance-gcp-project-name))
-      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
-      KUBERNETES_DEPLOYMENT_NAME: case-api
-      KUBERNETES_SELECTOR: app=case-api
-      KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
-      KUBERNETES_FILE_PREFIX: case-api
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
-
-- name: "Case Processor"
-  disable_manual_trigger: true
-  serial: true
-  serial_groups: [case-processor]
-  plan:
-  - get: census-rm-kubernetes-release
-  - get: census-rm-deploy
-  - get: every-minute
-    trigger: true
-    passed: ["Scale Down Apps and Reset DB"]
-  - task: apply-deployment
-    file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
-    on_failure: *slack_failure_alert
-    params:
-      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-      GCP_PROJECT_NAME: ((performance-gcp-project-name))
-      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
-      KUBERNETES_DEPLOYMENT_NAME: case-processor
-      KUBERNETES_SELECTOR: app=case-processor
-      KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
-      KUBERNETES_FILE_PREFIX: case-processor
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
-
-- name: "UAC QID Service"
-  disable_manual_trigger: true
-  serial: true
-  serial_groups: [uac-qid-service]
-  plan:
-  - get: census-rm-kubernetes-release
-  - get: census-rm-deploy
-  - get: every-minute
-    trigger: true
-    passed: ["Scale Down Apps and Reset DB"]
-  - task: apply-service-and-deploy
-    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
-    on_failure: *slack_failure_alert
-    params:
-      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-      GCP_PROJECT_NAME: ((performance-gcp-project-name))
-      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
-      KUBERNETES_DEPLOYMENT_NAME: uacqidservice
-      KUBERNETES_SELECTOR: app=uacqidservice
-      KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
-      KUBERNETES_FILE_PREFIX: uac-qid-service
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
-
-- name: "PubSub Service"
-  disable_manual_trigger: true
-  serial: true
-  serial_groups: [pubsubsvc]
-  plan:
-  - get: census-rm-kubernetes-release
-  - get: census-rm-deploy
-  - get: every-minute
-    trigger: true
-    passed: ["Scale Down Apps and Reset DB"]
-  - task: apply-deployment
-    file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
-    on_failure: *slack_failure_alert
-    params:
-      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-      GCP_PROJECT_NAME: ((performance-gcp-project-name))
-      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
-      KUBERNETES_DEPLOYMENT_NAME: pubsubsvc
-      KUBERNETES_SELECTOR: app=pubsubsvc
-      KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
-      KUBERNETES_FILE_PREFIX: pubsub
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
-
-- name: "Print File Service"
-  disable_manual_trigger: true
-  serial: true
-  serial_groups: [print-file-service]
-  plan:
-  - get: census-rm-kubernetes-release
-  - get: census-rm-deploy
-  - get: every-minute
-    trigger: true
-    passed: ["Scale Down Apps and Reset DB"]
-  - task: apply-deployment
-    file: census-rm-deploy/tasks/kubectl-apply-statefulset-no-patch.yml
-    on_failure: *slack_failure_alert
-    params:
-      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-      GCP_PROJECT_NAME: ((performance-gcp-project-name))
-      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
-      KUBERNETES_STATEFULSET_NAME: printfilesvc
-      KUBERNETES_SELECTOR: app=printfilesvc
-      KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
-      KUBERNETES_FILE_PREFIX: print-file-service
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
-
-- name: "Fieldwork Adapter"
-  disable_manual_trigger: true
-  serial: true
-  serial_groups: [fieldwork-adapter]
-  plan:
-  - get: census-rm-kubernetes-release
-  - get: census-rm-deploy
-  - get: every-minute
-    trigger: true
-    passed: ["Scale Down Apps and Reset DB"]
-  - task: apply-deployment
-    file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
-    on_failure: *slack_failure_alert
-    params:
-      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-      GCP_PROJECT_NAME: ((performance-gcp-project-name))
-      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
-      KUBERNETES_DEPLOYMENT_NAME: fieldwork-adapter
-      KUBERNETES_SELECTOR: app=fieldwork-adapter
-      KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
-      KUBERNETES_FILE_PREFIX: fieldwork-adapter
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
-
-- name: "Notify Processor"
-  disable_manual_trigger: true
-  serial: true
-  serial_groups: [notify-processor]
-  plan:
-  - get: census-rm-kubernetes-release
-  - get: census-rm-deploy
-  - get: every-minute
-    trigger: true
-    passed: ["Scale Down Apps and Reset DB"]
-  - task: apply-deployment
-    file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
-    on_failure: *slack_failure_alert
-    params:
-      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-      GCP_PROJECT_NAME: ((performance-gcp-project-name))
-      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
-      KUBERNETES_DEPLOYMENT_NAME: notify-processor
-      KUBERNETES_SELECTOR: app=notify-processor
-      KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
-      KUBERNETES_FILE_PREFIX: notify-processor
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
-
-- name: "Exception Manager"
-  disable_manual_trigger: true
-  serial: true
-  serial_groups: [exception-manager]
-  plan:
-  - get: census-rm-kubernetes-release
-  - get: census-rm-deploy
-  - get: every-minute
-    trigger: true
-    passed: ["Scale Down Apps and Reset DB"]
-  - task: apply-service-and-deploy
-    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
-    on_failure: *slack_failure_alert
-    params:
-      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-      GCP_PROJECT_NAME: ((performance-gcp-project-name))
-      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
-      KUBERNETES_DEPLOYMENT_NAME: exception-manager
-      KUBERNETES_SELECTOR: app=exception-manager
-      KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
-      KUBERNETES_FILE_PREFIX: exception-manager
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
-
-- name: "Toolbox"
-  disable_manual_trigger: true
-  serial: true
-  serial_groups: [toolbox]
-  plan:
-  - get: census-rm-kubernetes-release
-  - get: census-rm-deploy
-  - get: every-minute
-    trigger: true
-    passed: ["Scale Down Apps and Reset DB"]
-  - task: apply-deployment
-    file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
-    on_failure: *slack_failure_alert
-    params:
-      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-      GCP_PROJECT_NAME: ((performance-gcp-project-name))
-      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
-      KUBERNETES_DEPLOYMENT_NAME: census-rm-toolbox
-      KUBERNETES_SELECTOR: app=census-rm-toolbox
-      KUBERNETES_FILE_PATH: kubernetes-repo/release/optional
-      KUBERNETES_FILE_PREFIX: census-rm-toolbox
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
-
-- name: "Database Monitor"
-  disable_manual_trigger: true
-  serial: true
-  serial_groups: [database-monitor]
-  plan:
-  - get: census-rm-kubernetes-release
-  - get: census-rm-deploy
-  - get: every-minute
-    trigger: true
-    passed: ["Scale Down Apps and Reset DB"]
-  - task: apply-deployment
-    file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
-    on_failure: *slack_failure_alert
-    params:
-      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-      GCP_PROJECT_NAME: ((performance-gcp-project-name))
-      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
-      KUBERNETES_DEPLOYMENT_NAME: database-monitor
-      KUBERNETES_SELECTOR: app=database-monitor
-      KUBERNETES_FILE_PATH: kubernetes-repo/release/optional
-      KUBERNETES_FILE_PREFIX: database-monitor
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
-
-# Run Rabbit Helm
+  # Run Rabbit Helm
 - name: "Run Rabbit Helm"
   disable_manual_trigger: true
   serial: true
@@ -728,6 +440,294 @@ jobs:
         RABBITMQ_CONFIG_VALUES_FILE: release/rabbitmq/values_prod.yml
       input_mapping: {census-rm-kubernetes-dependencies-repo: census-rm-kubernetes-dependencies-repo}
 
+- name: "Action Scheduler"
+  disable_manual_trigger: true
+  serial: true
+  serial_groups: [action-scheduler]
+  plan:
+  - get: census-rm-kubernetes-release
+  - get: census-rm-deploy
+  - get: every-minute
+    trigger: true
+    passed: ["Run Rabbit Helm"]
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
+    on_failure: *slack_failure_alert
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((performance-gcp-project-name))
+      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: action-scheduler
+      KUBERNETES_SELECTOR: app=action-scheduler
+      KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
+      KUBERNETES_FILE_PREFIX: action-scheduler
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
+
+- name: "Action Worker"
+  disable_manual_trigger: true
+  serial: true
+  serial_groups: [action-worker]
+  plan:
+  - get: census-rm-kubernetes-release
+  - get: census-rm-deploy
+  - get: every-minute
+    trigger: true
+    passed: ["Run Rabbit Helm"]
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
+    on_failure: *slack_failure_alert
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((performance-gcp-project-name))
+      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: action-worker
+      KUBERNETES_SELECTOR: app=action-worker
+      KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
+      KUBERNETES_FILE_PREFIX: action-worker
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
+
+- name: "Case API"
+  disable_manual_trigger: true
+  serial: true
+  serial_groups: [case-api]
+  plan:
+  - get: census-rm-kubernetes-release
+  - get: census-rm-deploy
+  - get: every-minute
+    trigger: true
+    passed: ["Run Rabbit Helm"]
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
+    on_failure: *slack_failure_alert
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((performance-gcp-project-name))
+      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: case-api
+      KUBERNETES_SELECTOR: app=case-api
+      KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
+      KUBERNETES_FILE_PREFIX: case-api
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
+
+- name: "Case Processor"
+  disable_manual_trigger: true
+  serial: true
+  serial_groups: [case-processor]
+  plan:
+  - get: census-rm-kubernetes-release
+  - get: census-rm-deploy
+  - get: every-minute
+    trigger: true
+    passed: ["Run Rabbit Helm"]
+  - task: apply-deployment
+    file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
+    on_failure: *slack_failure_alert
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((performance-gcp-project-name))
+      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: case-processor
+      KUBERNETES_SELECTOR: app=case-processor
+      KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
+      KUBERNETES_FILE_PREFIX: case-processor
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
+
+- name: "UAC QID Service"
+  disable_manual_trigger: true
+  serial: true
+  serial_groups: [uac-qid-service]
+  plan:
+  - get: census-rm-kubernetes-release
+  - get: census-rm-deploy
+  - get: every-minute
+    trigger: true
+    passed: ["Run Rabbit Helm"]
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
+    on_failure: *slack_failure_alert
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((performance-gcp-project-name))
+      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: uacqidservice
+      KUBERNETES_SELECTOR: app=uacqidservice
+      KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
+      KUBERNETES_FILE_PREFIX: uac-qid-service
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
+
+- name: "PubSub Service"
+  disable_manual_trigger: true
+  serial: true
+  serial_groups: [pubsubsvc]
+  plan:
+  - get: census-rm-kubernetes-release
+  - get: census-rm-deploy
+  - get: every-minute
+    trigger: true
+    passed: ["Run Rabbit Helm"]
+  - task: apply-deployment
+    file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
+    on_failure: *slack_failure_alert
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((performance-gcp-project-name))
+      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: pubsubsvc
+      KUBERNETES_SELECTOR: app=pubsubsvc
+      KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
+      KUBERNETES_FILE_PREFIX: pubsub
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
+
+- name: "Print File Service"
+  disable_manual_trigger: true
+  serial: true
+  serial_groups: [print-file-service]
+  plan:
+  - get: census-rm-kubernetes-release
+  - get: census-rm-deploy
+  - get: every-minute
+    trigger: true
+    passed: ["Run Rabbit Helm"]
+  - task: apply-deployment
+    file: census-rm-deploy/tasks/kubectl-apply-statefulset-no-patch.yml
+    on_failure: *slack_failure_alert
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((performance-gcp-project-name))
+      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+      KUBERNETES_STATEFULSET_NAME: printfilesvc
+      KUBERNETES_SELECTOR: app=printfilesvc
+      KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
+      KUBERNETES_FILE_PREFIX: print-file-service
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
+
+- name: "Fieldwork Adapter"
+  disable_manual_trigger: true
+  serial: true
+  serial_groups: [fieldwork-adapter]
+  plan:
+  - get: census-rm-kubernetes-release
+  - get: census-rm-deploy
+  - get: every-minute
+    trigger: true
+    passed: ["Run Rabbit Helm"]
+  - task: apply-deployment
+    file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
+    on_failure: *slack_failure_alert
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((performance-gcp-project-name))
+      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: fieldwork-adapter
+      KUBERNETES_SELECTOR: app=fieldwork-adapter
+      KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
+      KUBERNETES_FILE_PREFIX: fieldwork-adapter
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
+
+- name: "Notify Processor"
+  disable_manual_trigger: true
+  serial: true
+  serial_groups: [notify-processor]
+  plan:
+  - get: census-rm-kubernetes-release
+  - get: census-rm-deploy
+  - get: every-minute
+    trigger: true
+    passed: ["Run Rabbit Helm"]
+  - task: apply-deployment
+    file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
+    on_failure: *slack_failure_alert
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((performance-gcp-project-name))
+      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: notify-processor
+      KUBERNETES_SELECTOR: app=notify-processor
+      KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
+      KUBERNETES_FILE_PREFIX: notify-processor
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
+
+- name: "Exception Manager"
+  disable_manual_trigger: true
+  serial: true
+  serial_groups: [exception-manager]
+  plan:
+  - get: census-rm-kubernetes-release
+  - get: census-rm-deploy
+  - get: every-minute
+    trigger: true
+    passed: ["Run Rabbit Helm"]
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
+    on_failure: *slack_failure_alert
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((performance-gcp-project-name))
+      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: exception-manager
+      KUBERNETES_SELECTOR: app=exception-manager
+      KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
+      KUBERNETES_FILE_PREFIX: exception-manager
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
+
+- name: "Toolbox"
+  disable_manual_trigger: true
+  serial: true
+  serial_groups: [toolbox]
+  plan:
+  - get: census-rm-kubernetes-release
+  - get: census-rm-deploy
+  - get: every-minute
+    trigger: true
+    passed: ["Run Rabbit Helm"]
+  - task: apply-deployment
+    file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
+    on_failure: *slack_failure_alert
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((performance-gcp-project-name))
+      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: census-rm-toolbox
+      KUBERNETES_SELECTOR: app=census-rm-toolbox
+      KUBERNETES_FILE_PATH: kubernetes-repo/release/optional
+      KUBERNETES_FILE_PREFIX: census-rm-toolbox
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
+
+- name: "Database Monitor"
+  disable_manual_trigger: true
+  serial: true
+  serial_groups: [database-monitor]
+  plan:
+  - get: census-rm-kubernetes-release
+  - get: census-rm-deploy
+  - get: every-minute
+    trigger: true
+    passed: ["Run Rabbit Helm"]
+  - task: apply-deployment
+    file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
+    on_failure: *slack_failure_alert
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((performance-gcp-project-name))
+      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: database-monitor
+      KUBERNETES_SELECTOR: app=database-monitor
+      KUBERNETES_FILE_PATH: kubernetes-repo/release/optional
+      KUBERNETES_FILE_PREFIX: database-monitor
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
+
 - name: "Rabbit Monitor"
   disable_manual_trigger: true
   serial: true
@@ -737,7 +737,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Scale Down Apps and Reset DB"]
+    passed: ["Run Rabbit Helm"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_failure_alert
@@ -791,7 +791,6 @@ jobs:
       "Exception Manager",
       "Toolbox",
       "Database Monitor",
-      "Run Rabbit Helm",
       "Rabbit Monitor"]
   - task: "Scale apps"
     config:
