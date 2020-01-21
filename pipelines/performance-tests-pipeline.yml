@@ -919,6 +919,10 @@ jobs:
             # Use gcloud service account to configure kubectl
             gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
             gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
+            
+            # Legacy workaround for 403 access denied when doing node pool work
+            gcloud config set container/use_client_certificate True
+
 
             # Delete cluster node pools
             NODE_POOL_LIST=`gcloud container node-pools list --cluster=${KUBERNETES_CLUSTER} --region=europe-west2 --format="value(name)"`
