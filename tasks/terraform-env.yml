@@ -25,6 +25,8 @@ run:
       EOL
       gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
       gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT}
+      gcloud services enable container.googleapis.com
+      gcloud config set container/use_client_certificate True
       cd census-rm-terraform
       tfenv install
 
