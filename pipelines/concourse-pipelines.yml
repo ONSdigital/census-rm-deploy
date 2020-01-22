@@ -25,6 +25,7 @@ resources:
       - "pipelines"
       - "tasks"
       private_key: ((github.service_account_private_key))
+      branch: preprod-pipeline
 
   - name: pipelines
     type: concourse-pipeline
@@ -119,3 +120,11 @@ jobs:
             action-worker-replicas: 10
             uac-qid-replicas: 2
             terraform-branch: master
+
+        - name: census-rm-preprod
+          team: rm
+          config_file: census-rm-deploy/pipelines/manual-release-pipeline.yml
+          vars:
+            gcp-environment-name: preprod
+            gcp-project-name: census-rm-preprod
+            kubernetes-cluster-name: rm-k8s-cluster
