@@ -69,6 +69,7 @@ resources:
   source:
     uri: git@github.com:ONSdigital/census-rm-deploy.git
     private_key: ((github.service_account_private_key))
+    branch: preprod-pipeline
 
 - name: census-rm-terraform-release
   type: git
