@@ -98,6 +98,7 @@ jobs:
             gcp-environment-name: blacklodge
             gcp-project-name: census-rm-blacklodge
             kubernetes-cluster-name: rm-k8s-cluster
+            ddl-image: eu.gcr.io/census-gcr-rm/rm/census-rm-ddl:latest
 
         - name: release-images
           team: rm
