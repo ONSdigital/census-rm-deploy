@@ -77,7 +77,7 @@ resources:
     uri: git@github.com:ONSdigital/census-rm-terraform.git
     private_key: ((github.service_account_private_key))
     tag_filter: v*.*.*
-    branch: master
+    branch: update-print-file-folders-for-preprod
 
 - name: census-rm-kubernetes-release
   type: git
