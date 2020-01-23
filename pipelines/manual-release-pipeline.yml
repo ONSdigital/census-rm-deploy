@@ -669,7 +669,7 @@ jobs:
       input_mapping: {census-rm-terraform: census-rm-terraform-release}
 
 - name: "Run Rabbit Helm"
-  disable_manual_trigger: true
+  disable_manual_trigger: false
   serial: true
   serial_groups: [action-scheduler,
                   action-worker,
