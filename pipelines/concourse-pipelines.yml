@@ -25,7 +25,6 @@ resources:
       - "pipelines"
       - "tasks"
       private_key: ((github.service_account_private_key))
-      branch: preprod-pipeline
 
   - name: pipelines
     type: concourse-pipeline

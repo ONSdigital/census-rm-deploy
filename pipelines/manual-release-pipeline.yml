@@ -69,14 +69,14 @@ resources:
   source:
     uri: git@github.com:ONSdigital/census-rm-deploy.git
     private_key: ((github.service_account_private_key))
-    branch: preprod-pipeline
 
 - name: census-rm-terraform-release
   type: git
   source:
     uri: git@github.com:ONSdigital/census-rm-terraform.git
     private_key: ((github.service_account_private_key))
-    branch: update-print-file-folders-for-preprod
+    tag_filter: v*.*.*
+    branch: master
 
 - name: census-rm-kubernetes-release
   type: git
@@ -668,7 +668,7 @@ jobs:
       input_mapping: {census-rm-terraform: census-rm-terraform-release}
 
 - name: "Run Rabbit Helm"
-  disable_manual_trigger: false
+  disable_manual_trigger: true
   serial: true
   serial_groups: [action-scheduler,
                   action-worker,
