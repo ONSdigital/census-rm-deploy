@@ -95,7 +95,7 @@ resources:
     uri: git@github.com:ONSdigital/census-rm-ddl.git
     private_key: ((github.service_account_private_key))
     tag_filter: v*.*.*
-    branch: master
+    branch: pipeline-testing
 
 - name: every-minute
   type: time
@@ -234,52 +234,20 @@ jobs:
   plan:
   - get: every-minute
     trigger: true
-  - get: census-rm-ddl-release
-    trigger: true
     passed: ["Trigger Deployment"]
+  - get: census-rm-ddl-release
+  - get: census-rm-kubernetes-release
   - task: apply-database-patches
-    config:
-      platform: linux
-      image_resource:
-        type: docker-image
-        source:
-          repository: eu.gcr.io/census-gcr/gcloud-kubectl
-      params:
-        SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-        KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
-        GCP_PROJECT_NAME: ((gcp-project-name))
-        DDL-IMAGE: ((ddl-image))
-      run:
-        path: bash
-        args:
-          - -exc
-          - |
-            cat >~/gcloud-service-key.json <<EOL
-            $SERVICE_ACCOUNT_JSON
-            EOL
-
-            # Use gcloud service account to configure kubectl
-            gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
-            gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
-
-            # Create a pod and run the database patches from there
-            # Env vars have to passed one by one as a --env flag each
-            # The sleep is to give kubectl time to attach properly, otherwise the first few log lines are lost
-            set +x
-            kubectl run apply-database-patches -it --command --rm --quiet \
-            --generator=run-pod/v1 \
-            --image=${DDL_IMAGE} \
-            --restart=Never \
-            $(while read env; do echo --env=${env}; done \
-            --env=DB_USERNAME=$(kubectl get secret db-credentials -o=jsonpath="{.data.username}" | base64 --decode) \
-            --env=DB_PASSWORD=$(kubectl get secret db-credentials -o=jsonpath="{.data.password}" | base64 --decode) \
-            --env=DB_HOST=$(kubectl get configmap db-config -o=jsonpath="{.data.db-host}") \
-            --env=DB_PORT=$(kubectl get configmap db-config -o=jsonpath="{.data.db-port}") \
-            --env=DB_NAME=$(kubectl get configmap db-config -o=jsonpath="{.data.db-name}") \
-            --env=DB_USESSL= \     # TODO: Need to check this
-            -- /bin/bash -c "sleep 2; PATCH_VERSION=$(cat census-rm-ddl-release/tag) ./patch_database_to_version.sh"
-            set -x
-
+    file: census-rm-deploy/tasks/kubectl-apply-ddl-patches.yml
+    on_failure: *slack_failure_alert
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release,
+                    ddl-release: census-rm-ddl-release}
 
 - name: "Action Scheduler"
   disable_manual_trigger: true
@@ -288,11 +256,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Trigger Deployment", "Apply database patches"]
+    passed: [ "Apply Database Patches"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Trigger Deployment", "Apply database patches"]
+    passed: ["Apply Database Patches"]
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
     on_failure: *slack_failure_alert
@@ -314,11 +282,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Trigger Deployment", "Apply database patches"]
+    passed: ["Apply Database Patches"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Trigger Deployment", "Apply database patches"]
+    passed: ["Apply Database Patches"]
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_failure_alert
@@ -340,11 +308,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Trigger Deployment", "Apply database patches"]
+    passed: ["Apply Database Patches"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Trigger Deployment", "Apply database patches"]
+    passed: ["Apply Database Patches"]
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
     on_failure: *slack_failure_alert
@@ -366,11 +334,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Trigger Deployment", "Apply database patches"]
+    passed: ["Apply Database Patches"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Trigger Deployment", "Apply database patches"]
+    passed: ["Apply Database Patches"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_failure_alert
@@ -392,11 +360,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Trigger Deployment", "Apply database patches"]
+    passed: ["Apply Database Patches"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Trigger Deployment", "Apply database patches"]
+    passed: ["Apply Database Patches"]
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
     on_failure: *slack_failure_alert
@@ -418,11 +386,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Trigger Deployment", "Apply database patches"]
+    passed: ["Apply Database Patches"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Trigger Deployment", "Apply database patches"]
+    passed: ["Apply Database Patches"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_failure_alert
@@ -444,11 +412,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Trigger Deployment", "Apply database patches"]
+    passed: ["Apply Database Patches"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Trigger Deployment", "Apply database patches"]
+    passed: ["Apply Database Patches"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
     on_failure: *slack_failure_alert
@@ -470,11 +438,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Trigger Deployment", "Apply database patches"]
+    passed: ["Apply Database Patches"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Trigger Deployment", "Apply database patches"]
+    passed: ["Apply Database Patches"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-statefulset-no-patch.yml
     on_failure: *slack_failure_alert
@@ -496,11 +464,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Trigger Deployment", "Apply database patches"]
+    passed: ["Apply Database Patches"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Trigger Deployment", "Apply database patches"]
+    passed: ["Apply Database Patches"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_failure_alert
@@ -522,11 +490,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Trigger Deployment", "Apply database patches"]
+    passed: ["Apply Database Patches"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Trigger Deployment", "Apply database patches"]
+    passed: ["Apply Database Patches"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_failure_alert
@@ -548,11 +516,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Trigger Deployment", "Apply database patches"]
+    passed: ["Apply Database Patches"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Trigger Deployment", "Apply database patches"]
+    passed: ["Apply Database Patches"]
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
     on_failure: *slack_failure_alert
@@ -574,11 +542,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Trigger Deployment", "Apply database patches"]
+    passed: ["Apply Database Patches"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Trigger Deployment", "Apply database patches"]
+    passed: ["Apply Database Patches"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_failure_alert
@@ -600,11 +568,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Trigger Deployment", "Apply database patches"]
+    passed: ["Apply Database Patches"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Trigger Deployment", "Apply database patches"]
+    passed: ["Apply Database Patches"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_failure_alert
@@ -626,11 +594,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Trigger Deployment", "Apply database patches"]
+    passed: ["Apply Database Patches"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Trigger Deployment", "Apply database patches"]
+    passed: ["Apply Database Patches"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_failure_alert
@@ -652,11 +620,11 @@ jobs:
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
-    passed: ["Trigger Deployment", "Apply database patches"]
+    passed: ["Apply Database Patches"]
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Trigger Deployment", "Apply database patches"]
+    passed: ["Apply Database Patches"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_failure_alert
@@ -677,7 +645,7 @@ jobs:
   plan:
   - get: every-minute
     trigger: true
-    passed: ["Apply database patches",
+    passed: ["Apply Database Patches",
             "Action Scheduler",
             "Case API",
             "Case Processor",
@@ -743,7 +711,7 @@ jobs:
       params:
         ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
         ENV: ((gcp-environment-name))
-        VAR_FILE: ./tfvars/census-rm-blacklodge.tfvars
+        VAR_FILE: ./tfvars/census-rm-liamtoozer10.tfvars
         KUBERNETES_CLUSTER: rm-k8s-cluster
       input_mapping: {census-rm-terraform: census-rm-terraform-release}
 

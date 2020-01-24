@@ -1,0 +1,43 @@
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-gcr/gcloud-kubectl
+
+params:
+  GCP_PROJECT_NAME:
+  KUBERNETES_CLUSTER:
+  KUBERNETES_FILE_PATH:
+  PATCH_VERSION:
+  SERVICE_ACCOUNT_JSON:
+  WAIT_UNTIL_AVAILABLE_TIMEOUT:
+
+inputs:
+  - name: kubernetes-repo
+  - name: ddl-release
+run:
+  path: sh
+  args:
+    - -exc
+    - |
+      cat >~/gcloud-service-key.json <<EOL
+      $SERVICE_ACCOUNT_JSON
+      EOL
+
+      # Use gcloud service account to configure kubectl
+      gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
+      gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
+
+      kubectl delete deploy census-rm-ddl --force --now || true
+
+      # Apply deployment config
+      kubectl apply -f ${KUBERNETES_FILE_PATH}/census-rm-ddl-deployment.yml --record
+
+      # Wait for rollout to finish
+      kubectl rollout status deploy census-rm-ddl --watch=true --timeout=${WAIT_UNTIL_AVAILABLE_TIMEOUT}
+
+      # Apply database patches
+      kubectl exec -it $(kubectl get pods --selector=app=census-rm-ddl -o jsonpath='{.items[*].metadata.name}') -- PATCH_VERSION=$(cat ddl-release/tag) python /app/patch_database.py
+
+      kubectl delete deploy census-rm-ddl --force --now
