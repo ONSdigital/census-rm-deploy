@@ -919,12 +919,17 @@ jobs:
             # Use gcloud service account to configure kubectl
             gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
             gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
+            
+            # Legacy workaround for 403 access denied when doing node pool work
+            gcloud services enable container.googleapis.com --project ${GCP_PROJECT_NAME}
+            gcloud config set container/use_client_certificate True --project ${GCP_PROJECT_NAME}
+
 
             # Delete cluster node pools
-            NODE_POOL_LIST=`gcloud container node-pools list --cluster=${KUBERNETES_CLUSTER} --region=europe-west2 --format="value(name)"`
+            NODE_POOL_LIST=`gcloud container node-pools list --cluster=${KUBERNETES_CLUSTER} --region=europe-west2 --format="value(name)" --project ${GCP_PROJECT_NAME}`
             for NODE_POOL in $NODE_POOL_LIST ; do
                 echo scaling $NODE_POOL
-                gcloud container node-pools delete $NODE_POOL --cluster=${KUBERNETES_CLUSTER} --region=europe-west2 --quiet
+                gcloud container node-pools delete $NODE_POOL --cluster=${KUBERNETES_CLUSTER} --region=europe-west2 --quiet --project ${GCP_PROJECT_NAME}
             done
     on_failure: *slack_failure_alert
     on_success: *slack_performance_tests_finished
