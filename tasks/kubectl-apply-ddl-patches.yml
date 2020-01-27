@@ -15,7 +15,6 @@ params:
 
 inputs:
   - name: kubernetes-repo
-  - name: ddl-release
 run:
   path: sh
   args:

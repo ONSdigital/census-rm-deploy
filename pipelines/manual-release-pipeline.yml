@@ -230,7 +230,6 @@ jobs:
   - get: every-minute
     trigger: true
     passed: ["Trigger Deployment"]
-  - get: census-rm-ddl-release
   - get: census-rm-kubernetes-release
   - get: census-rm-deploy
   - task: apply-database-patches
