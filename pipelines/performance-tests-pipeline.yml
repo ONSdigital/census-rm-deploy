@@ -369,7 +369,7 @@ jobs:
   - get: every-minute
     trigger: true
     passed: ["Run Terraform"]
-  - task: "Scale down pre ground zero"
+  - task: "Scale down apps and run ground zero"
     config:
       platform: linux
       image_resource:
@@ -896,7 +896,7 @@ jobs:
   - get: every-minute
     trigger: true
     passed: ["Performance Tests"]
-  - task: "Scale down pre ground zero"
+  - task: "Remove node-pools"
     config:
       platform: linux
       image_resource:
@@ -928,7 +928,7 @@ jobs:
             # Delete cluster node pools
             NODE_POOL_LIST=`gcloud container node-pools list --cluster=${KUBERNETES_CLUSTER} --region=europe-west2 --format="value(name)" --project ${GCP_PROJECT_NAME}`
             for NODE_POOL in $NODE_POOL_LIST ; do
-                echo scaling $NODE_POOL
+                echo deleting $NODE_POOL
                 gcloud container node-pools delete $NODE_POOL --cluster=${KUBERNETES_CLUSTER} --region=europe-west2 --quiet --project ${GCP_PROJECT_NAME}
             done
     on_failure: *slack_failure_alert
