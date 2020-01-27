@@ -40,4 +40,4 @@ run:
       # Apply database patches
       kubectl exec -it $(kubectl get pods --selector=app=census-rm-ddl -o jsonpath='{.items[*].metadata.name}') -- python patch_database.py
 
-      kubectl delete deploy census-rm-ddl --force --grace-period=0 --now
+      kubectl delete deploy census-rm-ddl --force --grace-period=0
