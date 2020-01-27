@@ -86,19 +86,11 @@ resources:
   source:
     uri: git@github.com:ONSdigital/census-rm-kubernetes.git
     private_key: ((github.service_account_private_key))
-#    paths: [release/*]
-    tag_filter: v*.*.*
+    paths: [release/*]
+#    tag_filter: v*.*.*
 #    branch: master
     branch: ddl-versioning
 
-- name: census-rm-ddl-release
-  type: git
-  source:
-    uri: git@github.com:ONSdigital/census-rm-ddl.git
-    private_key: ((github.service_account_private_key))
-#    tag_filter: v*.*.*
-#    branch: master
-    branch: pipeline-testing
 
 - name: every-minute
   type: time
@@ -216,7 +208,7 @@ jobs:
 #  on_success: *slack_in_progress_alert
 
 - name: "Apply Database Patches"
-  disable_manual_trigger: true
+#  disable_manual_trigger: true
   serial: true
   serial_groups: [apply-database-patches,
                   action-scheduler,
@@ -251,10 +243,9 @@ jobs:
 #      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_CLUSTER: rm-k8s-cluster
 #      KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
-      KUBERNETES_FILE_PATH: kubernetes-repo/optional
+      KUBERNETES_FILE_PATH: kubernetes-repo/release/optional
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {kubernetes-repo: census-rm-kubernetes-release,
-                    ddl-release: census-rm-ddl-release}
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
 
 - name: "Action Scheduler"
   disable_manual_trigger: true
