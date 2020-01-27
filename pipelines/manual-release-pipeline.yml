@@ -71,7 +71,7 @@ resources:
   source:
     uri: git@github.com:ONSdigital/census-rm-deploy.git
     private_key: ((github.service_account_private_key))
-    branch: ddl-versioning
+    branch: master
 
 - name: census-rm-terraform-release
   type: git
