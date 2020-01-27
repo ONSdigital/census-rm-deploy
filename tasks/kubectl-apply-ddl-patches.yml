@@ -29,7 +29,7 @@ run:
       gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
       gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
 
-      kubectl delete deploy census-rm-ddl --force --now || true
+      kubectl delete deploy census-rm-ddl --wait --now || true
 
       # Apply deployment config
       kubectl apply -f ${KUBERNETES_FILE_PATH}/census-rm-ddl-deployment.yml --record
