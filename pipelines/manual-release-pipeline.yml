@@ -71,6 +71,7 @@ resources:
   source:
     uri: git@github.com:ONSdigital/census-rm-deploy.git
     private_key: ((github.service_account_private_key))
+    branch: ddl-versioning
 
 - name: census-rm-terraform-release
   type: git
@@ -212,7 +213,7 @@ jobs:
   plan:
     - get: every-minute
     - get: census-rm-kubernetes-release
-  on_success: *slack_in_progress_alert
+#  on_success: *slack_in_progress_alert
 
 - name: "Apply Database Patches"
   disable_manual_trigger: true
@@ -239,6 +240,7 @@ jobs:
     passed: ["Trigger Deployment"]
   - get: census-rm-ddl-release
   - get: census-rm-kubernetes-release
+  - get: census-rm-deploy
   - task: apply-database-patches
     file: census-rm-deploy/tasks/kubectl-apply-ddl-patches.yml
     on_failure: *slack_failure_alert
