@@ -85,7 +85,7 @@ resources:
   source:
     uri: git@github.com:ONSdigital/census-rm-kubernetes.git
     private_key: ((github.service_account_private_key))
-    paths: [release/*]
+#    paths: [release/*]
     tag_filter: v*.*.*
 #    branch: master
     branch: ddl-versioning
@@ -95,7 +95,7 @@ resources:
   source:
     uri: git@github.com:ONSdigital/census-rm-ddl.git
     private_key: ((github.service_account_private_key))
-    tag_filter: v*.*.*
+#    tag_filter: v*.*.*
 #    branch: master
     branch: pipeline-testing
 
