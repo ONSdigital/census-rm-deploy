@@ -27,8 +27,9 @@ run:
       gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
       gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
 
+      # Delete deployment and pod to make sure nothing is left over
       kubectl delete deploy census-rm-ddl --force --grace-period=0 --wait || true
-      sleep 10
+      kubectl delete pod $(kubectl get pods --selector=app=census-rm-ddl -o jsonpath='{.items[*].metadata.name}') --wait || true
 
       # Apply deployment config
       kubectl apply -f ${KUBERNETES_FILE_PATH}/census-rm-ddl-deployment.yml --record
@@ -39,4 +40,6 @@ run:
       # Apply database patches
       kubectl exec -it $(kubectl get pods --selector=app=census-rm-ddl -o jsonpath='{.items[*].metadata.name}') -- python patch_database.py
 
-      kubectl delete deploy census-rm-ddl --force --grace-period=0
+      # Tidy up deployment and pod
+      kubectl delete deploy census-rm-ddl
+      kubectl delete pod $(kubectl get pods --selector=app=census-rm-ddl -o jsonpath='{.items[*].metadata.name}') || true
