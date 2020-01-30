@@ -2271,7 +2271,7 @@ jobs:
       KUBERNETES_DEPLOYMENT_NAME: rabbitmonitor
       KUBERNETES_SELECTOR: app=rabbitmonitor
       KUBERNETES_FILE_PATH: kubernetes-repo/optional
-      KUBERNETES_FILE_PREFIX: census-rm-toolbox
+      KUBERNETES_FILE_PREFIX: rabbitmonitor
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
       docker-image-resource: toolbox-docker-image-gcr,
