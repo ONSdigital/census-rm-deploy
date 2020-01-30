@@ -545,35 +545,71 @@ templating:
       icon_emoji: ":concourse:"
       username: Concourse
       attachments: [
+        {
+          "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+          "title": "$BUILD_JOB_NAME failed",
+          "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+          "fields": [
             {
-                "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "title": "$BUILD_JOB_NAME failed",
-                "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "fields": [
-                    {
-                        "title": "Pipeline",
-                        "value": "$BUILD_PIPELINE_NAME",
-                        "short": true
-                    },
-                    {
-                        "title": "Environment",
-                        "value": "((ci-gcp-environment-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Project",
-                        "value": "((ci-gcp-project-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Build",
-                        "value": "#$BUILD_NAME",
-                        "short": true
-                    }
-                ],
-                "color": "#F35A00"
+              "title": "Pipeline",
+              "value": "$BUILD_PIPELINE_NAME",
+              "short": true
+            },
+            {
+              "title": "Environment",
+              "value": "((ci-gcp-environment-name))",
+              "short": true
+            },
+            {
+              "title": "Project",
+              "value": "((ci-gcp-project-name))",
+              "short": true
+            },
+            {
+              "title": "Build",
+              "value": "#$BUILD_NAME",
+              "short": true
             }
-        ]
+          ],
+          "color": "#ff0000"
+        }
+      ]
+
+  slack_error_alert_ci: &slack_error_alert_ci
+    put: slack-alert
+    params:
+      icon_emoji: ":concourse:"
+      username: Concourse
+      attachments: [
+        {
+          "fallback": "$BUILD_JOB_NAME errored. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+          "title": "$BUILD_JOB_NAME errored",
+          "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+          "fields": [
+            {
+              "title": "Pipeline",
+              "value": "$BUILD_PIPELINE_NAME",
+              "short": true
+            },
+            {
+              "title": "Environment",
+              "value": "((ci-gcp-environment-name))",
+              "short": true
+            },
+            {
+              "title": "Project",
+              "value": "((ci-gcp-project-name))",
+              "short": true
+            },
+            {
+              "title": "Build",
+              "value": "#$BUILD_NAME",
+              "short": true
+            }
+          ],
+          "color": "#f58a3d"
+        }
+      ]
 
   slack_success_alert_ci: &slack_success_alert_ci
     put: slack-alert
@@ -581,35 +617,35 @@ templating:
       icon_emoji: ":concourse:"
       username: Concourse
       attachments: [
+        {
+          "fallback": "$BUILD_JOB_NAME succeeded. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+          "title": "$BUILD_JOB_NAME succeeded",
+          "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+          "fields": [
             {
-                "fallback": "$BUILD_JOB_NAME succeeded. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "title": "$BUILD_JOB_NAME succeeded",
-                "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "fields": [
-                    {
-                        "title": "Pipeline",
-                        "value": "$BUILD_PIPELINE_NAME",
-                        "short": true
-                    },
-                    {
-                        "title": "Environment",
-                        "value": "((ci-gcp-environment-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Project",
-                        "value": "((ci-gcp-project-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Build",
-                        "value": "#$BUILD_NAME",
-                        "short": true
-                    }
-                ],
-                "color": "#36a64f"
+              "title": "Pipeline",
+              "value": "$BUILD_PIPELINE_NAME",
+              "short": true
+            },
+            {
+              "title": "Environment",
+              "value": "((ci-gcp-environment-name))",
+              "short": true
+            },
+            {
+              "title": "Project",
+              "value": "((ci-gcp-project-name))",
+              "short": true
+            },
+            {
+              "title": "Build",
+              "value": "#$BUILD_NAME",
+              "short": true
             }
-        ]
+          ],
+          "color": "#36a64f"
+        }
+      ]
 
   slack_started_alert_ci: &slack_started_alert_ci
     put: slack-alert
@@ -617,35 +653,35 @@ templating:
       icon_emoji: ":concourse:"
       username: Concourse
       attachments: [
+        {
+          "fallback": "$BUILD_JOB_NAME started... See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+          "title": "$BUILD_JOB_NAME started...",
+          "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+          "fields": [
             {
-                "fallback": "$BUILD_JOB_NAME started... See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "title": "$BUILD_JOB_NAME started...",
-                "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "fields": [
-                    {
-                        "title": "Pipeline",
-                        "value": "$BUILD_PIPELINE_NAME",
-                        "short": true
-                    },
-                    {
-                        "title": "Environment",
-                        "value": "((ci-gcp-environment-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Project",
-                        "value": "((ci-gcp-project-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Build",
-                        "value": "#$BUILD_NAME",
-                        "short": true
-                    }
-                ],
-                "color": "#36a64f"
+              "title": "Pipeline",
+              "value": "$BUILD_PIPELINE_NAME",
+              "short": true
+            },
+            {
+              "title": "Environment",
+              "value": "((ci-gcp-environment-name))",
+              "short": true
+            },
+            {
+              "title": "Project",
+              "value": "((ci-gcp-project-name))",
+              "short": true
+            },
+            {
+              "title": "Build",
+              "value": "#$BUILD_NAME",
+              "short": true
             }
-        ]
+          ],
+          "color": "#36a64f"
+        }
+      ]
 
   slack_failure_alert_prebuild: &slack_failure_alert_prebuild
     put: slack-alert
@@ -653,24 +689,50 @@ templating:
       icon_emoji: ":concourse:"
       username: Concourse
       attachments: [
-          {
-              "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-              "title": "$BUILD_JOB_NAME failed",
-              "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-              "fields": [
-                  {
-                      "title": "Pipeline",
-                      "value": "$BUILD_PIPELINE_NAME",
-                      "short": true
-                  },
-                  {
-                      "title": "Build",
-                      "value": "#$BUILD_NAME",
-                      "short": true
-                  }
-              ],
-              "color": "#F35A00"
-          }
+        {
+          "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+          "title": "$BUILD_JOB_NAME failed",
+          "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+          "fields": [
+            {
+              "title": "Pipeline",
+              "value": "$BUILD_PIPELINE_NAME",
+              "short": true
+            },
+            {
+              "title": "Build",
+              "value": "#$BUILD_NAME",
+              "short": true
+            }
+        ],
+          "color": "#ff0000"
+        }
+      ]
+
+  slack_error_alert_prebuild: &slack_error_alert_prebuild
+    put: slack-alert
+    params:
+      icon_emoji: ":concourse:"
+      username: Concourse
+      attachments: [
+        {
+          "fallback": "$BUILD_JOB_NAME errored. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+          "title": "$BUILD_JOB_NAME errored",
+          "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+          "fields": [
+            {
+              "title": "Pipeline",
+              "value": "$BUILD_PIPELINE_NAME",
+              "short": true
+            },
+            {
+              "title": "Build",
+              "value": "#$BUILD_NAME",
+              "short": true
+            }
+        ],
+          "color": "#f58a3d"
+        }
       ]
 
   slack_docker_build_failure_ci: &slack_docker_build_failure_ci
@@ -679,29 +741,60 @@ templating:
       icon_emoji: ":concourse:"
       username: Concourse
       attachments: [
-          {
-              "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-              "title": "$BUILD_JOB_NAME failed",
-              "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-              "fields": [
-                  {
-                      "title": "Pipeline",
-                      "value": "$BUILD_PIPELINE_NAME",
-                      "short": true
-                  },
-                  {
-                      "title": "Registry",
-                      "value": "((docker-registry-ci))",
-                      "short": true
-                  },
-                  {
-                      "title": "Build",
-                      "value": "#$BUILD_NAME",
-                      "short": true
-                  }
-              ],
-              "color": "#F35A00"
-          }
+        {
+          "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+          "title": "$BUILD_JOB_NAME failed",
+          "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+          "fields": [
+            {
+              "title": "Pipeline",
+              "value": "$BUILD_PIPELINE_NAME",
+              "short": true
+            },
+            {
+              "title": "Registry",
+              "value": "((docker-registry-ci))",
+              "short": true
+            },
+            {
+              "title": "Build",
+              "value": "#$BUILD_NAME",
+              "short": true
+            }
+          ],
+          "color": "#ff0000"
+        }
+      ]
+
+  slack_docker_build_ereror_ci: &slack_docker_build_error_ci
+    put: slack-alert
+    params:
+      icon_emoji: ":concourse:"
+      username: Concourse
+      attachments: [
+        {
+          "fallback": "$BUILD_JOB_NAME errored. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+          "title": "$BUILD_JOB_NAME errored",
+          "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+          "fields": [
+            {
+              "title": "Pipeline",
+              "value": "$BUILD_PIPELINE_NAME",
+              "short": true
+            },
+            {
+              "title": "Registry",
+              "value": "((docker-registry-ci))",
+              "short": true
+            },
+            {
+              "title": "Build",
+              "value": "#$BUILD_NAME",
+              "short": true
+            }
+          ],
+          "color": "#f58a3d"
+        }
       ]
 
   slack_docker_build_failure_gcr: &slack_docker_build_failure_gcr
@@ -710,30 +803,62 @@ templating:
       icon_emoji: ":concourse:"
       username: Concourse
       attachments: [
-          {
-              "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-              "title": "$BUILD_JOB_NAME failed",
-              "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-              "fields": [
-                  {
-                      "title": "Pipeline",
-                      "value": "$BUILD_PIPELINE_NAME",
-                      "short": true
-                  },
-                  {
-                      "title": "Registry",
-                      "value": "((docker-registry-gcr))",
-                      "short": true
-                  },
+        {
+          "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+          "title": "$BUILD_JOB_NAME failed",
+          "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+          "fields": [
+            {
+              "title": "Pipeline",
+              "value": "$BUILD_PIPELINE_NAME",
+              "short": true
+            },
+            {
+              "title": "Registry",
+              "value": "((docker-registry-gcr))",
+              "short": true
+            },
 
-                  {
-                      "title": "Build",
-                      "value": "#$BUILD_NAME",
-                      "short": true
-                  }
-              ],
-              "color": "#F35A00"
-          }
+            {
+              "title": "Build",
+              "value": "#$BUILD_NAME",
+              "short": true
+            }
+          ],
+          "color": "#ff0000"
+        }
+      ]
+
+  slack_docker_build_error_gcr: &slack_docker_build_error_gcr
+    put: slack-alert
+    params:
+      icon_emoji: ":concourse:"
+      username: Concourse
+      attachments: [
+        {
+          "fallback": "$BUILD_JOB_NAME errored. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+          "title": "$BUILD_JOB_NAME errored",
+          "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+          "fields": [
+            {
+              "title": "Pipeline",
+              "value": "$BUILD_PIPELINE_NAME",
+              "short": true
+            },
+            {
+              "title": "Registry",
+              "value": "((docker-registry-gcr))",
+              "short": true
+            },
+
+            {
+              "title": "Build",
+              "value": "#$BUILD_NAME",
+              "short": true
+            }
+          ],
+          "color": "#f58a3d"
+        }
       ]
 
   slack_failure_alert_wl: &slack_failure_alert_wl
@@ -742,30 +867,61 @@ templating:
       icon_emoji: ":concourse:"
       username: Concourse
       attachments: [
+        {
+          "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+          "title": "$BUILD_JOB_NAME failed",
+          "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+          "fields": [
             {
-                "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "title": "$BUILD_JOB_NAME failed",
-                "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "fields": [
-                    {
-                        "title": "Pipeline",
-                        "value": "$BUILD_PIPELINE_NAME",
-                        "short": true
-                    },
-                    {
-                        "title": "Project",
-                        "value": "((wl-gcp-project-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Build",
-                        "value": "#$BUILD_NAME",
-                        "short": true
-                    }
-                ],
-                "color": "#F35A00"
+              "title": "Pipeline",
+              "value": "$BUILD_PIPELINE_NAME",
+              "short": true
+            },
+            {
+              "title": "Project",
+              "value": "((wl-gcp-project-name))",
+              "short": true
+            },
+            {
+              "title": "Build",
+              "value": "#$BUILD_NAME",
+              "short": true
             }
-        ]
+          ],
+          "color": "#ff0000"
+        }
+      ]
+
+  slack_error_alert_wl: &slack_error_alert_wl
+    put: slack-alert
+    params:
+      icon_emoji: ":concourse:"
+      username: Concourse
+      attachments: [
+        {
+          "fallback": "$BUILD_JOB_NAME errored. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+          "title": "$BUILD_JOB_NAME errored",
+          "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+          "fields": [
+            {
+              "title": "Pipeline",
+              "value": "$BUILD_PIPELINE_NAME",
+              "short": true
+            },
+            {
+              "title": "Project",
+              "value": "((wl-gcp-project-name))",
+              "short": true
+            },
+            {
+              "title": "Build",
+              "value": "#$BUILD_NAME",
+              "short": true
+            }
+          ],
+          "color": "#f58a3d"
+        }
+      ]
 
   slack_success_alert_wl: &slack_success_alert_wl
     put: slack-alert
@@ -773,30 +929,30 @@ templating:
       icon_emoji: ":concourse:"
       username: Concourse
       attachments: [
+        {
+          "fallback": "$BUILD_JOB_NAME succeeded. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+          "title": "$BUILD_JOB_NAME succeeded",
+          "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+          "fields": [
             {
-                "fallback": "$BUILD_JOB_NAME succeeded. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "title": "$BUILD_JOB_NAME succeeded",
-                "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "fields": [
-                    {
-                        "title": "Pipeline",
-                        "value": "$BUILD_PIPELINE_NAME",
-                        "short": true
-                    },
-                    {
-                        "title": "Project",
-                        "value": "((wl-gcp-project-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Build",
-                        "value": "#$BUILD_NAME",
-                        "short": true
-                    }
-                ],
-                "color": "#36a64f"
+              "title": "Pipeline",
+              "value": "$BUILD_PIPELINE_NAME",
+              "short": true
+            },
+            {
+              "title": "Project",
+              "value": "((wl-gcp-project-name))",
+              "short": true
+            },
+            {
+                "title": "Build",
+                "value": "#$BUILD_NAME",
+                "short": true
             }
-        ]
+          ],
+          "color": "#36a64f"
+       }
+      ]
 
   slack_started_alert_wl: &slack_started_alert_wl
     put: slack-alert
@@ -804,30 +960,30 @@ templating:
       icon_emoji: ":concourse:"
       username: Concourse
       attachments: [
+        {
+          "fallback": "$BUILD_JOB_NAME started... See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+          "title": "$BUILD_JOB_NAME started...",
+          "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+          "fields": [
             {
-                "fallback": "$BUILD_JOB_NAME started... See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "title": "$BUILD_JOB_NAME started...",
-                "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                "fields": [
-                    {
-                        "title": "Pipeline",
-                        "value": "$BUILD_PIPELINE_NAME",
-                        "short": true
-                    },
-                    {
-                        "title": "Project",
-                        "value": "((wl-gcp-project-name))",
-                        "short": true
-                    },
-                    {
-                        "title": "Build",
-                        "value": "#$BUILD_NAME",
-                        "short": true
-                    }
-                ],
-                "color": "#36a64f"
+              "title": "Pipeline",
+              "value": "$BUILD_PIPELINE_NAME",
+              "short": true
+          },
+            {
+              "title": "Project",
+              "value": "((wl-gcp-project-name))",
+              "short": true
+            },
+            {
+              "title": "Build",
+              "value": "#$BUILD_NAME",
+              "short": true
             }
-        ]
+          ],
+          "color": "#36a64f"
+        }
+      ]
 
 
 jobs:
@@ -840,6 +996,7 @@ jobs:
     trigger: true
   - task: Build Action Scheduler Image (master)
     on_failure: *slack_failure_alert_prebuild
+    on_error: *slack_error_alert_prebuild
     config:
       platform: linux
       image_resource:
@@ -863,6 +1020,7 @@ jobs:
             cp healthcheck.sh ../build
   - put: action-scheduler-docker-image-ci
     on_failure: *slack_docker_build_failure_ci
+    on_error: *slack_docker_build_error_ci
     params:
       build: build
       tag_file: action-scheduler-master/.git/ref
@@ -871,6 +1029,7 @@ jobs:
       save: true
   - put: action-scheduler-docker-image-gcr
     on_failure: *slack_docker_build_failure_gcr
+    on_error: *slack_docker_build_failure_gcr
     params:
       build: build
       cache_from:
@@ -887,6 +1046,7 @@ jobs:
     trigger: true
   - task: Build Action Worker Image (master)
     on_failure: *slack_failure_alert_prebuild
+    on_error: *slack_error_alert_prebuild
     config:
       platform: linux
       image_resource:
@@ -910,6 +1070,7 @@ jobs:
             cp healthcheck.sh ../build
   - put: action-worker-docker-image-ci
     on_failure: *slack_docker_build_failure_ci
+    on_error: *slack_docker_build_error_ci
     params:
       build: build
       tag_file: action-worker-master/.git/ref
@@ -918,6 +1079,7 @@ jobs:
       save: true
   - put: action-worker-docker-image-gcr
     on_failure: *slack_docker_build_failure_gcr
+    on_error: *slack_docker_build_error_gcr
     params:
       build: build
       cache_from:
@@ -934,6 +1096,7 @@ jobs:
     trigger: true
   - task: Build Case API Image (master)
     on_failure: *slack_failure_alert_prebuild
+    on_error: *slack_error_alert_prebuild
     config:
       platform: linux
       image_resource:
@@ -956,6 +1119,7 @@ jobs:
             cp Dockerfile ../build
   - put: case-api-docker-image-ci
     on_failure: *slack_docker_build_failure_ci
+    on_error: *slack_docker_build_error_ci
     params:
       build: build
       tag_file: case-api-master/.git/ref
@@ -964,6 +1128,7 @@ jobs:
       save: true
   - put: case-api-docker-image-gcr
     on_failure: *slack_docker_build_failure_gcr
+    on_error: *slack_docker_build_error_gcr
     params:
       build: build
       cache_from:
@@ -980,6 +1145,7 @@ jobs:
     trigger: true
   - task: Build Case Processor Image (master)
     on_failure: *slack_failure_alert_prebuild
+    on_error: *slack_error_alert_prebuild
     config:
       platform: linux
       image_resource:
@@ -1003,6 +1169,7 @@ jobs:
             cp healthcheck.sh ../build
   - put: case-processor-docker-image-ci
     on_failure: *slack_docker_build_failure_ci
+    on_error: *slack_docker_build_error_ci
     params:
       build: build
       tag_file: case-processor-master/.git/ref
@@ -1011,6 +1178,7 @@ jobs:
       save: true
   - put: case-processor-docker-image-gcr
     on_failure: *slack_docker_build_failure_gcr
+    on_error: *slack_docker_build_error_gcr
     params:
       build: build
       cache_from:
@@ -1027,6 +1195,7 @@ jobs:
     trigger: true
   - put: print-file-service-docker-image-ci
     on_failure: *slack_docker_build_failure_ci
+    on_error: *slack_docker_build_error_ci
     params:
       build: print-file-service-master
       tag_file: print-file-service-master/.git/ref
@@ -1035,6 +1204,7 @@ jobs:
       save: true
   - put: print-file-service-docker-image-gcr
     on_failure: *slack_docker_build_failure_gcr
+    on_error: *slack_docker_build_error_gcr
     params:
       build: print-file-service-master
       cache_from:
@@ -1051,6 +1221,7 @@ jobs:
     trigger: true
   - task: Build UAC QID Service Image (master)
     on_failure: *slack_failure_alert_prebuild
+    on_error: *slack_error_alert_prebuild
     config:
       platform: linux
       image_resource:
@@ -1073,6 +1244,7 @@ jobs:
             cp Dockerfile ../build
   - put: uac-qid-service-docker-image-ci
     on_failure: *slack_docker_build_failure_ci
+    on_error: *slack_docker_build_error_ci
     params:
       build: build
       tag_file: uac-qid-service-master/.git/ref
@@ -1081,6 +1253,7 @@ jobs:
       save: true
   - put: uac-qid-service-docker-image-gcr
     on_failure: *slack_docker_build_failure_gcr
+    on_error: *slack_docker_build_error_gcr
     params:
       build: build
       cache_from:
@@ -1097,6 +1270,7 @@ jobs:
     trigger: true
   - put: ops-docker-image-ci
     on_failure: *slack_docker_build_failure_ci
+    on_error: *slack_docker_build_error_ci
     params:
       build: ops-master
       tag_file: ops-master/.git/ref
@@ -1105,6 +1279,7 @@ jobs:
       save: true
   - put: ops-docker-image-gcr
     on_failure: *slack_docker_build_failure_gcr
+    on_error: *slack_docker_build_error_gcr
     params:
       build: ops-master
       cache_from:
@@ -1121,6 +1296,7 @@ jobs:
     trigger: true
   - put: toolbox-docker-image-ci
     on_failure: *slack_docker_build_failure_ci
+    on_error: *slack_docker_build_error_ci
     params:
       build: toolbox-master
       tag_file: toolbox-master/.git/ref
@@ -1129,6 +1305,7 @@ jobs:
       save: true
   - put: toolbox-docker-image-gcr
     on_failure: *slack_docker_build_failure_gcr
+    on_error: *slack_docker_build_error_gcr
     params:
       build: toolbox-master
       cache_from:
@@ -1145,6 +1322,7 @@ jobs:
     trigger: true
   - put: pubsub-docker-image-ci
     on_failure: *slack_docker_build_failure_ci
+    on_error: *slack_docker_build_error_ci
     params:
       build: pubsub-master
       tag_file: pubsub-master/.git/ref
@@ -1153,6 +1331,7 @@ jobs:
       save: true
   - put: pubsub-docker-image-gcr
     on_failure: *slack_docker_build_failure_gcr
+    on_error: *slack_docker_build_error_gcr
     params:
       build: pubsub-master
       cache_from:
@@ -1169,6 +1348,7 @@ jobs:
     trigger: true
   - put: qid-batch-runner-docker-image-ci
     on_failure: *slack_docker_build_failure_ci
+    on_error: *slack_docker_build_error_ci
     params:
       build: qid-batch-runner-master
       tag_file: qid-batch-runner-master/.git/ref
@@ -1177,6 +1357,7 @@ jobs:
       save: true
   - put: qid-batch-runner-docker-image-gcr
     on_failure: *slack_docker_build_failure_gcr
+    on_error: *slack_docker_build_error_gcr
     params:
       build: qid-batch-runner-master
       cache_from:
@@ -1193,6 +1374,7 @@ jobs:
     trigger: true
   - put: sample-loader-docker-image-ci
     on_failure: *slack_docker_build_failure_ci
+    on_error: *slack_docker_build_error_ci
     params:
       build: sample-loader-master
       tag_file: sample-loader-master/.git/ref
@@ -1201,6 +1383,7 @@ jobs:
       save: true
   - put: sample-loader-docker-image-gcr
     on_failure: *slack_docker_build_failure_gcr
+    on_error: *slack_docker_build_error_gcr
     params:
       build: sample-loader-master
       cache_from:
@@ -1217,6 +1400,7 @@ jobs:
     trigger: true
   - put: acceptance-tests-docker-image-ci
     on_failure: *slack_docker_build_failure_ci
+    on_error: *slack_docker_build_error_ci
     params:
       build: acceptance-tests-master
       tag_file: acceptance-tests-master/.git/ref
@@ -1225,6 +1409,7 @@ jobs:
       save: true
   - put: acceptance-tests-docker-image-gcr
     on_failure: *slack_docker_build_failure_gcr
+    on_error: *slack_docker_build_error_gcr
     params:
       build: acceptance-tests-master
       cache_from:
@@ -1241,6 +1426,7 @@ jobs:
     trigger: true
   - task: Build Fieldwork Adapter Image (master)
     on_failure: *slack_failure_alert_prebuild
+    on_error: *slack_error_alert_prebuild
     config:
       platform: linux
       image_resource:
@@ -1264,6 +1450,7 @@ jobs:
             cp healthcheck.sh ../build
   - put: fieldwork-adapter-docker-image-ci
     on_failure: *slack_docker_build_failure_ci
+    on_error: *slack_docker_build_error_ci
     params:
       build: build
       tag_file: fieldwork-adapter-master/.git/ref
@@ -1272,6 +1459,7 @@ jobs:
       save: true
   - put: fieldwork-adapter-docker-image-gcr
     on_failure: *slack_docker_build_failure_gcr
+    on_error: *slack_docker_build_error_gcr
     params:
       build: build
       cache_from:
@@ -1288,6 +1476,7 @@ jobs:
     trigger: true
   - task: Build Notify Processor Image (master)
     on_failure: *slack_failure_alert_prebuild
+    on_error: *slack_error_alert_prebuild
     config:
       platform: linux
       image_resource:
@@ -1311,6 +1500,7 @@ jobs:
             cp healthcheck.sh ../build
   - put: notify-processor-docker-image-ci
     on_failure: *slack_docker_build_failure_ci
+    on_error: *slack_docker_build_error_ci
     params:
       build: build
       tag_file: notify-processor-master/.git/ref
@@ -1319,6 +1509,7 @@ jobs:
       save: true
   - put: notify-processor-docker-image-gcr
     on_failure: *slack_docker_build_failure_gcr
+    on_error: *slack_docker_build_error_gcr
     params:
       build: build
       cache_from:
@@ -1335,6 +1526,7 @@ jobs:
     trigger: true
   - put: notify-stub-docker-image-ci
     on_failure: *slack_docker_build_failure_ci
+    on_error: *slack_docker_build_error_ci
     params:
       build: notify-stub-master
       tag_file: notify-stub-master/.git/ref
@@ -1343,6 +1535,7 @@ jobs:
       save: true
   - put: notify-stub-docker-image-gcr
     on_failure: *slack_docker_build_failure_gcr
+    on_error: *slack_docker_build_error_gcr
     params:
       build: notify-stub-master
       cache_from:
@@ -1359,6 +1552,7 @@ jobs:
     trigger: true
   - put: data-exporter-docker-image-ci
     on_failure: *slack_docker_build_failure_ci
+    on_error: *slack_docker_build_error_ci
     params:
       build: data-exporter-master/docker
       tag_file: data-exporter-master/.git/ref
@@ -1367,6 +1561,7 @@ jobs:
       save: true
   - put: data-exporter-docker-image-gcr
     on_failure: *slack_docker_build_failure_gcr
+    on_error: *slack_docker_build_error_gcr
     params:
       build: data-exporter-master/docker
       cache_from:
@@ -1383,6 +1578,7 @@ jobs:
     trigger: true
   - task: Build Exception Manager Image (master)
     on_failure: *slack_failure_alert_prebuild
+    on_error: *slack_error_alert_prebuild
     config:
       platform: linux
       image_resource:
@@ -1405,6 +1601,7 @@ jobs:
             cp Dockerfile ../build
   - put: exception-manager-docker-image-ci
     on_failure: *slack_docker_build_failure_ci
+    on_error: *slack_docker_build_error_ci
     params:
       build: build
       tag_file: exception-manager-master/.git/ref
@@ -1413,6 +1610,7 @@ jobs:
       save: true
   - put: exception-manager-docker-image-gcr
     on_failure: *slack_docker_build_failure_gcr
+    on_error: *slack_docker_build_error_gcr
     params:
       build: build
       cache_from:
@@ -1429,6 +1627,7 @@ jobs:
     trigger: true
   - put: performance-tests-docker-image-ci
     on_failure: *slack_docker_build_failure_ci
+    on_error: *slack_docker_build_error_ci
     params:
       build: performance-tests-master
       tag_file: performance-tests-master/.git/ref
@@ -1437,6 +1636,7 @@ jobs:
       save: true
   - put: performance-tests-docker-image-gcr
     on_failure: *slack_docker_build_failure_gcr
+    on_error: *slack_docker_build_error_gcr
     params:
       build: performance-tests-master
       cache_from:
@@ -1468,6 +1668,7 @@ jobs:
                   ops-deploy]
   on_success: *slack_success_alert_ci
   on_failure: *slack_failure_alert_ci
+  on_error: *slack_error_alert_ci
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -1503,6 +1704,7 @@ jobs:
                   regional-counts-deploy]
   on_success: *slack_success_alert_ci
   on_failure: *slack_failure_alert_ci
+  on_error: *slack_error_alert_ci
   plan:
     - get: census-rm-kubernetes-dependencies-repo
       trigger: true
@@ -1543,6 +1745,7 @@ jobs:
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
     on_failure: *slack_failure_alert_ci
+    on_error: *slack_error_alert_ci
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((ci-gcp-project-name))
@@ -1579,6 +1782,7 @@ jobs:
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
     on_failure: *slack_failure_alert_ci
+    on_error: *slack_error_alert_ci
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((ci-gcp-project-name))
@@ -1615,6 +1819,7 @@ jobs:
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
     on_failure: *slack_failure_alert_ci
+    on_error: *slack_error_alert_ci
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((ci-gcp-project-name))
@@ -1651,6 +1856,7 @@ jobs:
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
     on_failure: *slack_failure_alert_ci
+    on_error: *slack_error_alert_ci
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((ci-gcp-project-name))
@@ -1687,6 +1893,7 @@ jobs:
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
     on_failure: *slack_failure_alert_ci
+    on_error: *slack_error_alert_ci
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((ci-gcp-project-name))
@@ -1723,6 +1930,7 @@ jobs:
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
     on_failure: *slack_failure_alert_ci
+    on_error: *slack_error_alert_ci
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((ci-gcp-project-name))
@@ -1759,6 +1967,7 @@ jobs:
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
     on_failure: *slack_failure_alert_ci
+    on_error: *slack_error_alert_ci
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((ci-gcp-project-name))
@@ -1795,6 +2004,7 @@ jobs:
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-statefulset.yml
     on_failure: *slack_failure_alert_ci
+    on_error: *slack_error_alert_ci
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((ci-gcp-project-name))
@@ -1831,6 +2041,7 @@ jobs:
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
     on_failure: *slack_failure_alert_ci
+    on_error: *slack_error_alert_ci
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((ci-gcp-project-name))
@@ -1867,6 +2078,7 @@ jobs:
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
     on_failure: *slack_failure_alert_ci
+    on_error: *slack_error_alert_ci
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((ci-gcp-project-name))
@@ -1903,6 +2115,7 @@ jobs:
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
     on_failure: *slack_failure_alert_ci
+    on_error: *slack_error_alert_ci
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((ci-gcp-project-name))
@@ -1939,6 +2152,7 @@ jobs:
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
     on_failure: *slack_failure_alert_ci
+    on_error: *slack_error_alert_ci
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((ci-gcp-project-name))
@@ -1975,6 +2189,7 @@ jobs:
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
     on_failure: *slack_failure_alert_ci
+    on_error: *slack_error_alert_ci
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((ci-gcp-project-name))
@@ -2011,6 +2226,7 @@ jobs:
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
     on_failure: *slack_failure_alert_ci
+    on_error: *slack_error_alert_ci
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((ci-gcp-project-name))
@@ -2047,6 +2263,7 @@ jobs:
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
     on_failure: *slack_failure_alert_ci
+    on_error: *slack_error_alert_ci
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((ci-gcp-project-name))
@@ -2083,6 +2300,7 @@ jobs:
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
     on_failure: *slack_failure_alert_ci
+    on_error: *slack_error_alert_ci
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((ci-gcp-project-name))
@@ -2219,6 +2437,7 @@ jobs:
   - task: "Run Acceptance Tests (in K8s)"
     file: acceptance-tests-master/tasks/kubectl-run-acceptance-tests.yml
     on_failure: *slack_failure_alert_ci
+    on_error: *slack_error_alert_ci
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((ci-gcp-project-name))
@@ -2248,6 +2467,7 @@ jobs:
                   wl-regional-counts]
   on_success: *slack_success_alert_wl
   on_failure: *slack_failure_alert_wl
+  on_error: *slack_error_alert_wl
   plan:
     - get: census-rm-terraform
       trigger: true
@@ -2283,6 +2503,7 @@ jobs:
                   wl-regional-counts]
   on_success: *slack_success_alert_wl
   on_failure: *slack_failure_alert_wl
+  on_error: *slack_error_alert_wl
   plan:
     - get: census-rm-kubernetes-dependencies-repo
       trigger: true
@@ -2322,6 +2543,7 @@ jobs:
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
     on_failure: *slack_failure_alert_wl
+    on_error: *slack_error_alert_wl
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((wl-gcp-project-name))
@@ -2358,6 +2580,7 @@ jobs:
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
     on_failure: *slack_failure_alert_wl
+    on_error: *slack_error_alert_wl
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((wl-gcp-project-name))
@@ -2394,6 +2617,7 @@ jobs:
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-statefulset.yml
     on_failure: *slack_failure_alert_wl
+    on_error: *slack_error_alert_wl
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((wl-gcp-project-name))
@@ -2430,6 +2654,7 @@ jobs:
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
     on_failure: *slack_failure_alert_wl
+    on_error: *slack_error_alert_wl
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((wl-gcp-project-name))
@@ -2466,6 +2691,7 @@ jobs:
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
     on_failure: *slack_failure_alert_wl
+    on_error: *slack_error_alert_wl
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((wl-gcp-project-name))
@@ -2502,6 +2728,7 @@ jobs:
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
     on_failure: *slack_failure_alert_wl
+    on_error: *slack_error_alert_wl
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((wl-gcp-project-name))
@@ -2538,6 +2765,7 @@ jobs:
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
     on_failure: *slack_failure_alert_wl
+    on_error: *slack_error_alert_wl
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((wl-gcp-project-name))
@@ -2572,6 +2800,7 @@ jobs:
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
     on_failure: *slack_failure_alert_wl
+    on_error: *slack_error_alert_wl
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((wl-gcp-project-name))
@@ -2608,6 +2837,7 @@ jobs:
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
     on_failure: *slack_failure_alert_wl
+    on_error: *slack_error_alert_wl
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((wl-gcp-project-name))
@@ -2644,6 +2874,7 @@ jobs:
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
     on_failure: *slack_failure_alert_wl
+    on_error: *slack_error_alert_wl
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((wl-gcp-project-name))
@@ -2680,6 +2911,7 @@ jobs:
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
     on_failure: *slack_failure_alert_wl
+    on_error: *slack_error_alert_wl
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((wl-gcp-project-name))
@@ -2716,6 +2948,7 @@ jobs:
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
     on_failure: *slack_failure_alert_wl
+    on_error: *slack_error_alert_wl
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((wl-gcp-project-name))
@@ -2752,6 +2985,7 @@ jobs:
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
     on_failure: *slack_failure_alert_wl
+    on_error: *slack_error_alert_wl
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((wl-gcp-project-name))
@@ -2788,6 +3022,7 @@ jobs:
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
     on_failure: *slack_failure_alert_wl
+    on_error: *slack_error_alert_wl
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((wl-gcp-project-name))
@@ -2824,6 +3059,7 @@ jobs:
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
     on_failure: *slack_failure_alert_wl
+    on_error: *slack_error_alert_wl
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((wl-gcp-project-name))

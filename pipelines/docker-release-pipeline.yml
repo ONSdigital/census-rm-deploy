@@ -403,24 +403,24 @@ slack_failure_alert_prebuild: &slack_failure_alert_prebuild
     icon_emoji: ":concourse:"
     username: Concourse
     attachments: [
-        {
-            "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-            "title": "$BUILD_JOB_NAME failed",
-            "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-            "fields": [
-                {
-                    "title": "Pipeline",
-                    "value": "$BUILD_PIPELINE_NAME",
-                    "short": true
-                },
-                {
-                    "title": "Build",
-                    "value": "#$BUILD_NAME",
-                    "short": true
-                }
-            ],
-            "color": "#F35A00"
-        }
+      {
+        "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+        "title": "$BUILD_JOB_NAME failed",
+        "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+        "fields": [
+          {
+            "title": "Pipeline",
+            "value": "$BUILD_PIPELINE_NAME",
+            "short": true
+          },
+          {
+            "title": "Build",
+            "value": "#$BUILD_NAME",
+            "short": true
+          }
+        ],
+        "color": "#ff0000"
+      }
     ]
 
 slack_failure_alert_ci: &slack_failure_alert_ci
@@ -429,29 +429,29 @@ slack_failure_alert_ci: &slack_failure_alert_ci
     icon_emoji: ":concourse:"
     username: Concourse
     attachments: [
-        {
-            "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-            "title": "$BUILD_JOB_NAME failed",
-            "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-            "fields": [
-                {
-                    "title": "Pipeline",
-                    "value": "$BUILD_PIPELINE_NAME",
-                    "short": true
-                },
-                {
-                    "title": "Registry",
-                    "value": "((docker-registry-ci))",
-                    "short": true
-                },
-                {
-                    "title": "Build",
-                    "value": "#$BUILD_NAME",
-                    "short": true
-                }
-            ],
-            "color": "#F35A00"
-        }
+      {
+        "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+        "title": "$BUILD_JOB_NAME failed",
+        "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+        "fields": [
+          {
+            "title": "Pipeline",
+            "value": "$BUILD_PIPELINE_NAME",
+            "short": true
+          },
+          {
+            "title": "Registry",
+            "value": "((docker-registry-ci))",
+            "short": true
+          },
+          {
+            "title": "Build",
+            "value": "#$BUILD_NAME",
+            "short": true
+          }
+        ],
+        "color": "#ff0000"
+      }
     ]
 
 slack_failure_alert_gcr: &slack_failure_alert_gcr
@@ -460,30 +460,117 @@ slack_failure_alert_gcr: &slack_failure_alert_gcr
     icon_emoji: ":concourse:"
     username: Concourse
     attachments: [
-        {
-            "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-            "title": "$BUILD_JOB_NAME failed",
-            "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-            "fields": [
-                {
-                    "title": "Pipeline",
-                    "value": "$BUILD_PIPELINE_NAME",
-                    "short": true
-                },
-                {
-                    "title": "Registry",
-                    "value": "((docker-registry-gcr))",
-                    "short": true
-                },
+      {
+        "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+        "title": "$BUILD_JOB_NAME failed",
+        "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+        "fields": [
+          {
+            "title": "Pipeline",
+            "value": "$BUILD_PIPELINE_NAME",
+            "short": true
+          },
+          {
+            "title": "Registry",
+            "value": "((docker-registry-gcr))",
+            "short": true
+          },
+          {
+            "title": "Build",
+            "value": "#$BUILD_NAME",
+            "short": true
+          }
+        ],
+        "color": "#ff0000"
+      }
+    ]
 
-                {
-                    "title": "Build",
-                    "value": "#$BUILD_NAME",
-                    "short": true
-                }
-            ],
-            "color": "#F35A00"
-        }
+slack_error_alert_prebuild: &slack_error_alert_prebuild
+  put: slack-alert
+  params:
+    icon_emoji: ":concourse:"
+    username: Concourse
+    attachments: [
+      {
+        "fallback": "$BUILD_JOB_NAME errored. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+        "title": "$BUILD_JOB_NAME errored",
+        "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+        "fields": [
+          {
+            "title": "Pipeline",
+            "value": "$BUILD_PIPELINE_NAME",
+            "short": true
+          },
+          {
+            "title": "Build",
+            "value": "#$BUILD_NAME",
+            "short": true
+          }
+        ],
+        "color": "#f58a3d"
+      }
+    ]
+
+slack_error_alert_ci: &slack_error_alert_ci
+  put: slack-alert
+  params:
+    icon_emoji: ":concourse:"
+    username: Concourse
+    attachments: [
+      {
+        "fallback": "$BUILD_JOB_NAME errored. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+        "title": "$BUILD_JOB_NAME errored",
+        "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+        "fields": [
+          {
+            "title": "Pipeline",
+            "value": "$BUILD_PIPELINE_NAME",
+            "short": true
+          },
+          {
+            "title": "Registry",
+            "value": "((docker-registry-ci))",
+            "short": true
+          },
+          {
+            "title": "Build",
+            "value": "#$BUILD_NAME",
+            "short": true
+          }
+        ],
+        "color": "#f58a3d"
+      }
+    ]
+
+slack_error_alert_gcr: &slack_error_alert_gcr
+  put: slack-alert
+  params:
+    icon_emoji: ":concourse:"
+    username: Concourse
+    attachments: [
+      {
+        "fallback": "$BUILD_JOB_NAME errored. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+        "title": "$BUILD_JOB_NAME errored",
+        "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+        "fields": [
+          {
+            "title": "Pipeline",
+            "value": "$BUILD_PIPELINE_NAME",
+            "short": true
+          },
+          {
+            "title": "Registry",
+            "value": "((docker-registry-gcr))",
+            "short": true
+          },
+          {
+            "title": "Build",
+            "value": "#$BUILD_NAME",
+            "short": true
+          }
+        ],
+        "color": "#f58a3d"
+      }
     ]
 
 jobs:
@@ -496,6 +583,7 @@ jobs:
       trigger: true
     - task: Build Action Scheduler Image (release)
       on_failure: *slack_failure_alert_prebuild
+      on_error: *slack_error_alert_prebuild
       config:
         platform: linux
         image_resource:
@@ -522,6 +610,7 @@ jobs:
               cp healthcheck.sh ../build
     - put: action-scheduler-docker-image-ci
       on_failure: *slack_failure_alert_ci
+      on_error: *slack_error_alert_ci
       params:
         build: build
         tag_file: action-scheduler-release/tag
@@ -530,6 +619,7 @@ jobs:
         save: true
     - put: action-scheduler-docker-image-gcr
       on_failure: *slack_failure_alert_gcr
+      on_error: *slack_error_alert_gcr
       params:
         build: build
         cache_from:
@@ -547,6 +637,7 @@ jobs:
       trigger: true
     - task: Build Action Worker Image (release)
       on_failure: *slack_failure_alert_prebuild
+      on_error: *slack_error_alert_prebuild
       config:
         platform: linux
         image_resource:
@@ -573,6 +664,7 @@ jobs:
               cp healthcheck.sh ../build
     - put: action-worker-docker-image-ci
       on_failure: *slack_failure_alert_ci
+      on_error: *slack_error_alert_ci
       params:
         build: build
         tag_file: action-worker-release/tag
@@ -581,6 +673,7 @@ jobs:
         save: true
     - put: action-worker-docker-image-gcr
       on_failure: *slack_failure_alert_gcr
+      on_error: *slack_error_alert_gcr
       params:
         build: build
         cache_from:
@@ -598,6 +691,7 @@ jobs:
       trigger: true
     - task: Build Case API Image (release)
       on_failure: *slack_failure_alert_prebuild
+      on_error: *slack_error_alert_prebuild
       config:
         platform: linux
         image_resource:
@@ -623,6 +717,7 @@ jobs:
               cp Dockerfile ../build
     - put: case-api-docker-image-ci
       on_failure: *slack_failure_alert_ci
+      on_error: *slack_error_alert_ci
       params:
         build: build
         tag_file: case-api-release/tag
@@ -631,6 +726,7 @@ jobs:
         save: true
     - put: case-api-docker-image-gcr
       on_failure: *slack_failure_alert_gcr
+      on_error: *slack_error_alert_gcr
       params:
         build: build
         cache_from:
@@ -648,6 +744,7 @@ jobs:
       trigger: true
     - task: Build Case Processor Image (release)
       on_failure: *slack_failure_alert_prebuild
+      on_error: *slack_error_alert_prebuild
       config:
         platform: linux
         image_resource:
@@ -674,6 +771,7 @@ jobs:
               cp healthcheck.sh ../build
     - put: case-processor-docker-image-ci
       on_failure: *slack_failure_alert_ci
+      on_error: *slack_error_alert_ci
       params:
         build: build
         tag_file: case-processor-release/tag
@@ -682,6 +780,7 @@ jobs:
         save: true
     - put: case-processor-docker-image-gcr
       on_failure: *slack_failure_alert_gcr
+      on_error: *slack_error_alert_gcr
       params:
         build: build
         cache_from:
@@ -699,6 +798,7 @@ jobs:
       trigger: true
     - task: Build Print File Service Image (release)
       on_failure: *slack_failure_alert_prebuild
+      on_error: *slack_error_alert_prebuild
       config:
         platform: linux
         image_resource:
@@ -718,6 +818,7 @@ jobs:
               tar -xzf source.tar.gz -C ../extracted-print-file-service --strip-components=1
     - put: print-file-service-docker-image-ci
       on_failure: *slack_failure_alert_ci
+      on_error: *slack_error_alert_ci
       params:
         build: extracted-print-file-service
         tag_file: print-file-service-release/tag
@@ -726,6 +827,7 @@ jobs:
         save: true
     - put: print-file-service-docker-image-gcr
       on_failure: *slack_failure_alert_gcr
+      on_error: *slack_error_alert_gcr
       params:
         build: extracted-print-file-service
         cache_from:
@@ -743,6 +845,7 @@ jobs:
       trigger: true
     - task: Build UAC QID Service Image (release)
       on_failure: *slack_failure_alert_prebuild
+      on_error: *slack_error_alert_prebuild
       config:
         platform: linux
         image_resource:
@@ -768,6 +871,7 @@ jobs:
               cp Dockerfile ../build
     - put: uac-qid-service-docker-image-ci
       on_failure: *slack_failure_alert_ci
+      on_error: *slack_error_alert_ci
       params:
         build: build
         tag_file: uac-qid-service-release/tag
@@ -776,6 +880,7 @@ jobs:
         save: true
     - put: uac-qid-service-docker-image-gcr
       on_failure: *slack_failure_alert_gcr
+      on_error: *slack_error_alert_gcr
       params:
         build: build
         cache_from:
@@ -793,6 +898,7 @@ jobs:
       trigger: true
     - task: Build Ops Image (release)
       on_failure: *slack_failure_alert_prebuild
+      on_error: *slack_error_alert_prebuild
       config:
         platform: linux
         image_resource:
@@ -812,6 +918,7 @@ jobs:
               tar -xzf source.tar.gz -C ../extracted-ops --strip-components=1
     - put: ops-docker-image-ci
       on_failure: *slack_failure_alert_ci
+      on_error: *slack_error_alert_ci
       params:
         build: extracted-ops
         tag_file: ops-release/tag
@@ -820,6 +927,7 @@ jobs:
         save: true
     - put: ops-docker-image-gcr
       on_failure: *slack_failure_alert_gcr
+      on_error: *slack_error_alert_gcr
       params:
         build: extracted-ops
         cache_from:
@@ -837,6 +945,7 @@ jobs:
       trigger: true
     - task: Build RM-toolbox Image (release)
       on_failure: *slack_failure_alert_prebuild
+      on_error: *slack_error_alert_prebuild
       config:
         platform: linux
         image_resource:
@@ -856,6 +965,7 @@ jobs:
               tar -xzf source.tar.gz -C ../extracted-rm-toolbox --strip-components=1
     - put: rm-toolbox-docker-image-ci
       on_failure: *slack_failure_alert_ci
+      on_error: *slack_error_alert_ci
       params:
         build: extracted-rm-toolbox
         tag_file: rm-toolbox-release/tag
@@ -864,6 +974,7 @@ jobs:
         save: true
     - put: rm-toolbox-docker-image-gcr
       on_failure: *slack_failure_alert_gcr
+      on_error: *slack_error_alert_gcr
       params:
         build: extracted-rm-toolbox
         cache_from:
@@ -882,6 +993,7 @@ jobs:
       trigger: true
     - task: Build PubSub Image (release)
       on_failure: *slack_failure_alert_prebuild
+      on_error: *slack_error_alert_prebuild
       config:
         platform: linux
         image_resource:
@@ -901,6 +1013,7 @@ jobs:
               tar -xzf source.tar.gz -C ../extracted-pubsub --strip-components=1
     - put: pubsub-docker-image-ci
       on_failure: *slack_failure_alert_ci
+      on_error: *slack_error_alert_ci
       params:
         build: extracted-pubsub
         tag_file: pubsub-release/tag
@@ -909,6 +1022,7 @@ jobs:
         save: true
     - put: pubsub-docker-image-gcr
       on_failure: *slack_failure_alert_gcr
+      on_error: *slack_error_alert_gcr
       params:
         build: extracted-pubsub
         cache_from:
@@ -926,6 +1040,7 @@ jobs:
       trigger: true
     - task: Build Batch Runner Image (release)
       on_failure: *slack_failure_alert_prebuild
+      on_error: *slack_error_alert_prebuild
       config:
         platform: linux
         image_resource:
@@ -945,6 +1060,7 @@ jobs:
               tar -xzf source.tar.gz -C ../extracted-batch-runner --strip-components=1
     - put: qid-batch-runner-docker-image-ci
       on_failure: *slack_failure_alert_ci
+      on_error: *slack_error_alert_ci
       params:
         build: extracted-batch-runner
         tag_file: qid-batch-runner-release/tag
@@ -953,6 +1069,7 @@ jobs:
         save: true
     - put: qid-batch-runner-docker-image-gcr
       on_failure: *slack_failure_alert_gcr
+      on_error: *slack_error_alert_gcr
       params:
         build: extracted-batch-runner
         cache_from:
@@ -970,6 +1087,7 @@ jobs:
       trigger: true
     - task: Build Sample Loader Image (release)
       on_failure: *slack_failure_alert_prebuild
+      on_error: *slack_error_alert_prebuild
       config:
         platform: linux
         image_resource:
@@ -989,6 +1107,7 @@ jobs:
               tar -xzf source.tar.gz -C ../extracted-sample-loader --strip-components=1
     - put: sample-loader-docker-image-ci
       on_failure: *slack_failure_alert_ci
+      on_error: *slack_error_alert_ci
       params:
         build: extracted-sample-loader
         tag_file: sample-loader-release/tag
@@ -997,6 +1116,7 @@ jobs:
         save: true
     - put: sample-loader-docker-image-gcr
       on_failure: *slack_failure_alert_gcr
+      on_error: *slack_error_alert_gcr
       params:
         build: extracted-sample-loader
         cache_from:
@@ -1014,6 +1134,7 @@ jobs:
       trigger: true
     - task: Build Fieldwork Adapter Image (release)
       on_failure: *slack_failure_alert_prebuild
+      on_error: *slack_error_alert_prebuild
       config:
         platform: linux
         image_resource:
@@ -1040,6 +1161,7 @@ jobs:
               cp healthcheck.sh ../build
     - put: fieldwork-adapter-docker-image-ci
       on_failure: *slack_failure_alert_ci
+      on_error: *slack_error_alert_ci
       params:
         build: build
         tag_file: fieldwork-adapter-release/tag
@@ -1048,6 +1170,7 @@ jobs:
         save: true
     - put: fieldwork-adapter-docker-image-gcr
       on_failure: *slack_failure_alert_gcr
+      on_error: *slack_error_alert_gcr
       params:
         build: build
         cache_from:
@@ -1065,6 +1188,7 @@ jobs:
       trigger: true
     - task: Build Notify Processor Image (release)
       on_failure: *slack_failure_alert_prebuild
+      on_error: *slack_error_alert_prebuild
       config:
         platform: linux
         image_resource:
@@ -1091,6 +1215,7 @@ jobs:
               cp healthcheck.sh ../build
     - put: notify-processor-docker-image-ci
       on_failure: *slack_failure_alert_ci
+      on_error: *slack_error_alert_ci
       params:
         build: build
         tag_file: notify-processor-release/tag
@@ -1099,6 +1224,7 @@ jobs:
         save: true
     - put: notify-processor-docker-image-gcr
       on_failure: *slack_failure_alert_gcr
+      on_error: *slack_error_alert_gcr
       params:
         build: build
         cache_from:
@@ -1116,6 +1242,7 @@ jobs:
       trigger: true
     - task: Build Acceptance Tests Image (release)
       on_failure: *slack_failure_alert_prebuild
+      on_error: *slack_error_alert_prebuild
       config:
         platform: linux
         image_resource:
@@ -1135,6 +1262,7 @@ jobs:
               tar -xzf source.tar.gz -C ../extracted-acceptance-tests --strip-components=1
     - put: acceptance-tests-docker-image-ci
       on_failure: *slack_failure_alert_ci
+      on_error: *slack_error_alert_ci
       params:
         build: extracted-acceptance-tests
         tag_file: acceptance-tests-release/tag
@@ -1143,6 +1271,7 @@ jobs:
         save: true
     - put: acceptance-tests-docker-image-gcr
       on_failure: *slack_failure_alert_gcr
+      on_error: *slack_error_alert_gcr
       params:
         build: extracted-acceptance-tests
         cache_from:
@@ -1160,6 +1289,7 @@ jobs:
       trigger: true
     - task: Build Data Exporter Image (release)
       on_failure: *slack_failure_alert_prebuild
+      on_error: *slack_error_alert_prebuild
       config:
         platform: linux
         image_resource:
@@ -1179,6 +1309,7 @@ jobs:
               tar -xzf source.tar.gz -C ../extracted-data-exporter --strip-components=1
     - put: data-exporter-docker-image-ci
       on_failure: *slack_failure_alert_ci
+      on_error: *slack_error_alert_ci
       params:
         build: extracted-data-exporter/docker
         tag_file: data-exporter-release/tag
@@ -1187,6 +1318,7 @@ jobs:
         save: true
     - put: data-exporter-docker-image-gcr
       on_failure: *slack_failure_alert_gcr
+      on_error: *slack_error_alert_gcr
       params:
         build: extracted-data-exporter/docker
         cache_from:
@@ -1204,6 +1336,7 @@ jobs:
       trigger: true
     - task: Build Exception Manager Image (release)
       on_failure: *slack_failure_alert_prebuild
+      on_error: *slack_error_alert_prebuild
       config:
         platform: linux
         image_resource:
@@ -1229,6 +1362,7 @@ jobs:
               cp Dockerfile ../build
     - put: exception-manager-docker-image-ci
       on_failure: *slack_failure_alert_ci
+      on_error: *slack_error_alert_ci
       params:
         build: build
         tag_file: exception-manager-release/tag
@@ -1237,6 +1371,7 @@ jobs:
         save: true
     - put: exception-manager-docker-image-gcr
       on_failure: *slack_failure_alert_gcr
+      on_error: *slack_error_alert_gcr
       params:
         build: build
         cache_from:
@@ -1254,6 +1389,7 @@ jobs:
       trigger: true
     - task: Build Data Exporter Image (release)
       on_failure: *slack_failure_alert_prebuild
+      on_error: *slack_error_alert_prebuild
       config:
         platform: linux
         image_resource:
@@ -1273,6 +1409,7 @@ jobs:
               tar -xzf source.tar.gz -C ../extracted-performance-tests --strip-components=1
     - put: performance-tests-docker-image-ci
       on_failure: *slack_failure_alert_ci
+      on_error: *slack_error_alert_ci
       params:
         build: extracted-performance-tests
         tag_file: performance-tests-release/tag
@@ -1281,6 +1418,7 @@ jobs:
         save: true
     - put: performance-tests-docker-image-gcr
       on_failure: *slack_failure_alert_gcr
+      on_error: *slack_error_alert_gcr
       params:
         build: extracted-performance-tests
         cache_from:
