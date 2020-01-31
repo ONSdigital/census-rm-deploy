@@ -48,25 +48,52 @@ jobs:
           icon_emoji: ":concourse:"
           username: Concourse
           attachments: [
-              {
-                  "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                  "title": "$BUILD_JOB_NAME failed",
-                  "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-                  "fields": [
-                      {
-                          "title": "Pipeline",
-                          "value": "$BUILD_PIPELINE_NAME",
-                          "short": true
-                      },
-                      {
-                          "title": "Build",
-                          "value": "#$BUILD_NAME",
-                          "short": true
-                      }
-                  ],
-                  "color": "#F35A00"
-              }
+            {
+              "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+              "title": "$BUILD_JOB_NAME failed",
+              "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+              "fields": [
+                {
+                  "title": "Pipeline",
+                  "value": "$BUILD_PIPELINE_NAME",
+                  "short": true
+                },
+                {
+                  "title": "Build",
+                  "value": "#$BUILD_NAME",
+                  "short": true
+                }
+              ],
+              "color": "#ff0000"
+            }
           ]
+
+      on_error:
+        put: slack-alert
+        params:
+          icon_emoji: ":concourse:"
+          username: Concourse
+          attachments: [
+            {
+              "fallback": "$BUILD_JOB_NAME errored. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+              "title": "$BUILD_JOB_NAME errored",
+              "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+              "fields": [
+                {
+                  "title": "Pipeline",
+                  "value": "$BUILD_PIPELINE_NAME",
+                  "short": true
+                },
+                {
+                  "title": "Build",
+                  "value": "#$BUILD_NAME",
+                  "short": true
+                }
+              ],
+              "color": "#f58a3d"
+            }
+          ]
+
       params:
         pipelines:
 

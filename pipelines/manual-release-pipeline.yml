@@ -102,35 +102,71 @@ slack_failure_alert: &slack_failure_alert
     icon_emoji: ":concourse:"
     username: Concourse
     attachments: [
+      {
+        "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+        "title": "$BUILD_JOB_NAME failed",
+        "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+        "fields": [
           {
-              "fallback": "$BUILD_JOB_NAME failed. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-              "title": "$BUILD_JOB_NAME failed",
-              "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
-              "fields": [
-                  {
-                      "title": "Pipeline",
-                      "value": "$BUILD_PIPELINE_NAME",
-                      "short": true
-                  },
-                  {
-                      "title": "Environment",
-                      "value": "((gcp-environment-name))",
-                      "short": true
-                  },
-                  {
-                      "title": "Project",
-                      "value": "((gcp-project-name))",
-                      "short": true
-                  },
-                  {
-                      "title": "Build",
-                      "value": "#$BUILD_NAME",
-                      "short": true
-                  }
-              ],
-              "color": "#F35A00"
+            "title": "Pipeline",
+            "value": "$BUILD_PIPELINE_NAME",
+            "short": true
+          },
+          {
+            "title": "Environment",
+            "value": "((gcp-environment-name))",
+            "short": true
+          },
+          {
+            "title": "Project",
+            "value": "((gcp-project-name))",
+            "short": true
+          },
+          {
+            "title": "Build",
+            "value": "#$BUILD_NAME",
+            "short": true
           }
-      ]
+        ],
+          "color": "#ff0000"
+      }
+    ]
+
+slack_error_alert: &slack_error_alert
+  put: slack-alert
+  params:
+    icon_emoji: ":concourse:"
+    username: Concourse
+    attachments: [
+      {
+        "fallback": "$BUILD_JOB_NAME errored. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+        "title": "$BUILD_JOB_NAME errored",
+        "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME",
+        "fields": [
+          {
+            "title": "Pipeline",
+            "value": "$BUILD_PIPELINE_NAME",
+            "short": true
+          },
+          {
+            "title": "Environment",
+            "value": "((gcp-environment-name))",
+            "short": true
+          },
+          {
+            "title": "Project",
+            "value": "((gcp-project-name))",
+            "short": true
+          },
+          {
+            "title": "Build",
+            "value": "#$BUILD_NAME",
+            "short": true
+          }
+        ],
+        "color": "#f58a3d"
+      }
+    ]
 
 slack_success_alert: &slack_success_alert
   put: slack-alert
@@ -138,30 +174,30 @@ slack_success_alert: &slack_success_alert
     icon_emoji: ":concourse:"
     username: Concourse
     attachments: [
+      {
+        "fallback": "((gcp-environment-name)) release succeeded. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME",
+        "title": "((gcp-environment-name)) Release Succeeded",
+        "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME",
+        "fields": [
           {
-              "fallback": "((gcp-environment-name)) release succeeded. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME",
-              "title": "((gcp-environment-name)) Release Succeeded",
-              "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME",
-              "fields": [
-                  {
-                      "title": "Pipeline",
-                      "value": "$BUILD_PIPELINE_NAME",
-                      "short": true
-                  },
-                  {
-                      "title": "Environment",
-                      "value": "((gcp-environment-name))",
-                      "short": true
-                  },
-                  {
-                      "title": "Project",
-                      "value": "((gcp-project-name))",
-                      "short": true
-                  }
-              ],
-              "color": "#36a64f"
+            "title": "Pipeline",
+            "value": "$BUILD_PIPELINE_NAME",
+            "short": true
+          },
+          {
+            "title": "Environment",
+            "value": "((gcp-environment-name))",
+            "short": true
+          },
+          {
+            "title": "Project",
+            "value": "((gcp-project-name))",
+            "short": true
           }
-      ]
+        ],
+        "color": "#36a64f"
+      }
+    ]
 
 slack_in_progress_alert: &slack_in_progress_alert
   put: slack-alert
@@ -169,30 +205,30 @@ slack_in_progress_alert: &slack_in_progress_alert
     icon_emoji: ":concourse:"
     username: Concourse
     attachments: [
+      {
+        "fallback": "((gcp-environment-name)) release started. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME",
+        "title": "((gcp-environment-name)) Release Started",
+        "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME",
+        "fields": [
           {
-              "fallback": "((gcp-environment-name)) release started. See build: $ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME",
-              "title": "((gcp-environment-name)) Release Started",
-              "title_link": "$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME",
-              "fields": [
-                  {
-                      "title": "Pipeline",
-                      "value": "$BUILD_PIPELINE_NAME",
-                      "short": true
-                  },
-                  {
-                      "title": "Environment",
-                      "value": "((gcp-environment-name))",
-                      "short": true
-                  },
-                  {
-                      "title": "Project",
-                      "value": "((gcp-project-name))",
-                      "short": true
-                  }
-              ],
-              "color": "#ffe100"
+            "title": "Pipeline",
+            "value": "$BUILD_PIPELINE_NAME",
+            "short": true
+          },
+          {
+            "title": "Environment",
+            "value": "((gcp-environment-name))",
+            "short": true
+          },
+          {
+            "title": "Project",
+            "value": "((gcp-project-name))",
+            "short": true
           }
-      ]
+        ],
+        "color": "#ffe100"
+      }
+    ]
 
 
 jobs:
@@ -256,6 +292,7 @@ jobs:
     passed: ["Apply Database Patches"]
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
+    on_error: *slack_error_alert
     on_failure: *slack_failure_alert
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
@@ -282,6 +319,7 @@ jobs:
     passed: ["Apply Database Patches"]
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
+    on_error: *slack_error_alert
     on_failure: *slack_failure_alert
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
@@ -308,6 +346,7 @@ jobs:
     passed: ["Apply Database Patches"]
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
+    on_error: *slack_error_alert
     on_failure: *slack_failure_alert
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
@@ -334,6 +373,7 @@ jobs:
     passed: ["Apply Database Patches"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
+    on_error: *slack_error_alert
     on_failure: *slack_failure_alert
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
@@ -360,6 +400,7 @@ jobs:
     passed: ["Apply Database Patches"]
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
+    on_error: *slack_error_alert
     on_failure: *slack_failure_alert
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
@@ -386,6 +427,7 @@ jobs:
     passed: ["Apply Database Patches"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
+    on_error: *slack_error_alert
     on_failure: *slack_failure_alert
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
@@ -412,6 +454,7 @@ jobs:
     passed: ["Apply Database Patches"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
+    on_error: *slack_error_alert
     on_failure: *slack_failure_alert
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
@@ -438,6 +481,7 @@ jobs:
     passed: ["Apply Database Patches"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-statefulset-no-patch.yml
+    on_error: *slack_error_alert
     on_failure: *slack_failure_alert
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
@@ -464,6 +508,7 @@ jobs:
     passed: ["Apply Database Patches"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
+    on_error: *slack_error_alert
     on_failure: *slack_failure_alert
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
@@ -490,6 +535,7 @@ jobs:
     passed: ["Apply Database Patches"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
+    on_error: *slack_error_alert
     on_failure: *slack_failure_alert
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
@@ -516,6 +562,7 @@ jobs:
     passed: ["Apply Database Patches"]
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
+    on_error: *slack_error_alert
     on_failure: *slack_failure_alert
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
@@ -542,6 +589,7 @@ jobs:
     passed: ["Apply Database Patches"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
+    on_error: *slack_error_alert
     on_failure: *slack_failure_alert
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
@@ -568,6 +616,7 @@ jobs:
     passed: ["Apply Database Patches"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
+    on_error: *slack_error_alert
     on_failure: *slack_failure_alert
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
@@ -594,6 +643,7 @@ jobs:
     passed: ["Apply Database Patches"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
+    on_error: *slack_error_alert
     on_failure: *slack_failure_alert
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
@@ -620,6 +670,7 @@ jobs:
     passed: ["Apply Database Patches"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
+    on_error: *slack_error_alert
     on_failure: *slack_failure_alert
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
@@ -672,6 +723,7 @@ jobs:
     toolbox,
     event-latency-monitor,
     rabbitmonitor]
+  on_error: *slack_error_alert
   on_failure: *slack_failure_alert
   plan:
     - get: every-minute
@@ -692,6 +744,7 @@ jobs:
                   toolbox,
                   event-latency-monitor,
                   rabbitmonitor]
+  on_error: *slack_error_alert
   on_failure: *slack_failure_alert
   plan:
     - get: every-minute
@@ -724,6 +777,7 @@ jobs:
                   toolbox,
                   event-latency-monitor,
                   rabbitmonitor]
+  on_error: *slack_error_alert
   on_failure: *slack_failure_alert
   plan:
     - get: every-minute
