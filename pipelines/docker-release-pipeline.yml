@@ -155,6 +155,14 @@ resources:
       access_token: ((github.access_token))
       order_by: time
 
+  - name: ddl-release
+    type: github-release-latest
+    source:
+      owner: ONSdigital
+      repository: census-rm-ddl
+      access_token: ((github.access_token))
+      order_by: time
+
   # Docker Images
   - name: acceptance-tests-docker-image-ci
     type: docker-image
@@ -395,6 +403,19 @@ resources:
       username: _json_key
       password: ((gcp.service_account_json))
 
+  - name: ddl-docker-image-ci
+    type: docker-image
+    source:
+      repository: ((docker-registry-ci))/rm/census-rm-ddl
+      username: _json_key
+      password: ((gcp.service_account_json))
+
+  - name: ddl-docker-image-gcr
+    type: docker-image
+    source:
+      repository: ((docker-registry-gcr))/rm/census-rm-ddl
+      username: _json_key
+      password: ((gcp.service_account_json))
 templating:
 
 slack_failure_alert_prebuild: &slack_failure_alert_prebuild
@@ -1424,6 +1445,50 @@ jobs:
         cache_from:
           - performance-tests-docker-image-ci
         tag_file: performance-tests-release/tag
+        tag_as_latest: false
+      get_params:
+        skip_download: true
+
+  - name: build-ddl-release
+    plan:
+    - get: ddl-release
+      params:
+        include_source_tarball: true
+      trigger: true
+    - task: Build DDL Image (release)
+      on_failure: *slack_failure_alert_prebuild
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: alpine
+        inputs:
+          - name: ddl-release
+        outputs:
+          - name: extracted-ddl
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              cd ddl-release
+              tar -xzf source.tar.gz -C ../extracted-ddl --strip-components=1
+    - put: ddl-docker-image-ci
+      on_failure: *slack_failure_alert_ci
+      params:
+        build: extracted-ddl
+        tag_file: ddl-release/tag
+        tag_as_latest: false
+      get_params:
+        save: true
+    - put: ddl-docker-image-gcr
+      on_failure: *slack_failure_alert_gcr
+      params:
+        build: extracted-ddl
+        cache_from:
+          - ddl-docker-image-ci
+        tag_file: ddl-release/tag
         tag_as_latest: false
       get_params:
         skip_download: true
