@@ -311,7 +311,7 @@ jobs:
         KUBERNETES_CLUSTER: rm-k8s-cluster
       input_mapping: {census-rm-terraform: census-rm-terraform}
 
-- name: "Scale Down Apps"
+- name: "Scale Down Apps and Reset DB"
   disable_manual_trigger: true
   serial: true
   serial_groups: [
