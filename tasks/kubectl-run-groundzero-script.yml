@@ -19,8 +19,6 @@ run:
   args:
     - -exc
     - |
-    - -exc
-    - |
       cat >~/gcloud-service-key.json <<EOL
       $SERVICE_ACCOUNT_JSON
       EOL
