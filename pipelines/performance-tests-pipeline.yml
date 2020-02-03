@@ -369,13 +369,13 @@ jobs:
             kubectl scale deployment case-processor --replicas=0
             kubectl scale deployment uacqidservice --replicas=0
   - task: "Run ground zero"
+    file: census-rm-deploy/tasks/kubectl-run-groundzero-script.yml
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
       GCP_PROJECT_NAME: ((performance-gcp-project-name))
       KUBERNETES_FILE_PATH: kubernetes-repo/release/optional
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-      file: census-rm-deploy/tasks/run-groundzero-script.yml
 
   on_failure: *slack_performance_setup_failure
   on_error: *slack_error_alert
