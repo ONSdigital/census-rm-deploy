@@ -338,7 +338,7 @@ jobs:
   - get: every-minute
     trigger: true
     passed: ["Run Terraform"]
-  - task: "Scale down apps and run ground zero"
+  - task: "Scale down apps"
     config:
       platform: linux
       image_resource:
@@ -368,9 +368,15 @@ jobs:
             kubectl scale deployment case-api --replicas=0
             kubectl scale deployment case-processor --replicas=0
             kubectl scale deployment uacqidservice --replicas=0
+  - task: "Run ground zero"
+    file: census-rm-deploy/tasks/kubectl-run-groundzero-script.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+      GCP_PROJECT_NAME: ((performance-gcp-project-name))
+      KUBERNETES_FILE_PATH: kubernetes-repo/release/optional
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
 
-            # Wipe and rebuild database
-            kubectl exec $(kubectl get pods --selector=app=census-rm-toolbox -o jsonpath='{.items[*].metadata.name}') -- /bin/bash /app/groundzero/rebuild_from_ground_zero.sh
   on_failure: *slack_performance_setup_failure
   on_error: *slack_error_alert
 
