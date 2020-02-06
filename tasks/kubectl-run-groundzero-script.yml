@@ -31,7 +31,7 @@ run:
       kubectl apply -f ${KUBERNETES_FILE_PATH}/census-rm-ddl-pod.yml --record
       kubectl wait --for=condition=Ready pod/census-rm-ddl --timeout=${WAIT_UNTIL_AVAILABLE_TIMEOUT}
 
-      kubectl exec $(kubectl get pods --selector=app=census-rm-ddl -o jsonpath='{.items[*].metadata.name}') -- /bin/bash /groundzero_ddl/rebuild_from_ground_zero.sh
+      kubectl exec $(kubectl get pods --selector=app=census-rm-ddl -o jsonpath='{.items[*].metadata.name}') -- /bin/bash groundzero_ddl/rebuild_from_ground_zero.sh
 
       # Tidy up pod
       kubectl delete pod census-rm-ddl || true
