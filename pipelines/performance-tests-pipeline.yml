@@ -333,6 +333,8 @@ jobs:
   plan:
   - get: performance-tests-repo
   - get: performance-tests-docker-image
+  - get: census-rm-deploy
+  - get: census-rm-kubernetes-release
     params:
       skip_download: true
   - get: every-minute
