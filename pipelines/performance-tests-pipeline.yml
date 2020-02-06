@@ -378,6 +378,8 @@ jobs:
       GCP_PROJECT_NAME: ((performance-gcp-project-name))
       KUBERNETES_FILE_PATH: kubernetes-repo/release/optional
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
+
 
   on_failure: *slack_performance_setup_failure
   on_error: *slack_error_alert
