@@ -922,9 +922,6 @@ jobs:
             # Purge Rabbit helm
             helm tiller run helm delete rm --purge
 
-            # Delete Rabbit stateful set
-            kubectl delete statefulset rabbitmq
-
             # Delete Rabbit persistent volumes
             kubectl delete pvc data-rabbitmq-0
             kubectl delete pvc data-rabbitmq-1
