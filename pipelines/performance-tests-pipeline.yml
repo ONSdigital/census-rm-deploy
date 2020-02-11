@@ -335,8 +335,6 @@ jobs:
   - get: performance-tests-docker-image
   - get: census-rm-deploy
   - get: census-rm-kubernetes-release
-    params:
-      skip_download: true
   - get: every-minute
     trigger: true
     passed: ["Run Terraform"]
@@ -869,7 +867,7 @@ jobs:
   on_failure: *slack_failure_alert
   on_error: *slack_error_alert
 
-- name: "Remove Cluster Nodes"
+- name: "Tear Down"
   disable_manual_trigger: true
   serial: true
   serial_groups: [
@@ -892,6 +890,49 @@ jobs:
   - get: every-minute
     trigger: true
     passed: ["Performance Tests"]
+  - task: "Tear Down Rabbit"
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: google/cloud-sdk
+      params:
+        SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+        KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+        GCP_PROJECT_NAME: ((performance-gcp-project-name))
+      run:
+        path: bash
+        args:
+          - -exc
+          - |
+
+            # Authenticate
+            export GOOGLE_APPLICATION_CREDENTIALS=/root/gcloud-service-key.json
+            export GCP_PROJECT=census-rm-$ENV
+            cat >$GOOGLE_APPLICATION_CREDENTIALS <<EOL
+            $ADMIN_SERVICE_ACCOUNT_JSON
+            EOL
+            gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
+            gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT}
+
+            # Install helm and helm-tiller
+            apt-get install -y procps  # NB: procps is used by Helm
+            curl -L https://git.io/get_helm.sh | bash
+            helm init --client-only
+            helm plugin install https://github.com/rimusz/helm-tiller
+
+            # Purge Rabbit helm
+            helm tiller run helm delete rm --purge
+
+            # Delete Rabbit stateful set
+            kubectl delete statefulset rabbitmq
+
+            # Delete Rabbit persistent volumes
+            kubectl delete pvc data-rabbitmq-0
+            kubectl delete pvc data-rabbitmq-1
+            kubectl delete pvc data-rabbitmq-2
+            
   - task: "Remove node-pools"
     config:
       platform: linux
@@ -927,6 +968,6 @@ jobs:
                 echo deleting $NODE_POOL
                 gcloud container node-pools delete $NODE_POOL --cluster=${KUBERNETES_CLUSTER} --region=europe-west2 --quiet --project ${GCP_PROJECT_NAME}
             done
-    on_failure: *slack_failure_alert
-    on_error: *slack_error_alert
-    on_success: *slack_performance_tests_finished
+  on_failure: *slack_failure_alert
+  on_error: *slack_error_alert
+  on_success: *slack_performance_tests_finished
