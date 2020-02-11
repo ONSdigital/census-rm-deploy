@@ -889,6 +889,33 @@ jobs:
   - get: every-minute
     trigger: true
     passed: ["Performance Tests"]
+  - task: "Remove Print Files"
+    config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: google/cloud-sdk
+        params:
+          SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+          KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+          GCP_PROJECT_NAME: ((performance-gcp-project-name))
+        run:
+          path: bash
+          args:
+            - -exc
+            - |
+              cat >~/gcloud-service-key.json <<EOL
+              $SERVICE_ACCOUNT_JSON
+              EOL
+
+              # Use gcloud service account to configure kubectl
+              gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
+              gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
+
+              # Remove items from bucket
+              gsutil -m rm gs://census-rm-performance-sent-print-files/**
+
   - task: "Tear Down Rabbit"
     config:
       platform: linux
