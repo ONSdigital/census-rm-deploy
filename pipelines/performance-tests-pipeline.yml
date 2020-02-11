@@ -868,7 +868,6 @@ jobs:
   on_error: *slack_error_alert
 
 - name: "Tear Down"
-  disable_manual_trigger: true
   serial: true
   serial_groups: [
     scale-down,
