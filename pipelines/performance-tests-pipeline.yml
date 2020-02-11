@@ -914,7 +914,7 @@ jobs:
               gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
 
               # Remove items from bucket
-              gsutil -m rm gs://census-rm-performance-sent-print-files/**
+              gsutil -m rm gs://census-rm-performance-sent-print-files/** || true
 
   - task: "Tear Down Rabbit"
     config:
