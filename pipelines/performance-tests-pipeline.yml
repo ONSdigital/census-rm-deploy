@@ -906,15 +906,13 @@ jobs:
         args:
           - -exc
           - |
-
-            # Authenticate
-            export GOOGLE_APPLICATION_CREDENTIALS=/root/gcloud-service-key.json
-            export GCP_PROJECT=census-rm-$ENV
-            cat >$GOOGLE_APPLICATION_CREDENTIALS <<EOL
-            $ADMIN_SERVICE_ACCOUNT_JSON
+            cat >~/gcloud-service-key.json <<EOL
+            $SERVICE_ACCOUNT_JSON
             EOL
-            gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
-            gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT}
+
+            # Use gcloud service account to configure kubectl
+            gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
+            gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
 
             # Install helm and helm-tiller
             apt-get install -y procps  # NB: procps is used by Helm
