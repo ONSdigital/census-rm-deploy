@@ -820,7 +820,7 @@ jobs:
 
             # Wait for rollout to finish
             kubectl rollout status deploy action-scheduler --watch=true --timeout=200s
-            kubectl rollout status deploy action-worker --watch=true --timeout=200s
+            kubectl rollout status deploy action-worker --watch=true --timeout=400s
             kubectl rollout status deploy case-api --watch=true --timeout=200s
             kubectl rollout status deploy case-processor --watch=true --timeout=200s
             kubectl rollout status deploy uacqidservice --watch=true --timeout=200s
