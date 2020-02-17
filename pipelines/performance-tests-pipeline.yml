@@ -23,6 +23,16 @@ resources:
   source:
     interval: 1m
 
+- name: select-test-scenario
+  type: time
+  source:
+    interval: 1m
+
+- name: trigger-the-tests
+  type: time
+  source:
+    interval: 1m
+
 - name: performance-tests-repo
   type: git
   source:
@@ -271,7 +281,7 @@ jobs:
   - get: performance-tests-docker-image
     params:
       skip_download: true
-  - get: every-minute
+  - get: select-test-scenario
   - *slack_performance_tests_started
   - task: "Select test scenario"
     config:
@@ -297,7 +307,7 @@ jobs:
               gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
               gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
 
-              echo three-and-a-half-million | gsutil cp -I gs://census-rm-performance-sample-files/target-scenario-tag.txt || true
+              echo "three-and-a-half-million or not local-docker" | gsutil cp -I gs://census-rm-performance-sample-files/target-scenario-tag.txt || true
 
 - name: "Trigger Tests - 350k"
   serial: true
@@ -320,7 +330,7 @@ jobs:
   - get: performance-tests-docker-image
     params:
       skip_download: true
-  - get: every-minute
+  - get: select-test-scenario
   - *slack_performance_tests_started
   - task: "Select test scenario"
     config:
@@ -346,7 +356,7 @@ jobs:
               gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
               gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
 
-              echo three-hundred-and-fifty-thousand | gsutil cp -I gs://census-rm-performance-sample-files/target-scenario-tag.txt || true
+              echo "three-hundred-and-fifty-thousand or not local-docker" | gsutil cp -I gs://census-rm-performance-sample-files/target-scenario-tag.txt || true
 
 - name: "Trigger Tests - PubSub"
   serial: true
@@ -369,7 +379,7 @@ jobs:
   - get: performance-tests-docker-image
     params:
       skip_download: true
-  - get: every-minute
+  - get: select-test-scenario
   - *slack_performance_tests_started
   - task: "Select test scenario"
     config:
@@ -395,7 +405,32 @@ jobs:
               gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
               gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
 
-              echo pubsub | gsutil cp -I gs://census-rm-performance-sample-files/target-scenario-tag.txt || true
+              echo "pubsub" | gsutil cp -I gs://census-rm-performance-sample-files/target-scenario-tag.txt || true
+
+- name: "Trigger Requested Tests"
+  serial: true
+  serial_groups: [
+    action-scheduler,
+    action-worker,
+    case-api,
+    case-processor,
+    fieldwork-adapter,
+    notify-processor,
+    uac-qid-service,
+    pubsubsvc,
+    print-file-service,
+    exception-manager,
+    toolbox,
+    database-monitor,
+    rabbitmonitor]
+  plan:
+  - get: performance-tests-repo
+  - get: performance-tests-docker-image
+    params:
+      skip_download: true
+  - get: select-test-scenario
+    trigger: true
+  - *slack_performance_tests_started
 
 # Run Terraform
 - name: "Run Terraform"
@@ -422,13 +457,7 @@ jobs:
   plan:
     - get: every-minute
       trigger: true
-      passed: ["Trigger Tests - 3.5 million"]
-    - get: every-minute
-      trigger: true
-      passed: ["Trigger Tests - 350k"]
-    - get: every-minute
-      trigger: true
-      passed: ["Trigger Tests - PubSub"]
+      passed: ["Trigger Requested Tests"]
     - get: census-rm-terraform
     - get: census-rm-deploy
     - task: "Run Terraform"
