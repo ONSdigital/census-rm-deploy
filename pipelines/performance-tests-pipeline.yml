@@ -462,6 +462,7 @@ jobs:
     - get: trigger-the-tests
       trigger: true
       passed: ["Trigger Requested Tests"]
+    - get: every-minute
     - get: census-rm-terraform
     - get: census-rm-deploy
     - task: "Run Terraform"
