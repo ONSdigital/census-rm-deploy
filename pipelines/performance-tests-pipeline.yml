@@ -408,6 +408,7 @@ jobs:
               echo "pubsub" | gsutil cp -I gs://census-rm-performance-sample-files/target-scenario-tag.txt || true
 
 - name: "Trigger Requested Tests"
+  disable_manual_trigger: true
   serial: true
   serial_groups: [
     action-scheduler,
@@ -429,6 +430,8 @@ jobs:
     params:
       skip_download: true
   - get: select-test-scenario
+    trigger: true
+  - get: trigger-the-tests
     trigger: true
   - *slack_performance_tests_started
 
@@ -455,7 +458,7 @@ jobs:
                   database-monitor,
                   rabbitmonitor]
   plan:
-    - get: every-minute
+    - get: trigger-the-tests
       trigger: true
       passed: ["Trigger Requested Tests"]
     - get: census-rm-terraform
