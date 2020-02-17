@@ -250,7 +250,7 @@ slack_performance_tests_started: &slack_performance_tests_started
 
 jobs:
 
-- name: "Trigger Performance Tests"
+- name: "Trigger Tests - 3.5 million"
   serial: true
   serial_groups: [
     action-scheduler,
@@ -273,6 +273,129 @@ jobs:
       skip_download: true
   - get: every-minute
   - *slack_performance_tests_started
+  - task: "Select test scenario"
+    config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: google/cloud-sdk
+        params:
+          SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+          KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+          GCP_PROJECT_NAME: ((performance-gcp-project-name))
+        run:
+          path: bash
+          args:
+            - -exc
+            - |
+              cat >~/gcloud-service-key.json <<EOL
+              $SERVICE_ACCOUNT_JSON
+              EOL
+
+              # Use gcloud service account to configure kubectl
+              gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
+              gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
+
+              echo three-and-a-half-million | gsutil cp -I gs://census-rm-performance-sample-files/target-scenario-tag.txt || true
+
+- name: "Trigger Tests - 350k"
+  serial: true
+  serial_groups: [
+    action-scheduler,
+    action-worker,
+    case-api,
+    case-processor,
+    fieldwork-adapter,
+    notify-processor,
+    uac-qid-service,
+    pubsubsvc,
+    print-file-service,
+    exception-manager,
+    toolbox,
+    database-monitor,
+    rabbitmonitor]
+  plan:
+  - get: performance-tests-repo
+  - get: performance-tests-docker-image
+    params:
+      skip_download: true
+  - get: every-minute
+  - *slack_performance_tests_started
+  - task: "Select test scenario"
+    config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: google/cloud-sdk
+        params:
+          SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+          KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+          GCP_PROJECT_NAME: ((performance-gcp-project-name))
+        run:
+          path: bash
+          args:
+            - -exc
+            - |
+              cat >~/gcloud-service-key.json <<EOL
+              $SERVICE_ACCOUNT_JSON
+              EOL
+
+              # Use gcloud service account to configure kubectl
+              gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
+              gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
+
+              echo three-hundred-and-fifty | gsutil cp -I gs://census-rm-performance-sample-files/target-scenario-tag.txt || true
+
+- name: "Trigger Tests - PubSub"
+  serial: true
+  serial_groups: [
+    action-scheduler,
+    action-worker,
+    case-api,
+    case-processor,
+    fieldwork-adapter,
+    notify-processor,
+    uac-qid-service,
+    pubsubsvc,
+    print-file-service,
+    exception-manager,
+    toolbox,
+    database-monitor,
+    rabbitmonitor]
+  plan:
+  - get: performance-tests-repo
+  - get: performance-tests-docker-image
+    params:
+      skip_download: true
+  - get: every-minute
+  - *slack_performance_tests_started
+  - task: "Select test scenario"
+    config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: google/cloud-sdk
+        params:
+          SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+          KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+          GCP_PROJECT_NAME: ((performance-gcp-project-name))
+        run:
+          path: bash
+          args:
+            - -exc
+            - |
+              cat >~/gcloud-service-key.json <<EOL
+              $SERVICE_ACCOUNT_JSON
+              EOL
+
+              # Use gcloud service account to configure kubectl
+              gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
+              gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
+
+              echo pubsub | gsutil cp -I gs://census-rm-performance-sample-files/target-scenario-tag.txt || true
 
 # Run Terraform
 - name: "Run Terraform"
@@ -299,7 +422,13 @@ jobs:
   plan:
     - get: every-minute
       trigger: true
-      passed: ["Trigger Performance Tests"]
+      passed: ["Trigger Tests - 3.5 million"]
+    - get: every-minute
+      trigger: true
+      passed: ["Trigger Tests - 350k"]
+    - get: every-minute
+      trigger: true
+      passed: ["Trigger Tests - PubSub"]
     - get: census-rm-terraform
     - get: census-rm-deploy
     - task: "Run Terraform"
