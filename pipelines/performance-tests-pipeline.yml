@@ -431,6 +431,7 @@ jobs:
       skip_download: true
   - get: select-test-scenario
     trigger: true
+  - get: every-minute
   - get: trigger-the-tests
     trigger: true
   - *slack_performance_tests_started
