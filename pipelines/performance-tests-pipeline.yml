@@ -346,7 +346,7 @@ jobs:
               gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
               gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
 
-              echo three-hundred-and-fifty | gsutil cp -I gs://census-rm-performance-sample-files/target-scenario-tag.txt || true
+              echo three-hundred-and-fifty-thousand | gsutil cp -I gs://census-rm-performance-sample-files/target-scenario-tag.txt || true
 
 - name: "Trigger Tests - PubSub"
   serial: true
