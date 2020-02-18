@@ -338,7 +338,6 @@ jobs:
               echo "pubsub" | gsutil cp -I gs://census-rm-performance-sample-files/target-scenario-tag.txt || true
 
 - name: "Trigger Requested Tests"
-  disable_manual_trigger: true
   serial: true
   serial_groups: [
     action-scheduler,
