@@ -277,7 +277,7 @@ jobs:
               gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
               gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
 
-              echo "\"three-and-a-half-million or not local-docker\""" | gsutil cp -I gs://census-rm-performance-sample-files/target-scenario-tag.txt || true
+              echo "\"@three-and-a-half-million\"" | gsutil cp - gs://census-rm-performance-sample-files/target-scenario-tag.txt || true
 
 - name: "Select Test - 350k"
   plan:
@@ -306,7 +306,7 @@ jobs:
               gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
               gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
 
-              echo "\"three-hundred-and-fifty-thousand or not local-docker\"" | gsutil cp -I gs://census-rm-performance-sample-files/target-scenario-tag.txt || true
+              echo "\"@three-hundred-and-fifty-thousand\"" | gsutil cp - gs://census-rm-performance-sample-files/target-scenario-tag.txt || true
 
 - name: "Select Test - PubSub"
   plan:
@@ -335,7 +335,7 @@ jobs:
               gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
               gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
 
-              echo "\"pubsub\"" | gsutil cp -I gs://census-rm-performance-sample-files/target-scenario-tag.txt || true
+              echo "\"@pubsub\"" | gsutil cp - gs://census-rm-performance-sample-files/target-scenario-tag.txt || true
 
 - name: "Trigger Selected Test"
   serial: true
