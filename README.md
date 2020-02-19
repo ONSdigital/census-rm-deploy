@@ -66,3 +66,13 @@ fly -t <target> check-resource -r <pipeline>/census-rm-kubernetes-release -f ref
 ```
 
 This would bring in all versions from `v1.0.0` chronologically.
+
+### Performance Pipeline
+The performance pipeline has a number of different performance tests which can be run, by first selecting which one you would like to run, and then triggering the selected test.
+
+Presently there are three tests which can be run, by running these selection jobs:
+ - Select Test - 350k
+ - Select Test - 3.5 million
+ - Select Test - PubSub
+
+ Once you have run one of the selection jobs, you can then run Trigger Selected Test to run the test.
