@@ -721,7 +721,6 @@ jobs:
     print-file-service,
     exception-manager,
     toolbox,
-    event-latency-monitor,
     rabbitmonitor]
   on_error: *slack_error_alert
   on_failure: *slack_failure_alert
@@ -742,7 +741,6 @@ jobs:
                   print-file-service,
                   exception-manager,
                   toolbox,
-                  event-latency-monitor,
                   rabbitmonitor]
   on_error: *slack_error_alert
   on_failure: *slack_failure_alert
@@ -775,7 +773,6 @@ jobs:
                   print-file-service,
                   exception-manager,
                   toolbox,
-                  event-latency-monitor,
                   rabbitmonitor]
   on_error: *slack_error_alert
   on_failure: *slack_failure_alert
