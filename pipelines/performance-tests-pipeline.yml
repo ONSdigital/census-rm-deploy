@@ -308,6 +308,35 @@ jobs:
 
               echo "\"@three-hundred-and-fifty-thousand\"" | gsutil cp - gs://census-rm-performance-sample-files/target-scenario-tag.txt || true
 
+- name: "Select Test - Receipting"
+  plan:
+  - *slack_performance_tests_started
+  - task: "Select test scenario"
+    config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: google/cloud-sdk
+        params:
+          SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+          KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+          GCP_PROJECT_NAME: ((performance-gcp-project-name))
+        run:
+          path: bash
+          args:
+            - -exc
+            - |
+              cat >~/gcloud-service-key.json <<EOL
+              $SERVICE_ACCOUNT_JSON
+              EOL
+
+              # Use gcloud service account to configure kubectl
+              gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
+              gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
+
+              echo "\"@case-receipt-test\"" | gsutil cp - gs://census-rm-performance-sample-files/target-scenario-tag.txt || true
+
 - name: "Select Test - PubSub"
   plan:
   - *slack_performance_tests_started
