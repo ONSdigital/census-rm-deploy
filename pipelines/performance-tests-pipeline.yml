@@ -252,7 +252,6 @@ jobs:
 
 - name: "Select Test - 3.5 million"
   plan:
-  - *slack_performance_tests_started
   - task: "Select test scenario"
     config:
         platform: linux
@@ -281,7 +280,6 @@ jobs:
 
 - name: "Select Test - 350k"
   plan:
-  - *slack_performance_tests_started
   - task: "Select test scenario"
     config:
         platform: linux
@@ -310,7 +308,6 @@ jobs:
 
 - name: "Select Test - Receipting"
   plan:
-  - *slack_performance_tests_started
   - task: "Select test scenario"
     config:
         platform: linux
@@ -339,7 +336,6 @@ jobs:
 
 - name: "Select Test - PubSub"
   plan:
-  - *slack_performance_tests_started
   - task: "Select test scenario"
     config:
         platform: linux
