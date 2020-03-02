@@ -30,4 +30,4 @@ run:
 
       cd census-rm-kubernetes-dependencies-repo
       GCP_RABBIT_IP=`gcloud compute addresses describe rm-rabbitmq-$ENV-lb --project=$GCP_PROJECT --region=europe-west2 --format='value(address)'`
-      GCP_RABBIT_IP=${GCP_RABBIT_IP} RABBITMQ_CONFIG_VALUES_FILE=${RABBITMQ_CONFIG_VALUES_FILE} ./setup-dependencies.sh
+      GCP_RABBIT_IP=${GCP_RABBIT_IP} RABBITMQ_CONFIG_VALUES_FILE=${RABBITMQ_CONFIG_VALUES_FILE} PROMETHEUS_CONFIG_VALUES_FILE=${PROMETHEUS_CONFIG_VALUES_FILE} ./setup-dependencies.sh

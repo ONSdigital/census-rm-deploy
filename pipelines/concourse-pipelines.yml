@@ -126,6 +126,7 @@ jobs:
             gcp-project-name: census-rm-blacklodge
             kubernetes-cluster-name: rm-k8s-cluster
             rabbit-config: release/rabbitmq/values.yml
+            prometheus-config: release/prometheus/values.yml
 
         - name: release-images
           team: rm
@@ -156,3 +157,4 @@ jobs:
             gcp-project-name: census-rm-preprod
             kubernetes-cluster-name: rm-k8s-cluster
             rabbit-config: release/rabbitmq/values_prod.yml
+            prometheus-config: release/prometheus/values.yml
