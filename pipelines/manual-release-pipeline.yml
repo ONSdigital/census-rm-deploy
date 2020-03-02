@@ -22,14 +22,14 @@ groups:
   - "Report Deployment Success"
   - "Trigger Terraform"
   - "Run Terraform"
-  - "Run Rabbit Helm"
+  - "Run Helm"
   - "Report Terraform Success"
 
 - name: "Infrastructure"
   jobs:
   - "Trigger Terraform"
   - "Run Terraform"
-  - "Run Rabbit Helm"
+  - "Run Helm"
   - "Report Terraform Success"
 
 - name: "App Deployment"
