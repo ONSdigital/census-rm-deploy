@@ -8,6 +8,7 @@ params:
   ADMIN_SERVICE_ACCOUNT_JSON:
   KUBERNETES_CLUSTER:
   RABBITMQ_CONFIG_VALUES_FILE:
+  PROMETHEUS_CONFIG_VALUES_FILE:
 inputs:
   - name: census-rm-kubernetes-dependencies-repo
 run:
