@@ -800,5 +800,5 @@ jobs:
     trigger: true
     passed: [
       "Run Terraform",
-      "Run Rabbit Helm"]
+      "Run Helm"]
   - *slack_success_alert

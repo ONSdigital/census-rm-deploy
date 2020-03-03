@@ -494,8 +494,8 @@ jobs:
   on_failure: *slack_performance_setup_failure
   on_error: *slack_error_alert
 
-  # Run Rabbit Helm
-- name: "Run Rabbit Helm"
+  # Run Helm
+- name: "Run Helm"
   disable_manual_trigger: true
   serial: true
   on_failure: *slack_failure_alert
@@ -522,13 +522,14 @@ jobs:
       passed: ["Scale Down Apps and Reset DB"]
     - get: census-rm-kubernetes-dependencies-repo
     - get: census-rm-deploy
-    - task: "Run Rabbit Helm"
+    - task: "Run Helm"
       file: census-rm-deploy/tasks/helm.yml
       params:
         ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
         ENV: performance
         KUBERNETES_CLUSTER: rm-k8s-cluster
         RABBITMQ_CONFIG_VALUES_FILE: release/rabbitmq/values_prod.yml
+        PROMETHEUS_CONFIG_VALUES_FILE: release/prometheus/values.yml
       input_mapping: {census-rm-kubernetes-dependencies-repo: census-rm-kubernetes-dependencies-repo}
 
 - name: "Action Scheduler"
@@ -540,7 +541,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Rabbit Helm"]
+    passed: ["Run Helm"]
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
     on_failure: *slack_failure_alert
@@ -565,7 +566,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Rabbit Helm"]
+    passed: ["Run Helm"]
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_failure_alert
@@ -590,7 +591,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Rabbit Helm"]
+    passed: ["Run Helm"]
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
     on_failure: *slack_failure_alert
@@ -615,7 +616,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Rabbit Helm"]
+    passed: ["Run Helm"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_failure_alert
@@ -640,7 +641,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Rabbit Helm"]
+    passed: ["Run Helm"]
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
     on_failure: *slack_failure_alert
@@ -665,7 +666,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Rabbit Helm"]
+    passed: ["Run Helm"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_failure_alert
@@ -690,7 +691,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Rabbit Helm"]
+    passed: ["Run Helm"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-statefulset-no-patch.yml
     on_failure: *slack_failure_alert
@@ -715,7 +716,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Rabbit Helm"]
+    passed: ["Run Helm"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_failure_alert
@@ -740,7 +741,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Rabbit Helm"]
+    passed: ["Run Helm"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_failure_alert
@@ -765,7 +766,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Rabbit Helm"]
+    passed: ["Run Helm"]
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
     on_failure: *slack_failure_alert
@@ -790,7 +791,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Rabbit Helm"]
+    passed: ["Run Helm"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_failure_alert
@@ -815,7 +816,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Rabbit Helm"]
+    passed: ["Run Helm"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_failure_alert
@@ -840,7 +841,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Rabbit Helm"]
+    passed: ["Run Helm"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     on_failure: *slack_failure_alert
