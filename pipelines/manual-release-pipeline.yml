@@ -22,14 +22,14 @@ groups:
   - "Report Deployment Success"
   - "Trigger Terraform"
   - "Run Terraform"
-  - "Run Rabbit Helm"
+  - "Run Helm"
   - "Report Terraform Success"
 
 - name: "Infrastructure"
   jobs:
   - "Trigger Terraform"
   - "Run Terraform"
-  - "Run Rabbit Helm"
+  - "Run Helm"
   - "Report Terraform Success"
 
 - name: "App Deployment"
@@ -759,7 +759,7 @@ jobs:
         KUBERNETES_CLUSTER: rm-k8s-cluster
       input_mapping: {census-rm-terraform: census-rm-terraform-release}
 
-- name: "Run Rabbit Helm"
+- name: "Run Helm"
   disable_manual_trigger: true
   serial: true
   serial_groups: [action-scheduler,
@@ -782,13 +782,14 @@ jobs:
       passed: ["Run Terraform"]
     - get: census-rm-kubernetes-release
     - get: census-rm-deploy
-    - task: "Run Rabbit Helm"
-      file: census-rm-deploy/tasks/helm-rabbit.yml
+    - task: "Run Helm"
+      file: census-rm-deploy/tasks/helm.yml
       params:
         ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
         ENV: ((gcp-environment-name))
         KUBERNETES_CLUSTER: rm-k8s-cluster
         RABBITMQ_CONFIG_VALUES_FILE: ((rabbit-config))
+        PROMETHEUS_CONFIG_VALUES_FILE: ((prometheus-config))
       input_mapping: {census-rm-kubernetes-dependencies-repo: census-rm-kubernetes-release}
 
 - name: "Report Terraform Success"
@@ -799,5 +800,5 @@ jobs:
     trigger: true
     passed: [
       "Run Terraform",
-      "Run Rabbit Helm"]
+      "Run Helm"]
   - *slack_success_alert
