@@ -238,7 +238,6 @@ jobs:
   plan:
     - get: every-minute
     - get: census-rm-kubernetes-release
-  on_success: *slack_in_progress_alert
 
 - name: "Apply Database Patches"
   disable_manual_trigger: true

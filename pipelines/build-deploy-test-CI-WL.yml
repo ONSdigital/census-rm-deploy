@@ -2462,7 +2462,6 @@ jobs:
                   wl-database-monitor,
                   wl-rabbitmonitor,
                   wl-regional-counts]
-  on_success: *slack_success_alert_wl
   on_failure: *slack_failure_alert_wl
   on_error: *slack_error_alert_wl
   plan:
@@ -2498,7 +2497,6 @@ jobs:
                   wl-database-monitor,
                   wl-rabbitmonitor,
                   wl-regional-counts]
-  on_success: *slack_success_alert_wl
   on_failure: *slack_failure_alert_wl
   on_error: *slack_error_alert_wl
   plan:
