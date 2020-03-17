@@ -238,7 +238,6 @@ jobs:
   plan:
     - get: every-minute
     - get: census-rm-kubernetes-release
-  on_success: *slack_in_progress_alert
 
 - name: "Apply Database Patches"
   disable_manual_trigger: true
@@ -704,7 +703,6 @@ jobs:
             "Database Monitor",
             "Rabbit Monitor",
             "Regional Counts"]
-  - *slack_success_alert
 
 # Infrastructure
 - name: "Trigger Terraform"
@@ -801,4 +799,3 @@ jobs:
     passed: [
       "Run Terraform",
       "Run Helm"]
-  - *slack_success_alert

@@ -1666,14 +1666,12 @@ jobs:
                   rabbitmonitor-deploy,
                   regional-counts-deploy,
                   ops-deploy]
-  on_success: *slack_success_alert_ci
   on_failure: *slack_failure_alert_ci
   on_error: *slack_error_alert_ci
   plan:
   - get: census-rm-terraform
     trigger: true
   - get: census-rm-deploy
-  - *slack_started_alert_ci
   - task: "CI Terraform"
     file: census-rm-deploy/tasks/terraform-env.yml
     params:
@@ -1702,7 +1700,6 @@ jobs:
                   database-monitor-deploy,
                   rabbitmonitor-deploy,
                   regional-counts-deploy]
-  on_success: *slack_success_alert_ci
   on_failure: *slack_failure_alert_ci
   on_error: *slack_error_alert_ci
   plan:
@@ -1711,7 +1708,6 @@ jobs:
     - get: census-rm-deploy
     - get: census-rm-terraform
       passed: ["CI Terraform"]
-    - *slack_started_alert_ci
     - task: "CI Helm"
       file: census-rm-deploy/tasks/helm.yml
       params:
@@ -2466,7 +2462,6 @@ jobs:
                   wl-database-monitor,
                   wl-rabbitmonitor,
                   wl-regional-counts]
-  on_success: *slack_success_alert_wl
   on_failure: *slack_failure_alert_wl
   on_error: *slack_error_alert_wl
   plan:
@@ -2502,7 +2497,6 @@ jobs:
                   wl-database-monitor,
                   wl-rabbitmonitor,
                   wl-regional-counts]
-  on_success: *slack_success_alert_wl
   on_failure: *slack_failure_alert_wl
   on_error: *slack_error_alert_wl
   plan:
