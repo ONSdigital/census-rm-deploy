@@ -412,7 +412,6 @@ jobs:
     params:
       skip_download: true
   - get: every-minute
-  - *slack_performance_tests_started
 
 # Run Terraform
 - name: "Run Terraform"
