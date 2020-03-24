@@ -1083,7 +1083,7 @@ jobs:
 
             # Install helm and helm-tiller
             apt-get install -y procps  # NB: procps is used by Helm
-            curl -L https://git.io/get_helm.sh | bash
+            curl -L https://git.io/get_helm.sh | bash -s -- --version v2.16.3
             helm init --client-only
             helm plugin install https://github.com/rimusz/helm-tiller
 
