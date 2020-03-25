@@ -166,7 +166,7 @@ resources:
   source:
     uri: git@github.com:ONSdigital/census-rm-kubernetes.git
     private_key: ((github.service_account_private_key))
-    paths: [dependencies/*, rabbitmq/*, setup-dependencies.sh]
+    paths: [dependencies/*, grafana-dashboards/*, rabbitmq/*, setup-dependencies.sh]
 
 - name: census-rm-terraform
   type: git
