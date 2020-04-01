@@ -1,4 +1,3 @@
-
 resource_types:
 - name: slack-notification
   type: docker-image
@@ -43,14 +42,16 @@ resources:
     branch: ((terraform-branch))
     uri: git@github.com:ONSdigital/census-rm-terraform.git
     private_key: ((github.service_account_private_key))
-
+    tag_filter: v*.*.*
+    
 - name: census-rm-kubernetes-dependencies-repo
   type: git
   source:
     uri: git@github.com:ONSdigital/census-rm-kubernetes.git
     private_key: ((github.service_account_private_key))
     paths: [dependencies/*, rabbitmq/*, setup-dependencies.sh]
-
+    tag_filter: v*.*.*
+    
 - name: census-rm-kubernetes-release	
   type: git	
   source:
@@ -58,6 +59,7 @@ resources:
     private_key: ((github.service_account_private_key))	
     paths: [release/*]
     branch: master
+    tag_filter: v*.*.*
 
 templating:
 
