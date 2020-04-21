@@ -1126,11 +1126,14 @@ jobs:
             gcloud config set container/use_client_certificate True --project ${GCP_PROJECT_NAME}
 
 
-            # Delete cluster node pools
+            # Delete cluster node pools except for the monitoring one -
+            # We still need access to graphs and stats after the tests have finished running
             NODE_POOL_LIST=`gcloud container node-pools list --cluster=${KUBERNETES_CLUSTER} --region=europe-west2 --format="value(name)" --project ${GCP_PROJECT_NAME}`
             for NODE_POOL in $NODE_POOL_LIST ; do
+              if [ "$NODE_POOL" != "monitoring-node-pool" ]; then
                 echo deleting $NODE_POOL
                 gcloud container node-pools delete $NODE_POOL --cluster=${KUBERNETES_CLUSTER} --region=europe-west2 --quiet --project ${GCP_PROJECT_NAME}
+              fi
             done
   on_failure: *slack_failure_alert
   on_error: *slack_error_alert
