@@ -11,6 +11,7 @@ groups:
   - "Build Data Exporter Latest"
   - "Build Exception Manager Latest"
   - "Build Fieldwork Adapter Latest"
+  - "Build Load Generator Latest"
   - "Build Notify Processor Latest"
   - "Build Notify Stub Latest"
   - "Build Ops Latest"
@@ -70,6 +71,7 @@ groups:
   - "Build Data Exporter Latest"
   - "Build Exception Manager Latest"
   - "Build Fieldwork Adapter Latest"
+  - "Build Load Generator Latest"
   - "Build Notify Processor Latest"
   - "Build Notify Stub Latest"
   - "Build Ops Latest"
@@ -292,6 +294,12 @@ resources:
   type: git
   source:
     uri: git@github.com:ONSdigital/census-rm-performance-tests.git
+    private_key: ((github.service_account_private_key))
+
+- name: load-generator-master
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-load-generator.git
     private_key: ((github.service_account_private_key))
 
 # Docker images
@@ -547,6 +555,19 @@ resources:
     username: _json_key
     password: ((gcp.service_account_json))
 
+- name: load-generator-docker-image-ci
+  type: docker-image
+  source:
+    repository: ((docker-registry-ci))/rm/census-rm-load-generator
+    username: _json_key
+    password: ((gcp.service_account_json))
+
+- name: load-generator-docker-image-gcr
+  type: docker-image
+  source:
+    repository: ((docker-registry-gcr))/rm/census-rm-load-generator
+    username: _json_key
+    password: ((gcp.service_account_json))
 
 templating:
 
@@ -1653,6 +1674,32 @@ jobs:
       cache_from:
         - performance-tests-docker-image-ci
       tag_file: performance-tests-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      skip_download: true
+
+- name: "Build Load Generator Latest"
+  serial_groups: [load-generator-build]
+  plan:
+  - get: load-generator-master
+    trigger: true
+  - put: load-generator-docker-image-ci
+    on_failure: *slack_docker_build_failure_ci
+    on_error: *slack_docker_build_error_ci
+    params:
+      build: load-generator-master
+      tag_file: load-generator-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      save: true
+  - put: load-generator-docker-image-gcr
+    on_failure: *slack_docker_build_failure_gcr
+    on_error: *slack_docker_build_error_gcr
+    params:
+      build: load-generator-master
+      cache_from:
+        - load-generator-docker-image-ci
+      tag_file: load-generator-master/.git/ref
       tag_as_latest: true
     get_params:
       skip_download: true
