@@ -23,6 +23,7 @@ groups:
   - "Trigger Terraform"
   - "Run Terraform"
   - "Run Helm"
+  - "Deploy Monitoring"
   - "Report Terraform Success"
 
 - name: "Infrastructure"
@@ -30,6 +31,7 @@ groups:
   - "Trigger Terraform"
   - "Run Terraform"
   - "Run Helm"
+  - "Deploy Monitoring"
   - "Report Terraform Success"
 
 - name: "App Deployment"

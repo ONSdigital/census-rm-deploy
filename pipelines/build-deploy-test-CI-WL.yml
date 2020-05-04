@@ -1715,11 +1715,11 @@ jobs:
   on_failure: *slack_failure_alert_ci
   on_error: *slack_error_alert_ci
   plan:
-    - get: every-minute
-      trigger: true
-      passed: ["CI Terraform"]
     - get: census-rm-kubernetes-monitoring-repo
+      trigger: true
     - get: census-rm-deploy
+    - get: census-rm-terraform
+      passed: ["CI Terraform"]
     - task: "CI Monitoring"
       file: census-rm-deploy/tasks/monitoring.yml
       params:
@@ -2549,10 +2549,9 @@ jobs:
   on_failure: *slack_failure_alert_wl
   on_error: *slack_error_alert_wl
   plan:
-    - get: every-minute
+    - get: census-rm-kubernetes-dependencies-repo
       trigger: true
       passed: ["WL Terraform"]
-    - get: census-rm-kubernetes-monitoring-repo
     - get: census-rm-deploy
     - task: "WL Monitoring"
       file: census-rm-deploy/tasks/monitoring.yml
