@@ -2549,7 +2549,7 @@ jobs:
   on_failure: *slack_failure_alert_wl
   on_error: *slack_error_alert_wl
   plan:
-    - get: census-rm-kubernetes-dependencies-repo
+    - get: census-rm-kubernetes-monitoring-repo
       trigger: true
       passed: ["WL Terraform"]
     - get: census-rm-deploy
