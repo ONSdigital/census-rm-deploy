@@ -2551,8 +2551,9 @@ jobs:
   plan:
     - get: census-rm-kubernetes-monitoring-repo
       trigger: true
-      passed: ["WL Terraform"]
     - get: census-rm-deploy
+    - get: census-rm-terraform
+      passed: ["WL Terraform"]
     - task: "WL Monitoring"
       file: census-rm-deploy/tasks/monitoring.yml
       params:
