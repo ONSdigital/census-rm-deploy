@@ -172,7 +172,7 @@ resources:
   source:
     uri: git@github.com:ONSdigital/census-rm-kubernetes.git
     private_key: ((github.service_account_private_key))
-    paths: [rabbitmq/*, setup-dependencies.sh]
+    paths: [dependencies/*, rabbitmq/*, setup-dependencies.sh]
 
 - name: census-rm-kubernetes-monitoring-repo
   type: git
