@@ -2,6 +2,7 @@
 groups:
 - name: "Overview"
   jobs:
+  - "Reset DB"
   - "Build Acceptance Tests Latest"
   - "Build Action Scheduler Latest"
   - "Build Action Worker Latest"
@@ -9,6 +10,7 @@ groups:
   - "Build Case API Latest"
   - "Build Case Processor Latest"
   - "Build Data Exporter Latest"
+  - "Build DDL Latest"
   - "Build Exception Manager Latest"
   - "Build Fieldwork Adapter Latest"
   - "Build Notify Processor Latest"
@@ -22,6 +24,7 @@ groups:
   - "Build UAC QID Service Latest"
   - "CI Terraform"
   - "CI Helm"
+  - "CI Apply Database Patches"
   - "CI Deploy Action-Scheduler"
   - "CI Deploy Action-Worker"
   - "CI Deploy Case-API"
@@ -41,6 +44,7 @@ groups:
   - "CI Acceptance Tests"
   - "WL Terraform"
   - "WL Helm"
+  - "WL Apply Database Patches"
   - "WL Deploy Action-Scheduler"
   - "WL Deploy Action-Worker"
   - "WL Deploy Case-API"
@@ -66,6 +70,7 @@ groups:
   - "Build Case API Latest"
   - "Build Case Processor Latest"
   - "Build Data Exporter Latest"
+  - "Build DDL Latest"
   - "Build Exception Manager Latest"
   - "Build Fieldwork Adapter Latest"
   - "Build Notify Processor Latest"
@@ -82,6 +87,7 @@ groups:
   jobs:
   - "CI Terraform"
   - "CI Helm"
+  - "CI Apply Database Patches"
   - "CI Deploy Action-Scheduler"
   - "CI Deploy Action-Worker"
   - "CI Deploy Case-API"
@@ -104,6 +110,7 @@ groups:
   jobs:
   - "WL Terraform"
   - "WL Helm"
+  - "WL Apply Database Patches"
   - "WL Deploy Action-Scheduler"
   - "WL Deploy Action-Worker"
   - "WL Deploy Case-API"
@@ -1033,7 +1040,7 @@ jobs:
     file: census-rm-deploy/tasks/kubectl-run-groundzero-script.yml
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
       GCP_PROJECT_NAME: ((gcp-project-name))
       KUBERNETES_FILE_PATH: kubernetes-repo/optional
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
@@ -1799,22 +1806,23 @@ jobs:
   # Apply Database Patches
 - name: "CI Apply Database Patches"
   serial: true
-  serial_groups: [apply-database-patches,
-                  action-scheduler,
-                  action-worker,
-                  case-api,
-                  case-processor,
-                  uac-qid-service,
-                  pubsubsvc,
-                  ops,
-                  print-file-service,
-                  fieldwork-adapter,
-                  notify-processor,
-                  exception-manager,
-                  toolbox,
-                  database-monitor,
-                  rabbitmonitor,
-                  regionalcounts]
+  serial_groups: [ci-database-patches,
+                  ci-acceptance-tests,
+                  action-scheduler-deploy,
+                  action-worker-deploy,
+                  case-api-deploy,
+                  case-processor-deploy,
+                  uac-qid-service-deploy,
+                  pubsub-deploy,
+                  print-file-service-deploy,
+                  fieldwork-adapter-deploy,
+                  notify-processor-deploy,
+                  notify-stub-deploy,
+                  exception-manager-deploy,
+                  toolbox-deploy,
+                  database-monitor-deploy,
+                  rabbitmonitor-deploy,
+                  regional-counts-deploy]
   plan:
   - get: census-rm-ddl-master
     trigger: true
@@ -1827,8 +1835,8 @@ jobs:
     file: census-rm-deploy/tasks/kubectl-apply-ddl-patches.yml
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-      GCP_PROJECT_NAME: ((gcp-project-name))
-      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      GCP_PROJECT_NAME: ((ci-gcp-project-name))
+      KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
       KUBERNETES_FILE_PATH: kubernetes-repo/optional
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-repo}
@@ -2685,6 +2693,7 @@ jobs:
 - name: "WL Apply Database Patches"
   serial: true
   serial_groups: [wl-database-patches,
+                  wl-terraform,
                   wl-action-scheduler,
                   wl-action-worker,
                   wl-case-api,
@@ -2712,8 +2721,8 @@ jobs:
     file: census-rm-deploy/tasks/kubectl-apply-ddl-patches.yml
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-      GCP_PROJECT_NAME: ((gcp-project-name))
-      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      GCP_PROJECT_NAME: ((wl-gcp-project-name))
+      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
       KUBERNETES_FILE_PATH: kubernetes-repo/optional
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-repo}
