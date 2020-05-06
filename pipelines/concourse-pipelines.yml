@@ -131,7 +131,7 @@ jobs:
 
         - name: release-images
           team: rm
-          config_file: census-rm-deploy/pipelines/docker-release-pipeline.yml
+          config_file: census-rm-deploy/pipelines/build-release-images.yml
           unpaused: true
           vars:
             docker-registry-ci: eu.gcr.io/census-rm-ci
