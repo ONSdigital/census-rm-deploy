@@ -60,6 +60,7 @@ groups:
   - "WL Deploy Database Monitor"
   - "WL Deploy Rabbit Monitor"
   - "WL Deploy Regional Counts"
+  - "WL Whitelist"
 
 - name: "Docker Builds"
   jobs:
@@ -127,6 +128,7 @@ groups:
   - "WL Deploy Database Monitor"
   - "WL Deploy Rabbit Monitor"
   - "WL Deploy Regional Counts"
+  - "WL Whitelist"
 
 resource_types:
 
@@ -136,6 +138,13 @@ resource_types:
     repository: cfcommunity/slack-notification-resource
 
 resources:
+
+- name: every-midnight
+  type: time
+  source:
+    interval: 30m
+    start: 12:00 AM
+    stop: 12:30 AM
 
 - name: slack-alert
   type: slack-notification
@@ -308,6 +317,12 @@ resources:
   type: git
   source:
     uri: git@github.com:ONSdigital/census-rm-load-generator.git
+    private_key: ((github.service_account_private_key))
+
+- name: whitelist-master
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-whitelist.git
     private_key: ((github.service_account_private_key))
 
 # Docker images
@@ -3247,3 +3262,39 @@ jobs:
     input_mapping: {
       docker-image-resource: toolbox-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-optional-repo}
+
+- name: "WL Whitelist"
+  serial: true
+  serial_groups: [wl-whitelist]
+  plan:
+  - get: every-midnight
+    trigger: true
+  - get: case-api-master
+    trigger: true
+    passed: ["WL Deploy Case-API"]
+  - get: census-rm-terraform
+    trigger: true
+    passed: ["WL Terraform"]
+  - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["WL Helm"]
+  - get: census-rm-kubernetes-ops-repo
+    trigger: true
+    passed: ["WL Deploy Ops Tool"]
+  - get: ops-master
+    trigger: true
+    passed: ["WL Deploy Ops Tool"]
+  - get: whitelist-master
+    trigger: true
+  - get: census-rm-deploy
+  - task: apply-whitelist
+    file: census-rm-deploy/tasks/whitelist-env.yml
+    on_failure: *slack_failure_alert_wl
+    on_error: *slack_error_alert_wl
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((wl-gcp-project-name))
+      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
+    input_mapping: {
+      census-rm-whitelist: whitelist-master
+      }
