@@ -61,6 +61,7 @@ groups:
   - "WL Deploy Rabbit Monitor"
   - "WL Deploy Regional Counts"
   - "WL Whitelist"
+  - "WL Whitelist at Midnight"
 
 - name: "Docker Builds"
   jobs:
@@ -136,7 +137,7 @@ resource_types:
   type: docker-image
   source:
     repository: cfcommunity/slack-notification-resource
-    
+
 - name: cron-resource
   type: docker-image
   source:
@@ -3271,8 +3272,6 @@ jobs:
   serial: true
   serial_groups: [wl-whitelist]
   plan:
-  - get: every-midnight
-    trigger: true
   - get: case-api-master
     trigger: true
     passed: ["WL Deploy Case-API"]
@@ -3290,6 +3289,24 @@ jobs:
     passed: ["WL Deploy Ops Tool"]
   - get: whitelist-master
     trigger: true
+  - get: census-rm-deploy
+  - task: apply-whitelist
+    file: census-rm-deploy/tasks/whitelist-env.yml
+    on_failure: *slack_failure_alert_wl
+    on_error: *slack_error_alert_wl
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((wl-gcp-project-name))
+      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
+    input_mapping: {
+      census-rm-whitelist: whitelist-master
+      }
+
+- name: "WL Whitelist at Midnight"
+  plan:
+  - get: every-midnight
+    trigger: true
+  - get: whitelist-master
   - get: census-rm-deploy
   - task: apply-whitelist
     file: census-rm-deploy/tasks/whitelist-env.yml
