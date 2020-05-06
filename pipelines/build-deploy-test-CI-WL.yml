@@ -3278,7 +3278,7 @@ jobs:
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["WL Helm"]
-  - get: census-rm-kubernetes-optional-repo
+  - get: census-rm-kubernetes-ops-repo
     trigger: true
     passed: ["WL Deploy Ops Tool"]
   - get: ops-master
