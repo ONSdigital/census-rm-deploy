@@ -22,6 +22,7 @@ groups:
   - "Build Toolbox Latest"
   - "Build UAC QID Service Latest"
   - "CI Terraform"
+  - "CI Monitoring"
   - "CI Helm"
   - "CI Deploy Action-Scheduler"
   - "CI Deploy Action-Worker"
@@ -41,6 +42,7 @@ groups:
   - "CI Deploy Regional Counts"
   - "CI Acceptance Tests"
   - "WL Terraform"
+  - "WL Monitoring"
   - "WL Helm"
   - "WL Deploy Action-Scheduler"
   - "WL Deploy Action-Worker"
@@ -83,6 +85,7 @@ groups:
 - name: "CI"
   jobs:
   - "CI Terraform"
+  - "CI Monitoring"
   - "CI Helm"
   - "CI Deploy Action-Scheduler"
   - "CI Deploy Action-Worker"
@@ -105,6 +108,7 @@ groups:
 - name: "Whitelodge"
   jobs:
   - "WL Terraform"
+  - "WL Monitoring"
   - "WL Helm"
   - "WL Deploy Action-Scheduler"
   - "WL Deploy Action-Worker"
@@ -168,7 +172,14 @@ resources:
   source:
     uri: git@github.com:ONSdigital/census-rm-kubernetes.git
     private_key: ((github.service_account_private_key))
-    paths: [dependencies/*, grafana-dashboards/*, rabbitmq/*, setup-dependencies.sh]
+    paths: [dependencies/*, rabbitmq/*, setup-dependencies.sh]
+
+- name: census-rm-kubernetes-monitoring-repo
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-kubernetes.git
+    private_key: ((github.service_account_private_key))
+    paths: [monitoring/*, grafana-dashboards/*, setup-monitoring.sh]
 
 - name: census-rm-terraform
   type: git
@@ -1728,6 +1739,45 @@ jobs:
       KUBERNETES_CLUSTER: rm-k8s-cluster
     input_mapping: {census-rm-terraform: census-rm-terraform}
 
+# Deploy monitoring apps
+- name: "CI Monitoring"
+  serial: true
+  serial_groups: [ci-terraform,
+                  ci-acceptance-tests,
+                  action-scheduler-deploy,
+                  action-worker-deploy,
+                  case-api-deploy,
+                  case-processor-deploy,
+                  uac-qid-service-deploy,
+                  pubsub-deploy,
+                  print-file-service-deploy,
+                  fieldwork-adapter-deploy,
+                  notify-processor-deploy,
+                  notify-stub-deploy,
+                  exception-manager-deploy,
+                  toolbox-deploy,
+                  database-monitor-deploy,
+                  rabbitmonitor-deploy,
+                  regional-counts-deploy]
+  on_failure: *slack_failure_alert_ci
+  on_error: *slack_error_alert_ci
+  plan:
+    - get: census-rm-kubernetes-monitoring-repo
+      trigger: true
+    - get: census-rm-deploy
+    - get: census-rm-terraform
+      passed: ["CI Terraform"]
+    - task: "CI Monitoring"
+      file: census-rm-deploy/tasks/monitoring.yml
+      params:
+        ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+        ENV: ci
+        KUBERNETES_CLUSTER: rm-k8s-cluster
+        PROMETHEUS_CONFIG_VALUES_FILE: monitoring/prometheus-values.yml
+        GRAFANA_CONFIG_VALUES_FILE: monitoring/grafana-deployment.yml
+      input_mapping: {census-rm-kubernetes-monitoring-repo: census-rm-kubernetes-monitoring-repo}
+
+
 - name: "CI Helm"
   serial: true
   serial_groups: [ci-terraform,
@@ -1762,7 +1812,6 @@ jobs:
         ENV: ci
         KUBERNETES_CLUSTER: rm-k8s-cluster
         RABBITMQ_CONFIG_VALUES_FILE: rabbitmq/values.yml
-        PROMETHEUS_CONFIG_VALUES_FILE: prometheus/values.yml
       input_mapping: {census-rm-kubernetes-dependencies-repo: census-rm-kubernetes-dependencies-repo}
 
 # CI Deployments
@@ -2526,6 +2575,42 @@ jobs:
         KUBERNETES_CLUSTER: rm-k8s-cluster
       input_mapping: {census-rm-terraform: census-rm-terraform}
 
+# Deploy monitoring apps
+- name: "WL Monitoring"
+  serial: true
+  serial_groups: [wl-terraform,
+                  wl-action-scheduler,
+                  wl-action-worker,
+                  wl-case-api,
+                  wl-case-processor,
+                  wl-uac-qid-service,
+                  wl-pubsub,
+                  wl-print-file-service,
+                  wl-fieldwork-adapter,
+                  wl-notify-processor,
+                  wl-exception-manager,
+                  wl-toolbox,
+                  wl-database-monitor,
+                  wl-rabbitmonitor,
+                  wl-regional-counts]
+  on_failure: *slack_failure_alert_wl
+  on_error: *slack_error_alert_wl
+  plan:
+    - get: census-rm-kubernetes-monitoring-repo
+      trigger: true
+    - get: census-rm-deploy
+    - get: census-rm-terraform
+      passed: ["WL Terraform"]
+    - task: "WL Monitoring"
+      file: census-rm-deploy/tasks/monitoring.yml
+      params:
+        ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+        ENV: whitelodge
+        KUBERNETES_CLUSTER: rm-k8s-cluster
+        PROMETHEUS_CONFIG_VALUES_FILE: monitoring/prometheus-values.yml
+        GRAFANA_CONFIG_VALUES_FILE: monitoring/grafana-deployment.yml
+      input_mapping: {census-rm-kubernetes-monitoring-repo: census-rm-kubernetes-monitoring-repo}
+
 # WL Helm
 - name: "WL Helm"
   serial: true
@@ -2559,7 +2644,6 @@ jobs:
         ENV: whitelodge
         KUBERNETES_CLUSTER: rm-k8s-cluster
         RABBITMQ_CONFIG_VALUES_FILE: rabbitmq/values.yml
-        PROMETHEUS_CONFIG_VALUES_FILE: prometheus/values.yml
       input_mapping: {census-rm-kubernetes-dependencies-repo: census-rm-kubernetes-dependencies-repo}
 
 # WL Deployments
