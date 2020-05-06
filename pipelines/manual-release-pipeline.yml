@@ -23,6 +23,7 @@ groups:
   - "Trigger Terraform"
   - "Run Terraform"
   - "Run Helm"
+  - "Deploy Monitoring"
   - "Report Terraform Success"
 
 - name: "Infrastructure"
@@ -30,6 +31,7 @@ groups:
   - "Trigger Terraform"
   - "Run Terraform"
   - "Run Helm"
+  - "Deploy Monitoring"
   - "Report Terraform Success"
 
 - name: "App Deployment"
@@ -787,7 +789,40 @@ jobs:
         ENV: ((gcp-environment-name))
         KUBERNETES_CLUSTER: rm-k8s-cluster
         RABBITMQ_CONFIG_VALUES_FILE: ((rabbit-config))
+      input_mapping: {census-rm-kubernetes-dependencies-repo: census-rm-kubernetes-release}
+
+- name: "Deploy Monitoring"
+  disable_manual_trigger: true
+  serial: true
+  serial_groups: [action-scheduler,
+                  action-worker,
+                  case-api,
+                  case-processor,
+                  fieldwork-adapter,
+                  notify-processor,
+                  uac-qid-service,
+                  pubsubsvc,
+                  print-file-service,
+                  exception-manager,
+                  toolbox,
+                  rabbitmonitor]
+  on_error: *slack_error_alert
+  on_failure: *slack_failure_alert
+  plan:
+    - get: every-minute
+      trigger: true
+      passed: ["Run Helm"]
+    - get: census-rm-kubernetes-release
+    - get: census-rm-deploy
+    - task: "Deploy Monitoring"
+      file: census-rm-deploy/tasks/monitoring.yml
+      params:
+        ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+        ENV: ((gcp-environment-name))
+        KUBERNETES_CLUSTER: rm-k8s-cluster
+        RABBITMQ_CONFIG_VALUES_FILE: ((rabbit-config))
         PROMETHEUS_CONFIG_VALUES_FILE: ((prometheus-config))
+        GRAFANA_CONFIG_VALUES_FILE: ((grafana-config))
       input_mapping: {census-rm-kubernetes-dependencies-repo: census-rm-kubernetes-release}
 
 - name: "Report Terraform Success"

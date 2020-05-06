@@ -4,12 +4,13 @@ image_resource:
   source:
     repository: google/cloud-sdk
 params:
-  ENV:
   ADMIN_SERVICE_ACCOUNT_JSON:
+  ENV:
   KUBERNETES_CLUSTER:
-  RABBITMQ_CONFIG_VALUES_FILE:
+  PROMETHEUS_CONFIG_VALUES_FILE:
+  GRAFANA_CONFIG_VALUES_FILE:
 inputs:
-  - name: census-rm-kubernetes-dependencies-repo
+  - name: census-rm-kubernetes-monitoring-repo
 run:
   path: bash
   args:
@@ -28,5 +29,5 @@ run:
       helm init --client-only
       helm plugin install https://github.com/rimusz/helm-tiller
 
-      cd census-rm-kubernetes-dependencies-repo
-      ENV=${ENV} RABBITMQ_CONFIG_VALUES_FILE=${RABBITMQ_CONFIG_VALUES_FILE} ./setup-dependencies.sh
+      cd census-rm-kubernetes-monitoring-repo
+      ENV=${ENV} PROMETHEUS_CONFIG_VALUES_FILE=${PROMETHEUS_CONFIG_VALUES_FILE} GRAFANA_CONFIG_VALUES_FILE=${GRAFANA_CONFIG_VALUES_FILE} ./setup-monitoring.sh
