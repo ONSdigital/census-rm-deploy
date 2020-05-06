@@ -5,7 +5,7 @@ image_resource:
     repository: eu.gcr.io/census-gcr-rm/rm/census-rm-toolbox
 params:
   GCP_PROJECT_NAME:
-  ADMIN_SERVICE_ACCOUNT_JSON:
+  SERVICE_ACCOUNT_JSON:
   KUBERNETES_CLUSTER:
 inputs:
   - name: census-rm-whitelist
@@ -17,7 +17,7 @@ run:
       export GOOGLE_APPLICATION_CREDENTIALS=/home/toolbox/gcloud-service-key.json
       export GCP_PROJECT=$GCP_PROJECT_NAME
       cat >$GOOGLE_APPLICATION_CREDENTIALS <<EOL
-      $ADMIN_SERVICE_ACCOUNT_JSON
+      $SERVICE_ACCOUNT_JSON
       EOL
       gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
       gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT}
