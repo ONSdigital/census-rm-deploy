@@ -1041,7 +1041,7 @@ jobs:
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
-      GCP_PROJECT_NAME: ((gcp-project-name))
+      GCP_PROJECT_NAME: ((ci-gcp-project-name))
       KUBERNETES_FILE_PATH: kubernetes-repo/optional
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
       input_mapping: {kubernetes-repo: census-rm-kubernetes-repo}
@@ -2541,6 +2541,7 @@ jobs:
     params:
       skip_download: true
   - get: census-rm-kubernetes-dependencies-repo
+  - get: census-rm-ddl-master
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
     passed: ["CI Deploy Action-Scheduler",
@@ -2710,10 +2711,10 @@ jobs:
                   wl-regional-counts]
   plan:
   - get: census-rm-kubernetes-dependencies-repo
-    trigger: true
-    passed: ["WL Helm"]
   - get: census-rm-kubernetes-repo
   - get: census-rm-ddl-master
+    trigger: true
+    passed: ["CI Acceptance Tests"]
   - get: ddl-docker-image-gcr
     params:
       skip_download: true
