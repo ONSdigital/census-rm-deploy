@@ -136,15 +136,19 @@ resource_types:
   type: docker-image
   source:
     repository: cfcommunity/slack-notification-resource
+    
+- name: cron-resource
+  type: docker-image
+  source:
+    repository: cftoolsmiths/cron-resource
 
 resources:
 
 - name: every-midnight
-  type: time
+  type: cron-resource
   source:
-    interval: 30m
-    start: 12:00 AM
-    stop: 12:30 AM
+    expression: "0 0 * * *"
+    fire_immediately: true
 
 - name: slack-alert
   type: slack-notification
