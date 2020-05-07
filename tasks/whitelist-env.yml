@@ -24,4 +24,4 @@ run:
       gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
       gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT}
       cd /home/toolbox/cloudshell_utilities
-      ./whitelist.sh $GCP_PROJECT /home/toolbox/census-rm-whitelist/environments/$GCP_PROJECT
+      ./whitelist.sh $GCP_PROJECT /census-rm-whitelist/environments/$GCP_PROJECT
