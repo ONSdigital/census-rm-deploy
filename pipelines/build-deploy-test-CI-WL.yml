@@ -130,6 +130,7 @@ groups:
   - "WL Deploy Rabbit Monitor"
   - "WL Deploy Regional Counts"
   - "WL Whitelist"
+  - "WL Whitelist Nightly"
 
 resource_types:
 
