@@ -3,6 +3,8 @@ image_resource:
   type: docker-image
   source:
     repository: eu.gcr.io/census-gcr-rm/rm/census-rm-toolbox
+    username: _json_key
+    password: ((gcp.service_account_json))
 params:
   GCP_PROJECT_NAME:
   SERVICE_ACCOUNT_JSON:
