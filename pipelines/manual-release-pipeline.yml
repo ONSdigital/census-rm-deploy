@@ -25,6 +25,8 @@ groups:
   - "Run Helm"
   - "Deploy Monitoring"
   - "Report Terraform Success"
+  - "Whitelist"
+  - "Whitelist Nightly"
 
 - name: "Infrastructure"
   jobs:
@@ -33,6 +35,8 @@ groups:
   - "Run Helm"
   - "Deploy Monitoring"
   - "Report Terraform Success"
+  - "Whitelist"
+  - "Whitelist Nightly"
 
 - name: "App Deployment"
   jobs:
@@ -54,6 +58,7 @@ groups:
   - "Rabbit Monitor"
   - "Regional Counts"
   - "Report Deployment Success"
+  - "Whitelist"
 
 resource_types:
 - name: slack-notification
@@ -61,7 +66,19 @@ resource_types:
   source:
     repository: cfcommunity/slack-notification-resource
 
+
+- name: cron-resource
+  type: docker-image
+  source:
+    repository: cftoolsmiths/cron-resource
+
 resources:
+
+- name: every-midnight
+  type: cron-resource
+  source:
+    expression: "0 0 * * *"
+    fire_immediately: true
 
 - name: slack-alert
   type: slack-notification
@@ -90,6 +107,12 @@ resources:
     paths: [release/*]
     tag_filter: v*.*.*
     branch: master
+
+- name: whitelist-master
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-whitelist.git
+    private_key: ((github.service_account_private_key))
 
 - name: every-minute
   type: time
@@ -834,3 +857,50 @@ jobs:
     passed: [
       "Run Terraform",
       "Run Helm"]
+
+- name: "Whitelist"
+  serial: true
+  plan:
+  - get: every-minute
+    trigger: true
+    passed: [
+      "Run Terraform",
+      "Run Helm"]
+  - get: census-rm-kubernetes-release
+    trigger: true
+    passed: ["Case API",
+             "Ops Tool",
+             ]
+  - get: whitelist-master
+    trigger: true
+  - get: census-rm-deploy
+  - task: apply-whitelist
+    file: census-rm-deploy/tasks/whitelist-env.yml
+    on_failure: *slack_failure_alert
+    on_error: *slack_error_alert
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+    input_mapping: {
+      census-rm-whitelist: whitelist-master
+      }
+
+- name: "Whitelist Nightly"
+  serial: true
+  plan:
+  - get: every-midnight
+    trigger: true
+  - get: whitelist-master
+  - get: census-rm-deploy
+  - task: apply-whitelist
+    file: census-rm-deploy/tasks/whitelist-env.yml
+    on_failure: *slack_failure_alert
+    on_error: *slack_error_alert
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+    input_mapping: {
+      census-rm-whitelist: whitelist-master
+      }
