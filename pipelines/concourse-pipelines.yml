@@ -126,11 +126,12 @@ jobs:
             gcp-project-name: census-rm-blacklodge
             kubernetes-cluster-name: rm-k8s-cluster
             rabbit-config: release/rabbitmq/values.yml
-            prometheus-config: release/prometheus/values.yml
+            prometheus-config: release/monitoring/prometheus-values.yml
+            grafana-config: release/monitoring/grafana-deployment.yml
 
         - name: release-images
           team: rm
-          config_file: census-rm-deploy/pipelines/docker-release-pipeline.yml
+          config_file: census-rm-deploy/pipelines/build-release-images.yml
           unpaused: true
           vars:
             docker-registry-ci: eu.gcr.io/census-rm-ci
@@ -157,4 +158,5 @@ jobs:
             gcp-project-name: census-rm-preprod
             kubernetes-cluster-name: rm-k8s-cluster
             rabbit-config: release/rabbitmq/values_prod.yml
-            prometheus-config: release/prometheus/values.yml
+            prometheus-config: release/monitoring/prometheus-values.yml
+            grafana-config: release/monitoring/grafana-deployment.yml

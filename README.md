@@ -27,6 +27,15 @@ Required configuration:
 | wl-gcp-environment-name     | String                                                                              | WL - The name of the GCP project suffix the targeted cluster belongs to                       |
 
 
+#### How to validate the concourse definitions
+
+```
+./validate-pipelines.sh 
+```
+
+Expect that all files in the pipelines folder reportedly look good.
+
+
 #### How to fly manually
 To access fly locally, you'll now need to access it through a bastion.  Run the following at the start of a session then log into your Google account when prompted:
 ```bash

@@ -13,16 +13,19 @@ groups:
   - "Build DDL Latest"
   - "Build Exception Manager Latest"
   - "Build Fieldwork Adapter Latest"
+  - "Build Load Generator Latest"
   - "Build Notify Processor Latest"
   - "Build Notify Stub Latest"
   - "Build Ops Latest"
   - "Build Performance Tests Latest"
   - "Build Print File Service Latest"
   - "Build PubSub Latest"
+  - "Build PubSub Adapter Latest"
   - "Build Sample Loader Latest"
   - "Build Toolbox Latest"
   - "Build UAC QID Service Latest"
   - "CI Terraform"
+  - "CI Monitoring"
   - "CI Helm"
   - "CI Apply Database Patches"
   - "CI Deploy Action-Scheduler"
@@ -43,6 +46,7 @@ groups:
   - "CI Deploy Regional Counts"
   - "CI Acceptance Tests"
   - "WL Terraform"
+  - "WL Monitoring"
   - "WL Helm"
   - "WL Apply Database Patches"
   - "WL Deploy Action-Scheduler"
@@ -60,6 +64,8 @@ groups:
   - "WL Deploy Database Monitor"
   - "WL Deploy Rabbit Monitor"
   - "WL Deploy Regional Counts"
+  - "WL Whitelist"
+  - "WL Whitelist at Midnight"
 
 - name: "Docker Builds"
   jobs:
@@ -73,11 +79,13 @@ groups:
   - "Build DDL Latest"
   - "Build Exception Manager Latest"
   - "Build Fieldwork Adapter Latest"
+  - "Build Load Generator Latest"
   - "Build Notify Processor Latest"
   - "Build Notify Stub Latest"
   - "Build Ops Latest"
   - "Build Performance Tests Latest"
   - "Build Print File Service Latest"
+  - "Build PubSub Adapter Latest"
   - "Build PubSub Latest"
   - "Build Sample Loader Latest"
   - "Build Toolbox Latest"
@@ -86,6 +94,7 @@ groups:
 - name: "CI"
   jobs:
   - "CI Terraform"
+  - "CI Monitoring"
   - "CI Helm"
   - "CI Apply Database Patches"
   - "CI Deploy Action-Scheduler"
@@ -109,6 +118,7 @@ groups:
 - name: "Whitelodge"
   jobs:
   - "WL Terraform"
+  - "WL Monitoring"
   - "WL Helm"
   - "WL Apply Database Patches"
   - "WL Deploy Action-Scheduler"
@@ -126,6 +136,7 @@ groups:
   - "WL Deploy Database Monitor"
   - "WL Deploy Rabbit Monitor"
   - "WL Deploy Regional Counts"
+  - "WL Whitelist"
 
 resource_types:
 
@@ -134,7 +145,18 @@ resource_types:
   source:
     repository: cfcommunity/slack-notification-resource
 
+- name: cron-resource
+  type: docker-image
+  source:
+    repository: cftoolsmiths/cron-resource
+
 resources:
+
+- name: every-midnight
+  type: cron-resource
+  source:
+    expression: "0 0 * * *"
+    fire_immediately: true
 
 - name: census-rm-kubernetes-repo
   type: git
@@ -187,6 +209,13 @@ resources:
     uri: git@github.com:ONSdigital/census-rm-kubernetes.git
     private_key: ((github.service_account_private_key))
     paths: [dependencies/*, rabbitmq/*, setup-dependencies.sh]
+
+- name: census-rm-kubernetes-monitoring-repo
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-kubernetes.git
+    private_key: ((github.service_account_private_key))
+    paths: [monitoring/*, grafana-dashboards/*, setup-monitoring.sh]
 
 - name: census-rm-terraform
   type: git
@@ -249,6 +278,12 @@ resources:
     uri: git@github.com:ONSdigital/census-rm-toolbox.git
     private_key: ((github.service_account_private_key))
 
+- name: pubsub-adapter
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-pubsub-adapter.git
+    private_key: ((github.service_account_private_key))
+
 - name: pubsub-master
   type: git
   source:
@@ -307,6 +342,18 @@ resources:
   type: git
   source:
     uri: git@github.com:ONSdigital/census-rm-performance-tests.git
+    private_key: ((github.service_account_private_key))
+
+- name: load-generator-master
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-load-generator.git
+    private_key: ((github.service_account_private_key))
+
+- name: whitelist-master
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-whitelist.git
     private_key: ((github.service_account_private_key))
 
 # Docker images
@@ -419,6 +466,20 @@ resources:
   type: docker-image
   source:
     repository: ((docker-registry-gcr))/rm/census-rm-toolbox
+    username: _json_key
+    password: ((gcp.service_account_json))
+
+- name: pubsub-adapter-docker-image-ci
+  type: docker-image
+  source:
+    repository: ((docker-registry-ci))/rm/census-rm-pubsub-adapter
+    username: _json_key
+    password: ((gcp.service_account_json))
+
+- name: pubsub-adapter-docker-image-gcr
+  type: docker-image
+  source:
+    repository: ((docker-registry-gcr))/rm/census-rm-pubsub-adapter
     username: _json_key
     password: ((gcp.service_account_json))
 
@@ -576,6 +637,19 @@ resources:
     username: _json_key
     password: ((gcp.service_account_json))
 
+- name: load-generator-docker-image-ci
+  type: docker-image
+  source:
+    repository: ((docker-registry-ci))/rm/census-rm-load-generator
+    username: _json_key
+    password: ((gcp.service_account_json))
+
+- name: load-generator-docker-image-gcr
+  type: docker-image
+  source:
+    repository: ((docker-registry-gcr))/rm/census-rm-load-generator
+    username: _json_key
+    password: ((gcp.service_account_json))
 
 templating:
 
@@ -1399,6 +1473,32 @@ jobs:
     get_params:
       skip_download: true
 
+- name: "Build PubSub Adapter Latest"
+  serial_groups: [pubsub-adapter-build]
+  plan:
+  - get: pubsub-adapter
+    trigger: true
+  - put: pubsub-adapter-docker-image-ci
+    on_failure: *slack_docker_build_failure_ci
+    on_error: *slack_docker_build_error_ci
+    params:
+      build: pubsub-adapter
+      tag_file: pubsub-adapter/.git/ref
+      tag_as_latest: true
+    get_params:
+      save: true
+  - put: pubsub-adapter-docker-image-gcr
+    on_failure: *slack_docker_build_failure_gcr
+    on_error: *slack_docker_build_error_gcr
+    params:
+      build: pubsub-adapter
+      cache_from:
+        - pubsub-adapter-docker-image-ci
+      tag_file: pubsub-adapter/.git/ref
+      tag_as_latest: true
+    get_params:
+      skip_download: true
+
 - name: "Build PubSub Latest"
   serial_groups: [pubsub-build]
   plan:
@@ -1730,6 +1830,32 @@ jobs:
     get_params:
       skip_download: true
 
+- name: "Build Load Generator Latest"
+  serial_groups: [load-generator-build]
+  plan:
+  - get: load-generator-master
+    trigger: true
+  - put: load-generator-docker-image-ci
+    on_failure: *slack_docker_build_failure_ci
+    on_error: *slack_docker_build_error_ci
+    params:
+      build: load-generator-master
+      tag_file: load-generator-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      save: true
+  - put: load-generator-docker-image-gcr
+    on_failure: *slack_docker_build_failure_gcr
+    on_error: *slack_docker_build_error_gcr
+    params:
+      build: load-generator-master
+      cache_from:
+        - load-generator-docker-image-ci
+      tag_file: load-generator-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      skip_download: true
+
 - name: "CI Terraform"
   serial: true
   serial_groups: [ci-terraform,
@@ -1765,6 +1891,45 @@ jobs:
       KUBERNETES_CLUSTER: rm-k8s-cluster
     input_mapping: {census-rm-terraform: census-rm-terraform}
 
+# Deploy monitoring apps
+- name: "CI Monitoring"
+  serial: true
+  serial_groups: [ci-terraform,
+                  ci-acceptance-tests,
+                  action-scheduler-deploy,
+                  action-worker-deploy,
+                  case-api-deploy,
+                  case-processor-deploy,
+                  uac-qid-service-deploy,
+                  pubsub-deploy,
+                  print-file-service-deploy,
+                  fieldwork-adapter-deploy,
+                  notify-processor-deploy,
+                  notify-stub-deploy,
+                  exception-manager-deploy,
+                  toolbox-deploy,
+                  database-monitor-deploy,
+                  rabbitmonitor-deploy,
+                  regional-counts-deploy]
+  on_failure: *slack_failure_alert_ci
+  on_error: *slack_error_alert_ci
+  plan:
+    - get: census-rm-kubernetes-monitoring-repo
+      trigger: true
+    - get: census-rm-deploy
+    - get: census-rm-terraform
+      passed: ["CI Terraform"]
+    - task: "CI Monitoring"
+      file: census-rm-deploy/tasks/monitoring.yml
+      params:
+        ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+        ENV: ci
+        KUBERNETES_CLUSTER: rm-k8s-cluster
+        PROMETHEUS_CONFIG_VALUES_FILE: monitoring/prometheus-values.yml
+        GRAFANA_CONFIG_VALUES_FILE: monitoring/grafana-deployment.yml
+      input_mapping: {census-rm-kubernetes-monitoring-repo: census-rm-kubernetes-monitoring-repo}
+
+
 - name: "CI Helm"
   serial: true
   serial_groups: [ci-terraform,
@@ -1799,7 +1964,6 @@ jobs:
         ENV: ci
         KUBERNETES_CLUSTER: rm-k8s-cluster
         RABBITMQ_CONFIG_VALUES_FILE: rabbitmq/values.yml
-        PROMETHEUS_CONFIG_VALUES_FILE: prometheus/values.yml
       input_mapping: {census-rm-kubernetes-dependencies-repo: census-rm-kubernetes-dependencies-repo}
 
 
@@ -2653,6 +2817,42 @@ jobs:
         KUBERNETES_CLUSTER: rm-k8s-cluster
       input_mapping: {census-rm-terraform: census-rm-terraform}
 
+# Deploy monitoring apps
+- name: "WL Monitoring"
+  serial: true
+  serial_groups: [wl-terraform,
+                  wl-action-scheduler,
+                  wl-action-worker,
+                  wl-case-api,
+                  wl-case-processor,
+                  wl-uac-qid-service,
+                  wl-pubsub,
+                  wl-print-file-service,
+                  wl-fieldwork-adapter,
+                  wl-notify-processor,
+                  wl-exception-manager,
+                  wl-toolbox,
+                  wl-database-monitor,
+                  wl-rabbitmonitor,
+                  wl-regional-counts]
+  on_failure: *slack_failure_alert_wl
+  on_error: *slack_error_alert_wl
+  plan:
+    - get: census-rm-kubernetes-monitoring-repo
+      trigger: true
+    - get: census-rm-deploy
+    - get: census-rm-terraform
+      passed: ["WL Terraform"]
+    - task: "WL Monitoring"
+      file: census-rm-deploy/tasks/monitoring.yml
+      params:
+        ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+        ENV: whitelodge
+        KUBERNETES_CLUSTER: rm-k8s-cluster
+        PROMETHEUS_CONFIG_VALUES_FILE: monitoring/prometheus-values.yml
+        GRAFANA_CONFIG_VALUES_FILE: monitoring/grafana-deployment.yml
+      input_mapping: {census-rm-kubernetes-monitoring-repo: census-rm-kubernetes-monitoring-repo}
+
 # WL Helm
 - name: "WL Helm"
   serial: true
@@ -2687,7 +2887,6 @@ jobs:
         ENV: whitelodge
         KUBERNETES_CLUSTER: rm-k8s-cluster
         RABBITMQ_CONFIG_VALUES_FILE: rabbitmq/values.yml
-        PROMETHEUS_CONFIG_VALUES_FILE: prometheus/values.yml
       input_mapping: {census-rm-kubernetes-dependencies-repo: census-rm-kubernetes-dependencies-repo}
 
 # Apply Database Patches
@@ -3327,3 +3526,55 @@ jobs:
     input_mapping: {
       docker-image-resource: toolbox-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-optional-repo}
+
+- name: "WL Whitelist"
+  serial: true
+  serial_groups: [wl-whitelist]
+  plan:
+  - get: case-api-master
+    trigger: true
+    passed: ["WL Deploy Case-API"]
+  - get: census-rm-terraform
+    trigger: true
+    passed: ["WL Terraform"]
+  - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["WL Helm"]
+  - get: census-rm-kubernetes-ops-repo
+    trigger: true
+    passed: ["WL Deploy Ops Tool"]
+  - get: ops-master
+    trigger: true
+    passed: ["WL Deploy Ops Tool"]
+  - get: whitelist-master
+    trigger: true
+  - get: census-rm-deploy
+  - task: apply-whitelist
+    file: census-rm-deploy/tasks/whitelist-env.yml
+    on_failure: *slack_failure_alert_wl
+    on_error: *slack_error_alert_wl
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((wl-gcp-project-name))
+      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
+    input_mapping: {
+      census-rm-whitelist: whitelist-master
+      }
+
+- name: "WL Whitelist at Midnight"
+  plan:
+  - get: every-midnight
+    trigger: true
+  - get: whitelist-master
+  - get: census-rm-deploy
+  - task: apply-whitelist
+    file: census-rm-deploy/tasks/whitelist-env.yml
+    on_failure: *slack_failure_alert_wl
+    on_error: *slack_error_alert_wl
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((wl-gcp-project-name))
+      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
+    input_mapping: {
+      census-rm-whitelist: whitelist-master
+      }

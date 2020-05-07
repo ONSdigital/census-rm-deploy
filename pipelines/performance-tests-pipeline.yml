@@ -1,4 +1,3 @@
-
 resource_types:
 - name: slack-notification
   type: docker-image
@@ -43,14 +42,24 @@ resources:
     branch: ((terraform-branch))
     uri: git@github.com:ONSdigital/census-rm-terraform.git
     private_key: ((github.service_account_private_key))
-
+    tag_filter: v*.*.*
+    
 - name: census-rm-kubernetes-dependencies-repo
   type: git
   source:
     uri: git@github.com:ONSdigital/census-rm-kubernetes.git
     private_key: ((github.service_account_private_key))
     paths: [dependencies/*, rabbitmq/*, setup-dependencies.sh]
+    tag_filter: v*.*.*
 
+- name: census-rm-kubernetes-monitoring-repo
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-kubernetes.git
+    private_key: ((github.service_account_private_key))
+    paths: [release/monitoring/*, grafana-dashboards/*, setup-monitoring.sh]
+    tag_filter: v*.*.*
+    
 - name: census-rm-kubernetes-release	
   type: git	
   source:
@@ -58,6 +67,7 @@ resources:
     private_key: ((github.service_account_private_key))	
     paths: [release/*]
     branch: master
+    tag_filter: v*.*.*
 
 templating:
 
@@ -521,6 +531,43 @@ jobs:
   on_failure: *slack_performance_setup_failure
   on_error: *slack_error_alert
 
+# Deploy monitoring apps
+- name: "Monitoring"
+  serial: true
+  on_failure: *slack_failure_alert
+  on_error: *slack_error_alert
+  serial_groups: [scale-down,
+                  scale-apps,
+                  performance-tests,
+                  action-scheduler,
+                  action-worker,
+                  case-api,
+                  case-processor,
+                  fieldwork-adapter,
+                  notify-processor,
+                  uac-qid-service,
+                  pubsubsvc,
+                  print-file-service,
+                  exception-manager,
+                  toolbox,
+                  database-monitor,
+                  rabbitmonitor]
+  plan:
+    - get: every-minute
+      trigger: true
+      passed: ["Scale Down Apps and Reset DB"]
+    - get: census-rm-kubernetes-monitoring-repo
+    - get: census-rm-deploy
+    - task: "Monitoring"
+      file: census-rm-deploy/tasks/monitoring.yml
+      params:
+        ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+        ENV: performance
+        KUBERNETES_CLUSTER: rm-k8s-cluster
+        PROMETHEUS_CONFIG_VALUES_FILE: release/monitoring/prometheus-values.yml
+        GRAFANA_CONFIG_VALUES_FILE: release/monitoring/grafana-deployment.yml
+      input_mapping: {census-rm-kubernetes-monitoring-repo: census-rm-kubernetes-monitoring-repo}
+
   # Run Helm
 - name: "Run Helm"
   disable_manual_trigger: true
@@ -546,7 +593,7 @@ jobs:
   plan:
     - get: every-minute
       trigger: true
-      passed: ["Scale Down Apps and Reset DB"]
+      passed: ["Monitoring"]
     - get: census-rm-kubernetes-dependencies-repo
     - get: census-rm-deploy
     - task: "Run Helm"
@@ -556,7 +603,6 @@ jobs:
         ENV: performance
         KUBERNETES_CLUSTER: rm-k8s-cluster
         RABBITMQ_CONFIG_VALUES_FILE: release/rabbitmq/values_prod.yml
-        PROMETHEUS_CONFIG_VALUES_FILE: release/prometheus/values.yml
       input_mapping: {census-rm-kubernetes-dependencies-repo: census-rm-kubernetes-dependencies-repo}
 
 - name: "Action Scheduler"
@@ -1083,7 +1129,7 @@ jobs:
 
             # Install helm and helm-tiller
             apt-get install -y procps  # NB: procps is used by Helm
-            curl -L https://git.io/get_helm.sh | bash
+            curl -L https://git.io/get_helm.sh | bash -s -- --version v2.16.3
             helm init --client-only
             helm plugin install https://github.com/rimusz/helm-tiller
 
@@ -1124,11 +1170,14 @@ jobs:
             gcloud config set container/use_client_certificate True --project ${GCP_PROJECT_NAME}
 
 
-            # Delete cluster node pools
+            # Delete cluster node pools except for the monitoring one -
+            # We still need access to graphs and stats after the tests have finished running
             NODE_POOL_LIST=`gcloud container node-pools list --cluster=${KUBERNETES_CLUSTER} --region=europe-west2 --format="value(name)" --project ${GCP_PROJECT_NAME}`
             for NODE_POOL in $NODE_POOL_LIST ; do
+              if [ "$NODE_POOL" != "monitoring-node-pool" ]; then
                 echo deleting $NODE_POOL
                 gcloud container node-pools delete $NODE_POOL --cluster=${KUBERNETES_CLUSTER} --region=europe-west2 --quiet --project ${GCP_PROJECT_NAME}
+              fi
             done
   on_failure: *slack_failure_alert
   on_error: *slack_error_alert
