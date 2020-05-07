@@ -61,7 +61,7 @@ groups:
   - "WL Deploy Rabbit Monitor"
   - "WL Deploy Regional Counts"
   - "WL Whitelist"
-  - "WL Whitelist at Midnight"
+  - "WL Whitelist Nightly"
 
 - name: "Docker Builds"
   jobs:
@@ -3302,7 +3302,7 @@ jobs:
       census-rm-whitelist: whitelist-master
       }
 
-- name: "WL Whitelist at Midnight"
+- name: "WL Whitelist Nightly"
   plan:
   - get: every-midnight
     trigger: true

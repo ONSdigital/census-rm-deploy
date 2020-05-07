@@ -24,11 +24,7 @@ run:
       gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
       gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT}
 
-      ls -al /
-      ls -al
-
       export WORKING_DIRECTORY=`pwd`
-      echo Working directory is $WORKING_DIRECTORY
       
       cd /home/toolbox/cloudshell_utilities
       ./whitelist.sh $GCP_PROJECT $WORKING_DIRECTORY/census-rm-whitelist/environments/$GCP_PROJECT
