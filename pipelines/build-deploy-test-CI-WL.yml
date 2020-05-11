@@ -2722,6 +2722,18 @@ jobs:
       skip_download: true
   - get: census-rm-kubernetes-dependencies-repo
   - get: census-rm-ddl-master
+    trigger: true
+    passed: ["CI Deploy Action-Scheduler",
+             "CI Deploy Action-Worker",
+             "CI Deploy Case-API",
+             "CI Deploy Case-Processor",
+             "CI Deploy UAC QID Service",
+             "CI Deploy PubSub Service",
+             "CI Deploy Print File Service",
+             "CI Deploy Fieldwork Adapter",
+             "CI Deploy Notify Processor",
+             "CI Deploy Notify Stub",
+             "CI Deploy Exception Manager"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
     passed: ["CI Deploy Action-Scheduler",
