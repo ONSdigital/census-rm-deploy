@@ -165,12 +165,6 @@ resources:
     private_key: ((github.service_account_private_key))
     paths: [optional/census-rm-ddl-pod.yml]
 
-- name: midnight
-  type: time
-  source:
-    start: 12:00 AM
-    stop: 12:01 AM
-
 - name: slack-alert
   type: slack-notification
   source:
@@ -1106,7 +1100,7 @@ jobs:
 - name: "Reset DB"
   disable_manual_trigger: true
   plan:
-  - get: midnight
+  - get: every-midnight
     trigger: true
   - get: census-rm-kubernetes-repo-ddl
   - get: census-rm-deploy
