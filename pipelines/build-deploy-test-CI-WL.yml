@@ -2,7 +2,7 @@
 groups:
 - name: "Overview"
   jobs:
-  - "Reset DB"
+  - "Reset CI DB"
   - "Build Acceptance Tests Latest"
   - "Build Action Scheduler Latest"
   - "Build Action Worker Latest"
@@ -94,6 +94,7 @@ groups:
 - name: "CI"
   jobs:
   - "CI Terraform"
+  - "Reset CI DB"
   - "CI Monitoring"
   - "CI Helm"
   - "CI Apply Database Patches"
@@ -1098,8 +1099,10 @@ templating:
 jobs:
 
 # Run DB Teardown
-- name: "Reset DB"
+- name: "Reset CI DB"
   disable_manual_trigger: true
+  on_failure: *slack_failure_alert_ci
+  on_error: *slack_error_alert_ci
   plan:
   - get: every-midnight
     trigger: true
@@ -1982,6 +1985,8 @@ jobs:
                   database-monitor-deploy,
                   rabbitmonitor-deploy,
                   regional-counts-deploy]
+  on_failure: *slack_failure_alert_ci
+  on_error: *slack_error_alert_ci
   plan:
   - get: census-rm-ddl-master
     trigger: true
@@ -2938,6 +2943,8 @@ jobs:
                   wl-database-monitor,
                   wl-rabbitmonitor,
                   wl-regional-counts]
+  on_failure: *slack_failure_alert_wl
+  on_error: *slack_error_alert_wl
   plan:
   - get: census-rm-kubernetes-dependencies-repo
   - get: census-rm-kubernetes-repo-ddl
