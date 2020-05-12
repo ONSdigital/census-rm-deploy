@@ -846,7 +846,7 @@ jobs:
         RABBITMQ_CONFIG_VALUES_FILE: ((rabbit-config))
         PROMETHEUS_CONFIG_VALUES_FILE: ((prometheus-config))
         GRAFANA_CONFIG_VALUES_FILE: ((grafana-config))
-      input_mapping: {census-rm-kubernetes-dependencies-repo: census-rm-kubernetes-release}
+      input_mapping: {census-rm-kubernetes-monitoring-repo: census-rm-kubernetes-release}
 
 - name: "Report Terraform Success"
   disable_manual_trigger: true
