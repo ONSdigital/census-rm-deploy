@@ -2,7 +2,7 @@
 groups:
 - name: "Overview"
   jobs:
-  - "Reset CI DB"
+  - "CI Reset DB"
   - "Build Acceptance Tests Latest"
   - "Build Action Scheduler Latest"
   - "Build Action Worker Latest"
@@ -94,7 +94,7 @@ groups:
 - name: "CI"
   jobs:
   - "CI Terraform"
-  - "Reset CI DB"
+  - "CI Reset DB"
   - "CI Monitoring"
   - "CI Helm"
   - "CI Apply Database Patches"
@@ -160,12 +160,11 @@ resources:
     expression: "0 0 * * *"
     fire_immediately: true
 
-- name: census-rm-kubernetes-repo-ddl
+- name: census-rm-kubernetes-repo
   type: git
   source:
     uri: git@github.com:ONSdigital/census-rm-kubernetes.git
     private_key: ((github.service_account_private_key))
-    paths: [optional/census-rm-ddl-pod.yml]
 
 - name: slack-alert
   type: slack-notification
@@ -1098,26 +1097,6 @@ templating:
 
 jobs:
 
-# Run DB Teardown
-- name: "Reset CI DB"
-  disable_manual_trigger: true
-  on_failure: *slack_failure_alert_ci
-  on_error: *slack_error_alert_ci
-  plan:
-  - get: every-midnight
-    trigger: true
-  - get: census-rm-kubernetes-repo-ddl
-  - get: census-rm-deploy
-  - task: "Run ground zero"
-    file: census-rm-deploy/tasks/kubectl-run-groundzero-script.yml
-    params:
-      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-      KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
-      GCP_PROJECT_NAME: ((ci-gcp-project-name))
-      KUBERNETES_FILE_PATH: kubernetes-repo/optional
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-      input_mapping: {kubernetes-repo: census-rm-kubernetes-repo-ddl}
-
 # Docker Builds
 - name: "Build Action Scheduler Latest"
   serial_groups: [action-scheduler-build]
@@ -1854,6 +1833,25 @@ jobs:
     get_params:
       skip_download: true
 
+# Run DB Teardown
+- name: "CI Reset DB"
+  on_failure: *slack_failure_alert_ci
+  on_error: *slack_error_alert_ci
+  plan:
+  - get: every-midnight
+    trigger: true
+  - get: census-rm-kubernetes-repo
+  - get: census-rm-deploy
+  - task: "Run ground zero"
+    file: census-rm-deploy/tasks/kubectl-run-groundzero-script.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
+      GCP_PROJECT_NAME: ((ci-gcp-project-name))
+      KUBERNETES_FILE_PATH: kubernetes-repo/optional
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+      input_mapping: {kubernetes-repo: census-rm-kubernetes-repo}
+
 - name: "CI Terraform"
   serial: true
   serial_groups: [ci-terraform,
@@ -1991,8 +1989,7 @@ jobs:
   - get: census-rm-ddl-master
     trigger: true
     passed: ["Build DDL Latest"]
-  - get: census-rm-kubernetes-repo-ddl
-    trigger: true
+  - get: census-rm-kubernetes-repo
   - get: ddl-docker-image-gcr
     params:
       skip_download: true
@@ -2004,7 +2001,7 @@ jobs:
       KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
       KUBERNETES_FILE_PATH: kubernetes-repo/optional
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {kubernetes-repo: census-rm-kubernetes-repo-ddl}
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-repo}
 
 
 # CI Deployments
@@ -2031,9 +2028,6 @@ jobs:
     params:
       skip_download: true
   - get: census-rm-deploy
-  - get: census-rm-kubernetes-repo-ddl
-    trigger: true
-    passed: ["CI Apply Database Patches"]
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
     on_failure: *slack_failure_alert_ci
@@ -2074,9 +2068,6 @@ jobs:
     params:
       skip_download: true
   - get: census-rm-deploy
-  - get: census-rm-kubernetes-repo-ddl
-    trigger: true
-    passed: ["CI Apply Database Patches"]
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
     on_failure: *slack_failure_alert_ci
@@ -2117,9 +2108,6 @@ jobs:
     params:
       skip_download: true
   - get: census-rm-deploy
-  - get: census-rm-kubernetes-repo-ddl
-    trigger: true
-    passed: ["CI Apply Database Patches"]
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
     on_failure: *slack_failure_alert_ci
@@ -2160,9 +2148,6 @@ jobs:
     params:
       skip_download: true
   - get: census-rm-deploy
-  - get: census-rm-kubernetes-repo-ddl
-    trigger: true
-    passed: ["CI Apply Database Patches"]
   - task: apply-deployment
     file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
     on_failure: *slack_failure_alert_ci
@@ -2203,9 +2188,6 @@ jobs:
     params:
       skip_download: true
   - get: census-rm-deploy
-  - get: census-rm-kubernetes-repo-ddl
-    trigger: true
-    passed: ["CI Apply Database Patches"]
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
     on_failure: *slack_failure_alert_ci
@@ -2753,13 +2735,6 @@ jobs:
              "CI Deploy Database Monitor",
              "CI Deploy Rabbit Monitor",
              "CI Deploy Regional Counts"]
-  - get: census-rm-kubernetes-repo-ddl
-    trigger: true
-    passed: ["CI Deploy Action-Scheduler",
-             "CI Deploy Action-Worker",
-             "CI Deploy Case-API",
-             "CI Deploy Case-Processor",
-             "CI Deploy UAC QID Service"]
   - get: action-scheduler-master
     trigger: true
     passed: ["CI Deploy Action-Scheduler"]
@@ -2947,7 +2922,7 @@ jobs:
   on_error: *slack_error_alert_wl
   plan:
   - get: census-rm-kubernetes-dependencies-repo
-  - get: census-rm-kubernetes-repo-ddl
+  - get: census-rm-kubernetes-repo
   - get: census-rm-ddl-master
     trigger: true
     passed: ["CI Acceptance Tests"]
@@ -2962,7 +2937,7 @@ jobs:
       KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
       KUBERNETES_FILE_PATH: kubernetes-repo/optional
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {kubernetes-repo: census-rm-kubernetes-repo-ddl}
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-repo}
 
 
 # WL Deployments
