@@ -815,7 +815,6 @@ jobs:
       input_mapping: {census-rm-kubernetes-dependencies-repo: census-rm-kubernetes-release}
 
 - name: "Deploy Monitoring"
-  disable_manual_trigger: true
   serial: true
   serial_groups: [action-scheduler,
                   action-worker,
