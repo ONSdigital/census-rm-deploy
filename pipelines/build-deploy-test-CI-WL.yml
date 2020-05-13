@@ -2,6 +2,7 @@
 groups:
 - name: "Overview"
   jobs:
+  - "CI Reset DB"
   - "Build Acceptance Tests Latest"
   - "Build Action Scheduler Latest"
   - "Build Action Worker Latest"
@@ -9,6 +10,7 @@ groups:
   - "Build Case API Latest"
   - "Build Case Processor Latest"
   - "Build Data Exporter Latest"
+  - "Build DDL Latest"
   - "Build Exception Manager Latest"
   - "Build Fieldwork Adapter Latest"
   - "Build Load Generator Latest"
@@ -25,6 +27,7 @@ groups:
   - "CI Terraform"
   - "CI Monitoring"
   - "CI Helm"
+  - "CI Apply Database Patches"
   - "CI Deploy Action-Scheduler"
   - "CI Deploy Action-Worker"
   - "CI Deploy Case-API"
@@ -45,6 +48,7 @@ groups:
   - "WL Terraform"
   - "WL Monitoring"
   - "WL Helm"
+  - "WL Apply Database Patches"
   - "WL Deploy Action-Scheduler"
   - "WL Deploy Action-Worker"
   - "WL Deploy Case-API"
@@ -72,6 +76,7 @@ groups:
   - "Build Case API Latest"
   - "Build Case Processor Latest"
   - "Build Data Exporter Latest"
+  - "Build DDL Latest"
   - "Build Exception Manager Latest"
   - "Build Fieldwork Adapter Latest"
   - "Build Load Generator Latest"
@@ -89,8 +94,10 @@ groups:
 - name: "CI"
   jobs:
   - "CI Terraform"
+  - "CI Reset DB"
   - "CI Monitoring"
   - "CI Helm"
+  - "CI Apply Database Patches"
   - "CI Deploy Action-Scheduler"
   - "CI Deploy Action-Worker"
   - "CI Deploy Case-API"
@@ -114,6 +121,7 @@ groups:
   - "WL Terraform"
   - "WL Monitoring"
   - "WL Helm"
+  - "WL Apply Database Patches"
   - "WL Deploy Action-Scheduler"
   - "WL Deploy Action-Worker"
   - "WL Deploy Case-API"
@@ -203,6 +211,12 @@ resources:
   source:
     branch: ((terraform-branch))
     uri: git@github.com:ONSdigital/census-rm-terraform.git
+    private_key: ((github.service_account_private_key))
+
+- name: census-rm-ddl-master
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-ddl.git
     private_key: ((github.service_account_private_key))
 
 - name: action-scheduler-master
@@ -455,6 +469,20 @@ resources:
   type: docker-image
   source:
     repository: ((docker-registry-gcr))/rm/census-rm-pubsub-adapter
+    username: _json_key
+    password: ((gcp.service_account_json))
+
+- name: ddl-docker-image-ci
+  type: docker-image
+  source:
+    repository: ((docker-registry-ci))/rm/census-rm-ddl
+    username: _json_key
+    password: ((gcp.service_account_json))
+
+- name: ddl-docker-image-gcr
+  type: docker-image
+  source:
+    repository: ((docker-registry-gcr))/rm/census-rm-ddl
     username: _json_key
     password: ((gcp.service_account_json))
 
@@ -1289,6 +1317,32 @@ jobs:
     get_params:
       skip_download: true
 
+- name: "Build DDL Latest"
+  serial_groups: [ddl-build]
+  plan:
+  - get: census-rm-ddl-master
+    trigger: true
+  - put: ddl-docker-image-ci
+    on_failure: *slack_docker_build_failure_ci
+    on_error: *slack_docker_build_error_ci
+    params:
+      build: census-rm-ddl-master
+      tag_file: census-rm-ddl-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      save: true
+  - put: ddl-docker-image-gcr
+    on_failure: *slack_docker_build_failure_gcr
+    on_error: *slack_docker_build_error_gcr
+    params:
+      build: census-rm-ddl-master
+      cache_from:
+        - ddl-docker-image-ci
+      tag_file: census-rm-ddl-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      skip_download: true
+
 - name: "Build UAC QID Service Latest"
   serial_groups: [uac-qid-service-build]
   plan:
@@ -1773,6 +1827,25 @@ jobs:
     get_params:
       skip_download: true
 
+# Run DB Teardown
+- name: "CI Reset DB"
+  on_failure: *slack_failure_alert_ci
+  on_error: *slack_error_alert_ci
+  plan:
+  - get: every-midnight
+    trigger: true
+  - get: census-rm-kubernetes-optional-repo
+  - get: census-rm-deploy
+  - task: "Run ground zero"
+    file: census-rm-deploy/tasks/kubectl-run-groundzero-script.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
+      GCP_PROJECT_NAME: ((ci-gcp-project-name))
+      KUBERNETES_FILE_PATH: kubernetes-repo/optional
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+      input_mapping: {kubernetes-repo: census-rm-kubernetes-optional-repo}
+
 - name: "CI Terraform"
   serial: true
   serial_groups: [ci-terraform,
@@ -1883,6 +1956,48 @@ jobs:
         RABBITMQ_CONFIG_VALUES_FILE: rabbitmq/values.yml
       input_mapping: {census-rm-kubernetes-dependencies-repo: census-rm-kubernetes-dependencies-repo}
 
+
+  # Apply Database Patches
+- name: "CI Apply Database Patches"
+  serial: true
+  serial_groups: [ci-database-patches,
+                  ci-acceptance-tests,
+                  action-scheduler-deploy,
+                  action-worker-deploy,
+                  case-api-deploy,
+                  case-processor-deploy,
+                  uac-qid-service-deploy,
+                  pubsub-deploy,
+                  print-file-service-deploy,
+                  fieldwork-adapter-deploy,
+                  notify-processor-deploy,
+                  notify-stub-deploy,
+                  exception-manager-deploy,
+                  toolbox-deploy,
+                  database-monitor-deploy,
+                  rabbitmonitor-deploy,
+                  regional-counts-deploy]
+  on_failure: *slack_failure_alert_ci
+  on_error: *slack_error_alert_ci
+  plan:
+  - get: census-rm-ddl-master
+    trigger: true
+    passed: ["Build DDL Latest"]
+  - get: census-rm-kubernetes-optional-repo
+  - get: ddl-docker-image-gcr
+    params:
+      skip_download: true
+  - task: apply-database-patches
+    file: census-rm-deploy/tasks/kubectl-apply-ddl-patches.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((ci-gcp-project-name))
+      KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
+      KUBERNETES_FILE_PATH: kubernetes-repo/optional
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-optional-repo}
+
+
 # CI Deployments
 - name: "CI Deploy Action-Scheduler"
   serial: true
@@ -1900,6 +2015,9 @@ jobs:
   - get: action-scheduler-master
     trigger: true
     passed: ["Build Action Scheduler Latest"]
+  - get: census-rm-ddl-master
+    trigger: true
+    passed: ["CI Apply Database Patches"]
   - get: action-scheduler-docker-image-gcr
     params:
       skip_download: true
@@ -1932,6 +2050,9 @@ jobs:
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["CI Helm"]
+  - get: census-rm-ddl-master
+    trigger: true
+    passed: ["CI Apply Database Patches"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
   - get: action-worker-master
@@ -1969,6 +2090,9 @@ jobs:
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["CI Helm"]
+  - get: census-rm-ddl-master
+    trigger: true
+    passed: ["CI Apply Database Patches"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
   - get: case-api-master
@@ -2006,6 +2130,9 @@ jobs:
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["CI Helm"]
+  - get: census-rm-ddl-master
+    trigger: true
+    passed: ["CI Apply Database Patches"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
   - get: case-processor-master
@@ -2043,6 +2170,9 @@ jobs:
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["CI Helm"]
+  - get: census-rm-ddl-master
+    trigger: true
+    passed: ["CI Apply Database Patches"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
   - get: uac-qid-service-master
@@ -2080,6 +2210,9 @@ jobs:
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["CI Helm"]
+  - get: census-rm-ddl-master
+    trigger: true
+    passed: ["CI Apply Database Patches"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
   - get: pubsub-master
@@ -2119,6 +2252,9 @@ jobs:
     passed: ["CI Helm"]
   - get: census-rm-kubernetes-ops-repo
     trigger: true
+  - get: census-rm-ddl-master
+    trigger: true
+    passed: ["CI Apply Database Patches"]
   - get: ops-master
     trigger: true
     passed: ["Build Ops Latest"]
@@ -2156,6 +2292,9 @@ jobs:
     passed: ["CI Helm"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
+  - get: census-rm-ddl-master
+    trigger: true
+    passed: ["CI Apply Database Patches"]
   - get: print-file-service-master
     trigger: true
     passed: ["Build Print File Service Latest"]
@@ -2191,6 +2330,9 @@ jobs:
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["CI Helm"]
+  - get: census-rm-ddl-master
+    trigger: true
+    passed: ["CI Apply Database Patches"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
   - get: fieldwork-adapter-master
@@ -2228,6 +2370,9 @@ jobs:
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["CI Helm"]
+  - get: census-rm-ddl-master
+    trigger: true
+    passed: ["CI Apply Database Patches"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
   - get: notify-processor-master
@@ -2253,7 +2398,7 @@ jobs:
     input_mapping: {
       docker-image-resource: notify-processor-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
-  
+
 - name: "CI Deploy Notify Stub"
   serial: true
   serial_groups: [notify-stub-build,
@@ -2267,6 +2412,9 @@ jobs:
     passed: ["CI Helm"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
+  - get: census-rm-ddl-master
+    trigger: true
+    passed: ["CI Apply Database Patches"]
   - get: notify-stub-master
     trigger: true
     passed: ["Build Notify Stub Latest"]
@@ -2290,7 +2438,7 @@ jobs:
     input_mapping: {
       docker-image-resource: notify-stub-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
-  
+
 - name: "CI Deploy Exception Manager"
   serial: true
   serial_groups: [exception-manager-build,
@@ -2304,6 +2452,9 @@ jobs:
     passed: ["CI Helm"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
+  - get: census-rm-ddl-master
+    trigger: true
+    passed: ["CI Apply Database Patches"]
   - get: exception-manager-master
     trigger: true
     passed: ["Build Exception Manager Latest"]
@@ -2344,6 +2495,9 @@ jobs:
   - get: toolbox-master
     trigger: true
     passed: ["Build Toolbox Latest"]
+  - get: census-rm-ddl-master
+    trigger: true
+    passed: ["CI Apply Database Patches"]
   - get: toolbox-docker-image-gcr
     params:
       skip_download: true
@@ -2378,6 +2532,9 @@ jobs:
     passed: ["CI Helm"]
   - get: census-rm-kubernetes-optional-repo
     trigger: true
+  - get: census-rm-ddl-master
+    trigger: true
+    passed: ["CI Apply Database Patches"]
   - get: toolbox-master
     trigger: true
     passed: ["Build Toolbox Latest"]
@@ -2413,6 +2570,9 @@ jobs:
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["CI Helm"]
+  - get: census-rm-ddl-master
+    trigger: true
+    passed: ["CI Apply Database Patches"]
   - get: census-rm-kubernetes-optional-repo
     trigger: true
   - get: toolbox-master
@@ -2450,6 +2610,9 @@ jobs:
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["CI Helm"]
+  - get: census-rm-ddl-master
+    trigger: true
+    passed: ["CI Apply Database Patches"]
   - get: census-rm-kubernetes-optional-repo
     trigger: true
   - get: toolbox-master
@@ -2512,11 +2675,11 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Deploy Action-Scheduler", 
-             "CI Deploy Action-Worker", 
-             "CI Deploy Case-API", 
-             "CI Deploy Case-Processor", 
-             "CI Deploy UAC QID Service", 
+    passed: ["CI Deploy Action-Scheduler",
+             "CI Deploy Action-Worker",
+             "CI Deploy Case-API",
+             "CI Deploy Case-Processor",
+             "CI Deploy UAC QID Service",
              "CI Deploy PubSub Service",
              "CI Deploy Print File Service",
              "CI Deploy Fieldwork Adapter",
@@ -2534,13 +2697,26 @@ jobs:
     params:
       skip_download: true
   - get: census-rm-kubernetes-dependencies-repo
+  - get: census-rm-ddl-master
+    trigger: true
+    passed: ["CI Deploy Action-Scheduler",
+             "CI Deploy Action-Worker",
+             "CI Deploy Case-API",
+             "CI Deploy Case-Processor",
+             "CI Deploy UAC QID Service",
+             "CI Deploy PubSub Service",
+             "CI Deploy Print File Service",
+             "CI Deploy Fieldwork Adapter",
+             "CI Deploy Notify Processor",
+             "CI Deploy Notify Stub",
+             "CI Deploy Exception Manager"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
-    passed: ["CI Deploy Action-Scheduler", 
-             "CI Deploy Action-Worker", 
-             "CI Deploy Case-API", 
-             "CI Deploy Case-Processor", 
-             "CI Deploy UAC QID Service", 
+    passed: ["CI Deploy Action-Scheduler",
+             "CI Deploy Action-Worker",
+             "CI Deploy Case-API",
+             "CI Deploy Case-Processor",
+             "CI Deploy UAC QID Service",
              "CI Deploy PubSub Service",
              "CI Deploy Print File Service",
              "CI Deploy Fieldwork Adapter",
@@ -2613,6 +2789,7 @@ jobs:
 - name: "WL Terraform"
   serial: true
   serial_groups: [wl-terraform,
+                  wl-database-patches,
                   wl-action-scheduler,
                   wl-action-worker,
                   wl-case-api,
@@ -2684,6 +2861,7 @@ jobs:
 - name: "WL Helm"
   serial: true
   serial_groups: [wl-terraform,
+                  wl-database-patches,
                   wl-action-scheduler,
                   wl-action-worker,
                   wl-case-api,
@@ -2715,6 +2893,46 @@ jobs:
         RABBITMQ_CONFIG_VALUES_FILE: rabbitmq/values.yml
       input_mapping: {census-rm-kubernetes-dependencies-repo: census-rm-kubernetes-dependencies-repo}
 
+# Apply Database Patches
+- name: "WL Apply Database Patches"
+  serial: true
+  serial_groups: [wl-database-patches,
+                  wl-terraform,
+                  wl-action-scheduler,
+                  wl-action-worker,
+                  wl-case-api,
+                  wl-case-processor,
+                  wl-uac-qid-service,
+                  wl-pubsub,
+                  wl-print-file-service,
+                  wl-fieldwork-adapter,
+                  wl-notify-processor,
+                  wl-exception-manager,
+                  wl-toolbox,
+                  wl-database-monitor,
+                  wl-rabbitmonitor,
+                  wl-regional-counts]
+  on_failure: *slack_failure_alert_wl
+  on_error: *slack_error_alert_wl
+  plan:
+  - get: census-rm-kubernetes-optional-repo
+  - get: census-rm-ddl-master
+    trigger: true
+    passed: ["CI Acceptance Tests"]
+  - get: ddl-docker-image-gcr
+    params:
+      skip_download: true
+  - task: apply-database-patches
+    file: census-rm-deploy/tasks/kubectl-apply-ddl-patches.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((wl-gcp-project-name))
+      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
+      KUBERNETES_FILE_PATH: kubernetes-repo/optional
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-optional-repo}
+
+
 # WL Deployments
 - name: "WL Deploy Action-Scheduler"
   serial: true
@@ -2729,6 +2947,9 @@ jobs:
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
+  - get: census-rm-ddl-master
+    trigger: true
+    passed: ["WL Apply Database Patches"]
   - get: action-scheduler-master
     trigger: true
     passed: ["CI Acceptance Tests"]
@@ -2763,6 +2984,9 @@ jobs:
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["WL Helm"]
+  - get: census-rm-ddl-master
+    trigger: true
+    passed: ["WL Apply Database Patches"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
@@ -2803,6 +3027,9 @@ jobs:
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
+  - get: census-rm-ddl-master
+    trigger: true
+    passed: ["WL Apply Database Patches"]
   - get: print-file-service-master
     trigger: true
     passed: ["CI Acceptance Tests"]
@@ -2840,6 +3067,9 @@ jobs:
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
+  - get: census-rm-ddl-master
+    trigger: true
+    passed: ["WL Apply Database Patches"]
   - get: case-api-master
     trigger: true
     passed: ["CI Acceptance Tests"]
@@ -2874,6 +3104,9 @@ jobs:
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["WL Helm"]
+  - get: census-rm-ddl-master
+    trigger: true
+    passed: ["WL Apply Database Patches"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
@@ -2911,6 +3144,9 @@ jobs:
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["WL Helm"]
+  - get: census-rm-ddl-master
+    trigger: true
+    passed: ["WL Apply Database Patches"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
@@ -2948,6 +3184,9 @@ jobs:
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["WL Helm"]
+  - get: census-rm-ddl-master
+    trigger: true
+    passed: ["WL Apply Database Patches"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
@@ -2985,6 +3224,9 @@ jobs:
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["WL Helm"]
+  - get: census-rm-ddl-master
+    trigger: true
+    passed: ["WL Apply Database Patches"]
   - get: census-rm-kubernetes-ops-repo
     trigger: true
   - get: ops-master
@@ -3020,6 +3262,9 @@ jobs:
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["WL Helm"]
+  - get: census-rm-ddl-master
+    trigger: true
+    passed: ["WL Apply Database Patches"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
@@ -3057,6 +3302,9 @@ jobs:
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["WL Helm"]
+  - get: census-rm-ddl-master
+    trigger: true
+    passed: ["WL Apply Database Patches"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
@@ -3094,6 +3342,9 @@ jobs:
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["WL Helm"]
+  - get: census-rm-ddl-master
+    trigger: true
+    passed: ["WL Apply Database Patches"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
@@ -3131,6 +3382,9 @@ jobs:
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["WL Helm"]
+  - get: census-rm-ddl-master
+    trigger: true
+    passed: ["WL Apply Database Patches"]
   - get: census-rm-kubernetes-optional-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
@@ -3168,6 +3422,9 @@ jobs:
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["WL Helm"]
+  - get: census-rm-ddl-master
+    trigger: true
+    passed: ["WL Apply Database Patches"]
   - get: census-rm-kubernetes-optional-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
@@ -3205,6 +3462,9 @@ jobs:
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["WL Helm"]
+  - get: census-rm-ddl-master
+    trigger: true
+    passed: ["WL Apply Database Patches"]
   - get: census-rm-kubernetes-optional-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
@@ -3242,6 +3502,9 @@ jobs:
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["WL Helm"]
+  - get: census-rm-ddl-master
+    trigger: true
+    passed: ["WL Apply Database Patches"]
   - get: census-rm-kubernetes-optional-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
