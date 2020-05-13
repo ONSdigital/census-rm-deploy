@@ -160,12 +160,6 @@ resources:
     expression: "0 0 * * *"
     fire_immediately: true
 
-- name: census-rm-kubernetes-repo
-  type: git
-  source:
-    uri: git@github.com:ONSdigital/census-rm-kubernetes.git
-    private_key: ((github.service_account_private_key))
-
 - name: slack-alert
   type: slack-notification
   source:
@@ -1840,7 +1834,7 @@ jobs:
   plan:
   - get: every-midnight
     trigger: true
-  - get: census-rm-kubernetes-repo
+  - get: census-rm-kubernetes-optional-repo
   - get: census-rm-deploy
   - task: "Run ground zero"
     file: census-rm-deploy/tasks/kubectl-run-groundzero-script.yml
@@ -1850,7 +1844,7 @@ jobs:
       GCP_PROJECT_NAME: ((ci-gcp-project-name))
       KUBERNETES_FILE_PATH: kubernetes-repo/optional
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-      input_mapping: {kubernetes-repo: census-rm-kubernetes-repo}
+      input_mapping: {kubernetes-repo: census-rm-kubernetes-optional-repo}
 
 - name: "CI Terraform"
   serial: true
@@ -1989,7 +1983,7 @@ jobs:
   - get: census-rm-ddl-master
     trigger: true
     passed: ["Build DDL Latest"]
-  - get: census-rm-kubernetes-repo
+  - get: census-rm-kubernetes-optional-repo
   - get: ddl-docker-image-gcr
     params:
       skip_download: true
@@ -2001,7 +1995,7 @@ jobs:
       KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
       KUBERNETES_FILE_PATH: kubernetes-repo/optional
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {kubernetes-repo: census-rm-kubernetes-repo}
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-optional-repo}
 
 
 # CI Deployments
@@ -2921,8 +2915,7 @@ jobs:
   on_failure: *slack_failure_alert_wl
   on_error: *slack_error_alert_wl
   plan:
-  - get: census-rm-kubernetes-dependencies-repo
-  - get: census-rm-kubernetes-repo
+  - get: census-rm-kubernetes-optional-repo
   - get: census-rm-ddl-master
     trigger: true
     passed: ["CI Acceptance Tests"]
@@ -2937,7 +2930,7 @@ jobs:
       KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
       KUBERNETES_FILE_PATH: kubernetes-repo/optional
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    input_mapping: {kubernetes-repo: census-rm-kubernetes-repo}
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-optional-repo}
 
 
 # WL Deployments
