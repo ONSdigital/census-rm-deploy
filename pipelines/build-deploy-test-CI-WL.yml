@@ -1984,6 +1984,7 @@ jobs:
     trigger: true
     passed: ["Build DDL Latest"]
   - get: census-rm-kubernetes-optional-repo
+  - get: census-rm-deploy
   - get: ddl-docker-image-gcr
     params:
       skip_download: true
@@ -2916,6 +2917,7 @@ jobs:
   on_error: *slack_error_alert_wl
   plan:
   - get: census-rm-kubernetes-optional-repo
+  - get: census-rm-deploy
   - get: census-rm-ddl-master
     trigger: true
     passed: ["CI Acceptance Tests"]
