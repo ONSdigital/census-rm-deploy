@@ -1844,7 +1844,7 @@ jobs:
       GCP_PROJECT_NAME: ((ci-gcp-project-name))
       KUBERNETES_FILE_PATH: kubernetes-repo/optional
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-      input_mapping: {kubernetes-repo: census-rm-kubernetes-optional-repo}
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-optional-repo}
 
 - name: "CI Terraform"
   serial: true
