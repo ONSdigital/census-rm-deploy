@@ -2202,7 +2202,7 @@ jobs:
 
 - name: "CI Deploy PubSub Service"
   serial: true
-  serial_groups: [pubsub-build,
+  serial_groups: [pubsub-adapter-build,
                   pubsub-deploy]
   plan:
   - get: census-rm-terraform
@@ -2216,10 +2216,10 @@ jobs:
     passed: ["CI Apply Database Patches"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
-  - get: pubsub-master
+  - get: pubsub-adapter
     trigger: true
-    passed: ["Build PubSub Latest"]
-  - get: pubsub-docker-image-gcr
+    passed: ["Build PubSub Adapter Latest"]
+  - get: pubsub-adapter-docker-image-gcr
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -2237,7 +2237,7 @@ jobs:
       KUBERNETES_FILE_PREFIX: pubsub
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
-      docker-image-resource: pubsub-docker-image-gcr,
+      docker-image-resource: pubsub-adapter-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
 - name: "CI Deploy Ops Tool"
@@ -2656,7 +2656,7 @@ jobs:
                   case-processor-deploy,
                   uac-qid-service-build,
                   uac-qid-service-deploy,
-                  pubsub-build,
+                  pubsub-adapter-build,
                   pubsub-deploy,
                   print-file-service-build,
                   print-file-service-deploy,
@@ -2747,7 +2747,7 @@ jobs:
   - get: uac-qid-service-master
     trigger: true
     passed: ["CI Deploy UAC QID Service"]
-  - get: pubsub-master
+  - get: pubsub-adapter
     trigger: true
     passed: ["CI Deploy PubSub Service"]
   - get: qid-batch-runner-master
@@ -3192,10 +3192,10 @@ jobs:
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
     passed: ["CI Acceptance Tests"]
-  - get: pubsub-master
+  - get: pubsub-adapter
     trigger: true
     passed: ["CI Acceptance Tests"]
-  - get: pubsub-docker-image-gcr
+  - get: pubsub-adapter-docker-image-gcr
     params:
       skip_download: true
   - get: census-rm-deploy
@@ -3213,7 +3213,7 @@ jobs:
       KUBERNETES_FILE_PREFIX: pubsub
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
-      docker-image-resource: pubsub-docker-image-gcr,
+      docker-image-resource: pubsub-adapter-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
 - name: "WL Deploy Ops Tool"
