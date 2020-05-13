@@ -33,7 +33,7 @@ groups:
   - "CI Deploy Case-API"
   - "CI Deploy Case-Processor"
   - "CI Deploy UAC QID Service"
-  - "CI Deploy PubSub Service"
+  - "CI Deploy PubSub Adapter"
   - "CI Deploy Ops Tool"
   - "CI Deploy Print File Service"
   - "CI Deploy Fieldwork Adapter"
@@ -54,7 +54,7 @@ groups:
   - "WL Deploy Case-API"
   - "WL Deploy Case-Processor"
   - "WL Deploy UAC QID Service"
-  - "WL Deploy PubSub Service"
+  - "WL Deploy PubSub Adapter"
   - "WL Deploy Ops Tool"
   - "WL Deploy Print File Service"
   - "WL Deploy Fieldwork Adapter"
@@ -103,7 +103,7 @@ groups:
   - "CI Deploy Case-API"
   - "CI Deploy Case-Processor"
   - "CI Deploy UAC QID Service"
-  - "CI Deploy PubSub Service"
+  - "CI Deploy PubSub Adapter"
   - "CI Deploy Ops Tool"
   - "CI Deploy Print File Service"
   - "CI Deploy Fieldwork Adapter"
@@ -127,7 +127,7 @@ groups:
   - "WL Deploy Case-API"
   - "WL Deploy Case-Processor"
   - "WL Deploy UAC QID Service"
-  - "WL Deploy PubSub Service"
+  - "WL Deploy PubSub Adapter"
   - "WL Deploy Ops Tool"
   - "WL Deploy Print File Service"
   - "WL Deploy Fieldwork Adapter"
@@ -1855,7 +1855,7 @@ jobs:
                   case-api-deploy,
                   case-processor-deploy,
                   uac-qid-service-deploy,
-                  pubsub-deploy,
+                  pubsub-adapter-deploy,
                   print-file-service-deploy,
                   fieldwork-adapter-deploy,
                   notify-processor-deploy,
@@ -1891,7 +1891,7 @@ jobs:
                   case-api-deploy,
                   case-processor-deploy,
                   uac-qid-service-deploy,
-                  pubsub-deploy,
+                  pubsub-adapter-deploy,
                   print-file-service-deploy,
                   fieldwork-adapter-deploy,
                   notify-processor-deploy,
@@ -1929,7 +1929,7 @@ jobs:
                   case-api-deploy,
                   case-processor-deploy,
                   uac-qid-service-deploy,
-                  pubsub-deploy,
+                  pubsub-adapter-deploy,
                   print-file-service-deploy,
                   fieldwork-adapter-deploy,
                   notify-processor-deploy,
@@ -1967,7 +1967,7 @@ jobs:
                   case-api-deploy,
                   case-processor-deploy,
                   uac-qid-service-deploy,
-                  pubsub-deploy,
+                  pubsub-adapter-deploy,
                   print-file-service-deploy,
                   fieldwork-adapter-deploy,
                   notify-processor-deploy,
@@ -2200,10 +2200,10 @@ jobs:
       docker-image-resource: uac-qid-service-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
-- name: "CI Deploy PubSub Service"
+- name: "CI Deploy PubSub Adapter"
   serial: true
   serial_groups: [pubsub-adapter-build,
-                  pubsub-deploy]
+                  pubsub-adapter-deploy]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -2657,7 +2657,7 @@ jobs:
                   uac-qid-service-build,
                   uac-qid-service-deploy,
                   pubsub-adapter-build,
-                  pubsub-deploy,
+                  pubsub-adapter-deploy,
                   print-file-service-build,
                   print-file-service-deploy,
                   fieldwork-adapter-build,
@@ -2681,7 +2681,7 @@ jobs:
              "CI Deploy Case-API",
              "CI Deploy Case-Processor",
              "CI Deploy UAC QID Service",
-             "CI Deploy PubSub Service",
+             "CI Deploy PubSub Adapter",
              "CI Deploy Print File Service",
              "CI Deploy Fieldwork Adapter",
              "CI Deploy Notify Processor",
@@ -2705,7 +2705,7 @@ jobs:
              "CI Deploy Case-API",
              "CI Deploy Case-Processor",
              "CI Deploy UAC QID Service",
-             "CI Deploy PubSub Service",
+             "CI Deploy PubSub Adapter",
              "CI Deploy Print File Service",
              "CI Deploy Fieldwork Adapter",
              "CI Deploy Notify Processor",
@@ -2718,7 +2718,7 @@ jobs:
              "CI Deploy Case-API",
              "CI Deploy Case-Processor",
              "CI Deploy UAC QID Service",
-             "CI Deploy PubSub Service",
+             "CI Deploy PubSub Adapter",
              "CI Deploy Print File Service",
              "CI Deploy Fieldwork Adapter",
              "CI Deploy Notify Processor",
@@ -2749,7 +2749,7 @@ jobs:
     passed: ["CI Deploy UAC QID Service"]
   - get: pubsub-adapter
     trigger: true
-    passed: ["CI Deploy PubSub Service"]
+    passed: ["CI Deploy PubSub Adapter"]
   - get: qid-batch-runner-master
     trigger: true
   - get: print-file-service-master
@@ -2796,7 +2796,7 @@ jobs:
                   wl-case-api,
                   wl-case-processor,
                   wl-uac-qid-service,
-                  wl-pubsub,
+                  wl-pubsub-adapter,
                   wl-print-file-service,
                   wl-fieldwork-adapter,
                   wl-notify-processor,
@@ -2831,7 +2831,7 @@ jobs:
                   wl-case-api,
                   wl-case-processor,
                   wl-uac-qid-service,
-                  wl-pubsub,
+                  wl-pubsub-adapter,
                   wl-print-file-service,
                   wl-fieldwork-adapter,
                   wl-notify-processor,
@@ -2868,7 +2868,7 @@ jobs:
                   wl-case-api,
                   wl-case-processor,
                   wl-uac-qid-service,
-                  wl-pubsub,
+                  wl-pubsub-adapter,
                   wl-print-file-service,
                   wl-fieldwork-adapter,
                   wl-notify-processor,
@@ -2904,7 +2904,7 @@ jobs:
                   wl-case-api,
                   wl-case-processor,
                   wl-uac-qid-service,
-                  wl-pubsub,
+                  wl-pubsub-adapter,
                   wl-print-file-service,
                   wl-fieldwork-adapter,
                   wl-notify-processor,
@@ -3176,7 +3176,7 @@ jobs:
       docker-image-resource: uac-qid-service-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
-- name: "WL Deploy PubSub Service"
+- name: "WL Deploy PubSub Adapter"
   serial: true
   serial_groups: [wl-pubsubsvc]
   plan:
