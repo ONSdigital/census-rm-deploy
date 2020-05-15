@@ -1,9 +1,12 @@
 resource_types:
 
+  # Recent release 3.0.0 needs the fly version to be 6.1.0 to work. Ours is currently 5.6.0 so we need to pin the resource 
+  # to a previous release instead of using the latest image.
   - name: concourse-pipeline
     type: docker-image
     source:
       repository: concourse/concourse-pipeline-resource
+      tag: 2.2.0
 
   - name: slack-notification
     type: docker-image
