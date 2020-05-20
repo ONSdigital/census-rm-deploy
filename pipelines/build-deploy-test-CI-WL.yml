@@ -2823,6 +2823,9 @@ jobs:
     passed: ["CI Reset DB"]
   - get: acceptance-tests-master
     passed: ["Build Acceptance Tests Latest"]
+  - get: acceptance-tests-docker-image-gcr
+    params:
+      skip_download: true
   - get: action-scheduler-master
     passed: ["CI Deploy Action-Scheduler"]
   - get: action-worker-master
