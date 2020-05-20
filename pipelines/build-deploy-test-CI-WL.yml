@@ -3178,7 +3178,7 @@ jobs:
 
 - name: "WL Deploy PubSub Adapter"
   serial: true
-  serial_groups: [wl-pubsubsvc]
+  serial_groups: [wl-pubsub-adapter]
   plan:
   - get: census-rm-terraform
     trigger: true
