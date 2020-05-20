@@ -730,7 +730,7 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
 
-- name: "PubSub Adapter Service"
+- name: "PubSub Adapter"
   disable_manual_trigger: true
   serial: true
   serial_groups: [pubsub-adapter]
@@ -962,7 +962,7 @@ jobs:
       "Case API",
       "Case Processor",
       "UAC QID Service",
-      "PubSub Adapter Service",
+      "PubSub Adapter",
       "Print File Service",
       "Fieldwork Adapter",
       "Notify Processor",
