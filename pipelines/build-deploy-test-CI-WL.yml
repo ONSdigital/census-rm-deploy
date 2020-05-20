@@ -2821,6 +2821,8 @@ jobs:
   - get: every-midnight
     trigger: true
     passed: ["CI Reset DB"]
+  - get: acceptance-tests-master
+    passed: ["Build Acceptance Tests Latest"]
   - get: action-scheduler-master
     passed: ["CI Deploy Action-Scheduler"]
   - get: action-worker-master
