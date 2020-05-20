@@ -2735,11 +2735,9 @@ jobs:
   - get: action-scheduler-master
     trigger: true
     passed: ["CI Deploy Action-Scheduler"]
-    params:
   - get: action-worker-master
     trigger: true
     passed: ["CI Deploy Action-Worker"]
-    params:
   - get: case-api-master
     trigger: true
     passed: ["CI Deploy Case-API"]
@@ -2825,10 +2823,8 @@ jobs:
     passed: ["CI Reset DB"]
   - get: action-scheduler-master
     passed: ["CI Deploy Action-Scheduler"]
-    params:
   - get: action-worker-master
     passed: ["CI Deploy Action-Worker"]
-    params:
   - get: case-api-master
     passed: ["CI Deploy Case-API"]
   - get: case-processor-master
