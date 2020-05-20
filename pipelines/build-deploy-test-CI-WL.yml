@@ -2823,6 +2823,36 @@ jobs:
   - get: every-midnight
     trigger: true
     passed: ["CI Reset DB"]
+  - get: action-scheduler-master
+    passed: ["CI Deploy Action-Scheduler"]
+    params:
+  - get: action-worker-master
+    passed: ["CI Deploy Action-Worker"]
+    params:
+  - get: case-api-master
+    passed: ["CI Deploy Case-API"]
+  - get: case-processor-master
+    passed: ["CI Deploy Case-Processor"]
+  - get: uac-qid-service-master
+    passed: ["CI Deploy UAC QID Service"]
+  - get: pubsub-adapter
+    passed: ["CI Deploy PubSub Adapter"]
+  - get: qid-batch-runner-master
+  - get: print-file-service-master
+    passed: ["CI Deploy Print File Service"]
+  - get: fieldwork-adapter-master
+    passed: ["CI Deploy Fieldwork Adapter"]
+  - get: notify-processor-master
+    passed: ["CI Deploy Notify Processor"]
+  - get: notify-stub-master
+    passed: ["CI Deploy Notify Stub"]
+  - get: exception-manager-master
+    passed: ["CI Deploy Exception Manager"]
+  - get: toolbox-master
+    passed: ["CI Deploy Toolbox",
+             "CI Deploy Database Monitor",
+             "CI Deploy Rabbit Monitor",
+             "CI Deploy Regional Counts"]
   - task: "Run Regression Acceptance Tests (in K8s)"
     file: acceptance-tests-master/tasks/kubectl-run-regression-acceptance-tests.yml
     on_failure: *slack_failure_alert_ci
@@ -2835,7 +2865,6 @@ jobs:
       BATCH_RUNNER_CONFIG: batch-runner-repo/qid-batch-runner.yml
     input_mapping: {acceptance-tests-repo: acceptance-tests-master,
                     batch-runner-repo: qid-batch-runner-master}
-
 
 # WL Terraform
 - name: "WL Terraform"
