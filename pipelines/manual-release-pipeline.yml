@@ -9,7 +9,7 @@ groups:
   - "Case API"
   - "Case Processor"
   - "UAC QID Service"
-  - "PubSub Service"
+  - "PubSub Adapter"
   - "Ops Tool"
   - "Print File Service"
   - "Fieldwork Adapter"
@@ -47,7 +47,7 @@ groups:
   - "Case API"
   - "Case Processor"
   - "UAC QID Service"
-  - "PubSub Service"
+  - "PubSub Adapter"
   - "Ops Tool"
   - "Print File Service"
   - "Fieldwork Adapter"
@@ -273,7 +273,7 @@ jobs:
                   case-api,
                   case-processor,
                   uac-qid-service,
-                  pubsubsvc,
+                  pubsub-adapter,
                   ops,
                   print-file-service,
                   fieldwork-adapter,
@@ -437,10 +437,10 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
 
-- name: "PubSub Service"
+- name: "PubSub Adapter"
   disable_manual_trigger: true
   serial: true
-  serial_groups: [pubsubsvc]
+  serial_groups: [pubsub-adapter]
   plan:
   - get: census-rm-kubernetes-release
     trigger: true
@@ -457,10 +457,10 @@ jobs:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((gcp-project-name))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
-      KUBERNETES_DEPLOYMENT_NAME: pubsubsvc
-      KUBERNETES_SELECTOR: app=pubsubsvc
+      KUBERNETES_DEPLOYMENT_NAME: pubsub-adapter
+      KUBERNETES_SELECTOR: app=pubsub-adapter
       KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
-      KUBERNETES_FILE_PREFIX: pubsub
+      KUBERNETES_FILE_PREFIX: pubsub-adapter
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
 
@@ -718,7 +718,7 @@ jobs:
             "Case API",
             "Case Processor",
             "UAC QID Service",
-            "PubSub Service",
+            "PubSub Adapter",
             "Print File Service",
             "Ops Tool",
             "Fieldwork Adapter",
@@ -740,7 +740,7 @@ jobs:
     fieldwork-adapter,
     notify-processor,
     uac-qid-service,
-    pubsubsvc,
+    pubsub-adapter,
     print-file-service,
     exception-manager,
     toolbox,
@@ -760,7 +760,7 @@ jobs:
                   fieldwork-adapter,
                   notify-processor,
                   uac-qid-service,
-                  pubsubsvc,
+                  pubsub-adapter,
                   print-file-service,
                   exception-manager,
                   toolbox,
@@ -792,7 +792,7 @@ jobs:
                   fieldwork-adapter,
                   notify-processor,
                   uac-qid-service,
-                  pubsubsvc,
+                  pubsub-adapter,
                   print-file-service,
                   exception-manager,
                   toolbox,
@@ -823,7 +823,7 @@ jobs:
                   fieldwork-adapter,
                   notify-processor,
                   uac-qid-service,
-                  pubsubsvc,
+                  pubsub-adapter,
                   print-file-service,
                   exception-manager,
                   toolbox,
