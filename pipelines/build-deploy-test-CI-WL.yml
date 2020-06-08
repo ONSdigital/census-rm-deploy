@@ -3658,7 +3658,7 @@ jobs:
       docker-image-resource: toolbox-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-optional-repo}
 
-- name: WL Deploy QID Batch Runner"
+- name: "WL Deploy QID Batch Runner"
   serial: true
   serial_groups: [wl-qid-batch-runner]
   plan:
