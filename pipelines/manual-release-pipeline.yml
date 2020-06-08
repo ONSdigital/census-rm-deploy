@@ -90,6 +90,7 @@ resources:
   source:
     uri: git@github.com:ONSdigital/census-rm-deploy.git
     private_key: ((github.service_account_private_key))
+    tag_filter: v*.*.*
 
 - name: census-rm-terraform-release
   type: git
@@ -97,7 +98,6 @@ resources:
     uri: git@github.com:ONSdigital/census-rm-terraform.git
     private_key: ((github.service_account_private_key))
     tag_filter: v*.*.*
-    branch: master
 
 - name: census-rm-kubernetes-release
   type: git
@@ -106,13 +106,13 @@ resources:
     private_key: ((github.service_account_private_key))
     paths: [release/*]
     tag_filter: v*.*.*
-    branch: master
 
 - name: whitelist-master
   type: git
   source:
     uri: git@github.com:ONSdigital/census-rm-whitelist.git
     private_key: ((github.service_account_private_key))
+    tag_filter: v*.*.*
 
 - name: every-minute
   type: time
