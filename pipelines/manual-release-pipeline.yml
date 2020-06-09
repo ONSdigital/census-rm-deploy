@@ -97,7 +97,7 @@ resources:
     uri: git@github.com:ONSdigital/census-rm-terraform.git
     private_key: ((github.service_account_private_key))
     tag_filter: v*.*.*
-    branch: .*
+    branch: *
 
 - name: census-rm-kubernetes-release
   type: git
@@ -106,7 +106,7 @@ resources:
     private_key: ((github.service_account_private_key))
     paths: [release/*]
     tag_filter: v*.*.*
-    branch: .*
+    branch: *
 
 - name: whitelist-master
   type: git
