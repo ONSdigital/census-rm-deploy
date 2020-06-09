@@ -92,7 +92,7 @@ resources:
     private_key: ((github.service_account_private_key))
 
 - name: census-rm-terraform-release
-  type: git
+  type: github-release
   source:
     uri: git@github.com:ONSdigital/census-rm-terraform.git
     private_key: ((github.service_account_private_key))
@@ -100,7 +100,7 @@ resources:
     branch: *
 
 - name: census-rm-kubernetes-release
-  type: git
+  type: github-release
   source:
     uri: git@github.com:ONSdigital/census-rm-kubernetes.git
     private_key: ((github.service_account_private_key))

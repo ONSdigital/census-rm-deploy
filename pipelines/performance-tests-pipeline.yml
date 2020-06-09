@@ -37,9 +37,9 @@ resources:
     password: ((gcp.service_account_json))
 
 - name: census-rm-terraform
-  type: git
+  type: github-release
   source:
-    branch: ((terraform-branch))
+    branch: *
     uri: git@github.com:ONSdigital/census-rm-terraform.git
     private_key: ((github.service_account_private_key))
     tag_filter: v*.*.*
@@ -61,12 +61,12 @@ resources:
     tag_filter: v*.*.*
     
 - name: census-rm-kubernetes-release	
-  type: git	
+  type: github-release
   source:
     uri: git@github.com:ONSdigital/census-rm-kubernetes.git	
     private_key: ((github.service_account_private_key))	
     paths: [release/*]
-    branch: master
+    branch: *
     tag_filter: v*.*.*
 
 templating:
