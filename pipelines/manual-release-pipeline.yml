@@ -22,6 +22,7 @@ groups:
   - "Regional Counts"
   - "Report Deployment Success"
   - "Trigger Terraform"
+  - "Preview Terraform Changes"
   - "Run Terraform"
   - "Run Helm"
   - "Deploy Monitoring"
@@ -778,6 +779,33 @@ jobs:
   on_failure: *slack_failure_alert
   plan:
     - get: every-minute
+
+- name: "Preview Terraform Changes"
+  serial: true
+  serial_groups: [action-scheduler,
+                  action-worker,
+                  case-api,
+                  case-processor,
+                  fieldwork-adapter,
+                  notify-processor,
+                  uac-qid-service,
+                  pubsub-adapter,
+                  print-file-service,
+                  exception-manager,
+                  toolbox,
+                  rabbitmonitor]
+  plan:
+    - get: census-rm-terraform-release
+    - get: census-rm-deploy
+    - task: "Preview Terraform Changes"
+      file: census-rm-deploy/tasks/preview-changes-terraform-env.yml
+      params:
+        ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+        ENV: ((gcp-environment-name))
+        VAR_FILE: ./tfvars/((gcp-project-name)).tfvars
+        KUBERNETES_CLUSTER: rm-k8s-cluster
+      input_mapping: {census-rm-terraform: census-rm-terraform-release}
+
 
 - name: "Run Terraform"
   disable_manual_trigger: true
