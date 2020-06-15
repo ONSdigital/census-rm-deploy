@@ -781,19 +781,6 @@ jobs:
     - get: every-minute
 
 - name: "Preview Terraform Changes"
-  serial: true
-  serial_groups: [action-scheduler,
-                  action-worker,
-                  case-api,
-                  case-processor,
-                  fieldwork-adapter,
-                  notify-processor,
-                  uac-qid-service,
-                  pubsub-adapter,
-                  print-file-service,
-                  exception-manager,
-                  toolbox,
-                  rabbitmonitor]
   plan:
     - get: census-rm-terraform-release
     - get: census-rm-deploy
