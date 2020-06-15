@@ -33,6 +33,7 @@ groups:
 - name: "Infrastructure"
   jobs:
   - "Trigger Terraform"
+  - "Preview Terraform Changes"
   - "Run Terraform"
   - "Run Helm"
   - "Deploy Monitoring"
