@@ -1991,8 +1991,6 @@ jobs:
       trigger: true
     - get: census-rm-deploy
     - get: census-rm-terraform
-      passed: ["CI Terraform"]
-      trigger: true
     - task: "CI Monitoring"
       file: census-rm-deploy/tasks/monitoring.yml
       params:
@@ -2098,7 +2096,7 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Helm","CI Monitoring"]
+    passed: ["CI Helm"]
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["CI Helm"]
