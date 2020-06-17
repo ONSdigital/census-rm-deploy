@@ -1016,6 +1016,7 @@ jobs:
         GCP_PROJECT_NAME: ((performance-gcp-project-name))
         CASE_PROCESSOR_REPLICAS: ((case-processor-replicas))
         ACTION_WORKER_REPLICAS: ((action-worker-replicas))
+        ACTION_PROCESSOR_REPLICAS: ((action-processor-replicas))
         UAC_QID_REPLICAS: ((uac-qid-replicas))
       run:
         path: bash
@@ -1033,7 +1034,7 @@ jobs:
             # Scale apps up
             kubectl scale deployment action-scheduler --replicas=1
             kubectl scale deployment action-worker --replicas=$ACTION_WORKER_REPLICAS
-            kubectl scale deployment action-processor --replicas=1
+            kubectl scale deployment action-processor --replicas=$ACTION_PROCESSOR_REPLICAS
             kubectl scale deployment case-api --replicas=1
             kubectl scale deployment case-processor --replicas=$CASE_PROCESSOR_REPLICAS
             kubectl scale deployment uacqidservice --replicas=$UAC_QID_REPLICAS
