@@ -405,6 +405,7 @@ jobs:
   serial_groups: [
     action-scheduler,
     action-worker,
+    action-processor,
     case-api,
     case-processor,
     fieldwork-adapter,
@@ -434,6 +435,7 @@ jobs:
                   performance-tests,
                   action-scheduler,
                   action-worker,
+                  action-processor,
                   case-api,
                   case-processor,
                   fieldwork-adapter,
@@ -468,6 +470,7 @@ jobs:
     scale-apps,
     action-scheduler,
     action-worker,
+    action-processor,
     case-api,
     case-processor,
     fieldwork-adapter,
@@ -514,6 +517,7 @@ jobs:
             # Scale apps down
             kubectl scale deployment action-scheduler --replicas=0
             kubectl scale deployment action-worker --replicas=0
+            kubectl scale deployment action-processor --replicas=0
             kubectl scale deployment case-api --replicas=0
             kubectl scale deployment case-processor --replicas=0
             kubectl scale deployment uacqidservice --replicas=0
@@ -541,6 +545,7 @@ jobs:
                   performance-tests,
                   action-scheduler,
                   action-worker,
+                  action-processor,
                   case-api,
                   case-processor,
                   fieldwork-adapter,
@@ -579,6 +584,7 @@ jobs:
                   performance-tests,
                   action-scheduler,
                   action-worker,
+                  action-processor,
                   case-api,
                   case-processor,
                   fieldwork-adapter,
@@ -652,6 +658,31 @@ jobs:
       KUBERNETES_SELECTOR: app=action-worker
       KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
       KUBERNETES_FILE_PREFIX: action-worker
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
+
+- name: "Action Processor"
+  disable_manual_trigger: true
+  serial: true
+  serial_groups: [action-processor]
+  plan:
+  - get: census-rm-kubernetes-release
+  - get: census-rm-deploy
+  - get: every-minute
+    trigger: true
+    passed: ["Run Helm"]
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
+    on_failure: *slack_failure_alert
+    on_error: *slack_error_alert
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((performance-gcp-project-name))
+      KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: action-processor
+      KUBERNETES_SELECTOR: app=action-processor
+      KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
+      KUBERNETES_FILE_PREFIX: action-processor
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release}
 
@@ -938,6 +969,7 @@ jobs:
     scale-apps,
     action-scheduler,
     action-worker,
+    action-processor,
     case-api,
     case-processor,
     fieldwork-adapter,
@@ -959,6 +991,7 @@ jobs:
     passed: [
       "Action Scheduler",
       "Action Worker",
+      "Action Processor",
       "Case API",
       "Case Processor",
       "UAC QID Service",
@@ -983,6 +1016,7 @@ jobs:
         GCP_PROJECT_NAME: ((performance-gcp-project-name))
         CASE_PROCESSOR_REPLICAS: ((case-processor-replicas))
         ACTION_WORKER_REPLICAS: ((action-worker-replicas))
+        ACTION_PROCESSOR_REPLICAS: ((action-processor-replicas))
         UAC_QID_REPLICAS: ((uac-qid-replicas))
       run:
         path: bash
@@ -1000,6 +1034,7 @@ jobs:
             # Scale apps up
             kubectl scale deployment action-scheduler --replicas=1
             kubectl scale deployment action-worker --replicas=$ACTION_WORKER_REPLICAS
+            kubectl scale deployment action-processor --replicas=$ACTION_PROCESSOR_REPLICAS
             kubectl scale deployment case-api --replicas=1
             kubectl scale deployment case-processor --replicas=$CASE_PROCESSOR_REPLICAS
             kubectl scale deployment uacqidservice --replicas=$UAC_QID_REPLICAS
@@ -1007,6 +1042,7 @@ jobs:
             # Wait for rollout to finish
             kubectl rollout status deploy action-scheduler --watch=true --timeout=200s
             kubectl rollout status deploy action-worker --watch=true --timeout=400s
+            kubectl rollout status deploy action-processor --watch=true --timeout=200s
             kubectl rollout status deploy case-api --watch=true --timeout=200s
             kubectl rollout status deploy case-processor --watch=true --timeout=200s
             kubectl rollout status deploy uacqidservice --watch=true --timeout=200s
@@ -1023,6 +1059,7 @@ jobs:
     performance-tests,
     action-scheduler,
     action-worker,
+    action-processor,
     case-api,
     case-processor,
     fieldwork-adapter,
@@ -1061,6 +1098,7 @@ jobs:
     scale-apps,
     action-scheduler,
     action-worker,
+    action-processor,
     case-api,
     case-processor,
     fieldwork-adapter,

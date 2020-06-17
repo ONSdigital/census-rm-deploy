@@ -43,6 +43,14 @@ resources:
       access_token: ((github.access_token))
       order_by: time
 
+  - name: action-processor-release
+    type: github-release-latest
+    source:
+      owner: ONSdigital
+      repository: census-rm-action-processor
+      access_token: ((github.access_token))
+      order_by: time
+
   - name: case-api-release
     type: github-release-latest
     source:
@@ -211,6 +219,20 @@ resources:
     type: docker-image
     source:
       repository: ((docker-registry-gcr))/rm/census-rm-action-worker
+      username: _json_key
+      password: ((gcp.service_account_json))
+
+  - name: action-processor-docker-image-ci
+    type: docker-image
+    source:
+      repository: ((docker-registry-ci))/rm/census-rm-action-processor
+      username: _json_key
+      password: ((gcp.service_account_json))
+
+  - name: action-processor-docker-image-gcr
+    type: docker-image
+    source:
+      repository: ((docker-registry-gcr))/rm/census-rm-action-processor
       username: _json_key
       password: ((gcp.service_account_json))
 
@@ -722,6 +744,60 @@ jobs:
         cache_from:
           - action-worker-docker-image-ci
         tag_file: action-worker-release/tag
+        tag_as_latest: false
+      get_params:
+        skip_download: true
+
+  - name: build-action-processor-release
+    plan:
+    - get: action-processor-release
+      params:
+        include_source_tarball: true
+      trigger: true
+    - task: Build Action Processor Image (release)
+      on_failure: *slack_failure_alert_prebuild
+      on_error: *slack_error_alert_prebuild
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: adoptopenjdk/maven-openjdk11
+        inputs:
+          - name: action-processor-release
+        outputs:
+          - name: build
+          - name: extracted-action-processor
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              mkdir -p build/target
+              cd action-processor-release
+              tar -xzf source.tar.gz -C ../extracted-action-processor --strip-components=1
+              cd ../extracted-action-processor
+              mvn package -DskipITs -Ddockerfile.skip
+              cp target/census-rm-*.jar ../build/target
+              cp Dockerfile ../build
+              cp healthcheck.sh ../build
+    - put: action-processor-docker-image-ci
+      on_failure: *slack_failure_alert_ci
+      on_error: *slack_error_alert_ci
+      params:
+        build: build
+        tag_file: action-processor-release/tag
+        tag_as_latest: false
+      get_params:
+        save: true
+    - put: action-processor-docker-image-gcr
+      on_failure: *slack_failure_alert_gcr
+      on_error: *slack_error_alert_gcr
+      params:
+        build: build
+        cache_from:
+          - action-processor-docker-image-ci
+        tag_file: action-processor-release/tag
         tag_as_latest: false
       get_params:
         skip_download: true
