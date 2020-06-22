@@ -39,10 +39,9 @@ resources:
 - name: census-rm-terraform
   type: git
   source:
-    branch: ((terraform-branch))
+    branch: perf-resource-workaround
     uri: git@github.com:ONSdigital/census-rm-terraform.git
     private_key: ((github.service_account_private_key))
-    tag_filter: v*.*.*
     
 - name: census-rm-kubernetes-dependencies-repo
   type: git
