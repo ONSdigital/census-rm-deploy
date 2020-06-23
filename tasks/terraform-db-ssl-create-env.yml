@@ -1,0 +1,35 @@
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: google/cloud-sdk
+params:
+  ENV:
+  ADMIN_SERVICE_ACCOUNT_JSON:
+  VAR_FILE:
+  KUBERNETES_CLUSTER:
+inputs:
+  - name: census-rm-terraform
+run:
+  path: bash
+  args:
+    - -exc
+    - |
+      export GOOGLE_APPLICATION_CREDENTIALS=/root/gcloud-service-key.json
+      export GCP_PROJECT=census-rm-$ENV
+      apt-get install -y unzip
+      git clone https://github.com/kamatama41/tfenv.git ~/.tfenv
+      ln -s /root/.tfenv/bin/* /usr/local/bin
+      cat >$GOOGLE_APPLICATION_CREDENTIALS <<EOL
+      $ADMIN_SERVICE_ACCOUNT_JSON
+      EOL
+      gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
+      gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT}
+      cd census-rm-terraform
+      tfenv install
+
+      set +x
+      echo "db_user_password = \"$(kubectl get secret db-credentials -o=jsonpath='{.data.password}' | base64 --decode)\"" >> secret.tfvars
+      set -x
+      
+      SKIP_REPLICA_DB_SSL_RESET=false SKIP_DB_SSL_RESET=false SECRETS_VAR_FILE=./secret.tfvars AUTO_APPLY=true ./apply-prod.sh
