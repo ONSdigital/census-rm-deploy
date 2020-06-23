@@ -103,7 +103,6 @@ resources:
     owner: ONSdigital
     repository: census-rm-terraform
     access_token: ((github.access_token))
-    branch: *
 
 - name: census-rm-kubernetes-release
   type: github-release
@@ -111,7 +110,6 @@ resources:
     owner: ONSdigital
     repository: census-rm-kubernetes
     access_token: ((github.access_token))
-    branch: *
 
 - name: whitelist-master
   type: git
