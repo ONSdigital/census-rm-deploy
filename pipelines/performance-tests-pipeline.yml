@@ -459,6 +459,8 @@ jobs:
         ENV: performance
         VAR_FILE: ./tfvars/census-rm-performance.tfvars
         KUBERNETES_CLUSTER: rm-k8s-cluster
+        SKIP_DB_SSL_RESET: false
+        SKIP_REPLICA_DB_SSL_RESET: false
       input_mapping: {census-rm-terraform: census-rm-terraform}
 
 - name: "Scale Down Apps and Reset DB"
