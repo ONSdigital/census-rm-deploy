@@ -6,6 +6,7 @@ groups:
   - "Build Acceptance Tests Latest"
   - "Build Action Scheduler Latest"
   - "Build Action Worker Latest"
+  - "Build Action Processor Latest"
   - "Build QID Batch Runner Latest"
   - "Build Case API Latest"
   - "Build Case Processor Latest"
@@ -30,6 +31,7 @@ groups:
   - "CI Apply Database Patches"
   - "CI Deploy Action-Scheduler"
   - "CI Deploy Action-Worker"
+  - "CI Deploy Action-Processor"
   - "CI Deploy Case-API"
   - "CI Deploy Case-Processor"
   - "CI Deploy UAC QID Service"
@@ -53,6 +55,7 @@ groups:
   - "WL Apply Database Patches"
   - "WL Deploy Action-Scheduler"
   - "WL Deploy Action-Worker"
+  - "WL Deploy Action-Processor"
   - "WL Deploy Case-API"
   - "WL Deploy Case-Processor"
   - "WL Deploy UAC QID Service"
@@ -75,6 +78,7 @@ groups:
   - "Build Acceptance Tests Latest"
   - "Build Action Scheduler Latest"
   - "Build Action Worker Latest"
+  - "Build Action Processor Latest"
   - "Build QID Batch Runner Latest"
   - "Build Case API Latest"
   - "Build Case Processor Latest"
@@ -103,6 +107,7 @@ groups:
   - "CI Apply Database Patches"
   - "CI Deploy Action-Scheduler"
   - "CI Deploy Action-Worker"
+  - "CI Deploy Action-Processor"
   - "CI Deploy Case-API"
   - "CI Deploy Case-Processor"
   - "CI Deploy UAC QID Service"
@@ -129,6 +134,7 @@ groups:
   - "WL Apply Database Patches"
   - "WL Deploy Action-Scheduler"
   - "WL Deploy Action-Worker"
+  - "WL Deploy Action-Processor"
   - "WL Deploy Case-API"
   - "WL Deploy Case-Processor"
   - "WL Deploy UAC QID Service"
@@ -235,6 +241,12 @@ resources:
   type: git
   source:
     uri: git@github.com:ONSdigital/census-rm-action-worker.git
+    private_key: ((github.service_account_private_key))
+
+- name: action-processor-master
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-action-processor.git
     private_key: ((github.service_account_private_key))
 
 - name: case-api-master
@@ -377,6 +389,20 @@ resources:
   type: docker-image
   source:
     repository: ((docker-registry-gcr))/rm/census-rm-action-worker
+    username: _json_key
+    password: ((gcp.service_account_json))
+
+- name: action-processor-docker-image-ci
+  type: docker-image
+  source:
+    repository: ((docker-registry-ci))/rm/census-rm-action-processor
+    username: _json_key
+    password: ((gcp.service_account_json))
+
+- name: action-processor-docker-image-gcr
+  type: docker-image
+  source:
+    repository: ((docker-registry-gcr))/rm/census-rm-action-processor
     username: _json_key
     password: ((gcp.service_account_json))
 
@@ -1198,6 +1224,56 @@ jobs:
     get_params:
       skip_download: true
 
+- name: "Build Action Processor Latest"
+  serial_groups: [action-processor-build]
+  plan:
+  - get: action-processor-master
+    trigger: true
+  - task: Build Action Processor Image (master)
+    on_failure: *slack_failure_alert_prebuild
+    on_error: *slack_error_alert_prebuild
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: adoptopenjdk/maven-openjdk11
+      inputs:
+        - name: action-processor-master
+      outputs:
+        - name: build
+      run:
+        path: sh
+        args:
+          - -exc
+          - |
+            mkdir -p build/target
+            cd action-processor-master
+            mvn package -DskipITs -Ddockerfile.skip
+            cp target/census-rm-*.jar ../build/target
+            cp Dockerfile ../build
+            cp healthcheck.sh ../build
+  - put: action-processor-docker-image-ci
+    on_failure: *slack_docker_build_failure_ci
+    on_error: *slack_docker_build_error_ci
+    params:
+      build: build
+      tag_file: action-processor-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      save: true
+  - put: action-processor-docker-image-gcr
+    on_failure: *slack_docker_build_failure_gcr
+    on_error: *slack_docker_build_failure_gcr
+    params:
+      build: build
+      cache_from:
+        - action-processor-docker-image-ci
+      tag_file: action-processor-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      skip_download: true
+
 - name: "Build Case API Latest"
   serial_groups: [case-api-build]
   plan:
@@ -1858,6 +1934,7 @@ jobs:
                   ci-acceptance-tests,
                   action-scheduler-deploy,
                   action-worker-deploy,
+                  action-processor-deploy,
                   case-api-deploy,
                   case-processor-deploy,
                   uac-qid-service-deploy,
@@ -1894,6 +1971,7 @@ jobs:
                   ci-acceptance-tests,
                   action-scheduler-deploy,
                   action-worker-deploy,
+                  action-processor-deploy,
                   case-api-deploy,
                   case-processor-deploy,
                   uac-qid-service-deploy,
@@ -1932,6 +2010,7 @@ jobs:
                   ci-acceptance-tests,
                   action-scheduler-deploy,
                   action-worker-deploy,
+                  action-processor-deploy,
                   case-api-deploy,
                   case-processor-deploy,
                   uac-qid-service-deploy,
@@ -1970,6 +2049,7 @@ jobs:
                   ci-acceptance-tests,
                   action-scheduler-deploy,
                   action-worker-deploy,
+                  action-processor-deploy,
                   case-api-deploy,
                   case-processor-deploy,
                   uac-qid-service-deploy,
@@ -2084,6 +2164,46 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
       docker-image-resource: action-worker-docker-image-gcr,
+      kubernetes-repo: census-rm-kubernetes-microservices-repo}
+
+- name: "CI Deploy Action-Processor"
+  serial: true
+  serial_groups: [action-processor-build,
+                  action-processor-deploy]
+  plan:
+  - get: census-rm-terraform
+    trigger: true
+    passed: ["CI Terraform"]
+  - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["CI Helm"]
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+  - get: action-processor-master
+    trigger: true
+    passed: ["Build Action Processor Latest"]
+  - get: census-rm-ddl-master
+    trigger: true
+    passed: ["CI Apply Database Patches"]
+  - get: action-processor-docker-image-gcr
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
+    on_failure: *slack_failure_alert_ci
+    on_error: *slack_error_alert_ci
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((ci-gcp-project-name))
+      KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: action-processor
+      KUBERNETES_SELECTOR: app=action-processor
+      KUBERNETES_FILE_PATH: kubernetes-repo/microservices
+      KUBERNETES_FILE_PREFIX: action-processor
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {
+      docker-image-resource: action-processor-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
 - name: "CI Deploy Case-API"
@@ -2693,6 +2813,7 @@ jobs:
                   ci-acceptance-tests,
                   action-scheduler-build,
                   action-scheduler-deploy,
+                  action-processor-build,
                   action-worker-build,
                   action-worker-deploy,
                   case-api-build,
@@ -2723,6 +2844,7 @@ jobs:
     trigger: true
     passed: ["CI Deploy Action-Scheduler",
              "CI Deploy Action-Worker",
+             "CI Deploy Action-Processor",
              "CI Deploy Case-API",
              "CI Deploy Case-Processor",
              "CI Deploy UAC QID Service",
@@ -2747,6 +2869,7 @@ jobs:
     trigger: true
     passed: ["CI Deploy Action-Scheduler",
              "CI Deploy Action-Worker",
+             "CI Deploy Action-Processor",
              "CI Deploy Case-API",
              "CI Deploy Case-Processor",
              "CI Deploy UAC QID Service",
@@ -2760,6 +2883,7 @@ jobs:
     trigger: true
     passed: ["CI Deploy Action-Scheduler",
              "CI Deploy Action-Worker",
+             "CI Deploy Action-Processor",
              "CI Deploy Case-API",
              "CI Deploy Case-Processor",
              "CI Deploy UAC QID Service",
@@ -2781,6 +2905,9 @@ jobs:
   - get: action-worker-master
     trigger: true
     passed: ["CI Deploy Action-Worker"]
+  - get: action-processor-master
+    trigger: true
+    passed: ["CI Deploy Action-Processor"]
   - get: case-api-master
     trigger: true
     passed: ["CI Deploy Case-API"]
@@ -2835,6 +2962,7 @@ jobs:
                   ci-acceptance-tests,
                   action-scheduler-build,
                   action-scheduler-deploy,
+                  action-processor-build,
                   action-worker-build,
                   action-worker-deploy,
                   case-api-build,
@@ -2873,6 +3001,8 @@ jobs:
     passed: ["CI Deploy Action-Scheduler"]
   - get: action-worker-master
     passed: ["CI Deploy Action-Worker"]
+  - get: action-processor-master
+    passed: ["CI Deploy Action-Processor"]
   - get: case-api-master
     passed: ["CI Deploy Case-API"]
   - get: case-processor-master
@@ -2917,6 +3047,7 @@ jobs:
                   wl-database-patches,
                   wl-action-scheduler,
                   wl-action-worker,
+                  wl-action-processor,
                   wl-case-api,
                   wl-case-processor,
                   wl-uac-qid-service,
@@ -2952,6 +3083,7 @@ jobs:
   serial_groups: [wl-terraform,
                   wl-action-scheduler,
                   wl-action-worker,
+                  wl-action-processor,
                   wl-case-api,
                   wl-case-processor,
                   wl-uac-qid-service,
@@ -2989,6 +3121,7 @@ jobs:
                   wl-database-patches,
                   wl-action-scheduler,
                   wl-action-worker,
+                  wl-action-processor,
                   wl-case-api,
                   wl-case-processor,
                   wl-uac-qid-service,
@@ -3025,6 +3158,7 @@ jobs:
                   wl-terraform,
                   wl-action-scheduler,
                   wl-action-worker,
+                  wl-action-processor,
                   wl-case-api,
                   wl-case-processor,
                   wl-uac-qid-service,
@@ -3138,6 +3272,46 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
       docker-image-resource: action-worker-docker-image-gcr,
+      kubernetes-repo: census-rm-kubernetes-microservices-repo}
+
+- name: "WL Deploy Action-Processor"
+  serial: true
+  serial_groups: [wl-action-processor]
+  plan:
+  - get: census-rm-terraform
+    trigger: true
+    passed: ["WL Terraform"]
+  - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["WL Helm"]
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+    passed: ["CI Acceptance Tests"]
+  - get: census-rm-ddl-master
+    trigger: true
+    passed: ["WL Apply Database Patches"]
+  - get: action-processor-master
+    trigger: true
+    passed: ["CI Acceptance Tests"]
+  - get: action-processor-docker-image-gcr
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-service-and-deploy
+    file: census-rm-deploy/tasks/kubectl-apply-deployment.yml
+    on_failure: *slack_failure_alert_wl
+    on_error: *slack_error_alert_wl
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((wl-gcp-project-name))
+      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: action-processor
+      KUBERNETES_SELECTOR: app=action-processor
+      KUBERNETES_FILE_PATH: kubernetes-repo/microservices
+      KUBERNETES_FILE_PREFIX: action-processor
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {
+      docker-image-resource: action-processor-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
 - name: "WL Deploy Print File Service"
