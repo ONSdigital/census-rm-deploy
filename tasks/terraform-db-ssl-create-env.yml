@@ -32,4 +32,5 @@ run:
       echo "db_user_password = \"$(kubectl get secret db-credentials -o=jsonpath='{.data.password}' | base64 --decode)\"" >> secret.tfvars
       set -x
       
-      SKIP_REPLICA_DB_SSL_RESET=false SKIP_DB_SSL_RESET=false SECRETS_VAR_FILE=./secret.tfvars AUTO_APPLY=true ./apply-prod.sh
+      SECRETS_VAR_FILE=./secret.tfvars AUTO_APPLY=true ./apply-prod.sh
+
