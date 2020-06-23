@@ -42,7 +42,7 @@ resources:
     owner: ONSdigital
     repository: census-rm-terraform
     access_token: ((github.access_token))
-    branch: perf-resource-workaround
+    branch: perf-resource-workaround # TO DO: use github release resource when this temporary branch is finished (remove branch option)
 
 - name: census-rm-kubernetes-dependencies-repo
   type: git
@@ -59,8 +59,8 @@ resources:
     private_key: ((github.service_account_private_key))
     paths: [release/monitoring/*, grafana-dashboards/*, setup-monitoring.sh]
     tag_filter: v*.*.*
-    
-- name: census-rm-kubernetes-release	
+
+- name: census-rm-kubernetes-release
   type: github-release
   source:
     owner: ONSdigital
@@ -1176,7 +1176,7 @@ jobs:
             kubectl delete pvc data-rabbitmq-0
             kubectl delete pvc data-rabbitmq-1
             kubectl delete pvc data-rabbitmq-2
-            
+
   - task: "Remove node-pools"
     config:
       platform: linux
@@ -1200,7 +1200,7 @@ jobs:
             # Use gcloud service account to configure kubectl
             gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
             gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
-            
+
             # Legacy workaround for 403 access denied when doing node pool work
             gcloud services enable container.googleapis.com --project ${GCP_PROJECT_NAME}
             gcloud config set container/use_client_certificate True --project ${GCP_PROJECT_NAME}
