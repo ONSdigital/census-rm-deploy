@@ -33,3 +33,4 @@ run:
       set -x
       
       SECRETS_VAR_FILE=./secret.tfvars AUTO_APPLY=true ./apply-prod.sh
+
