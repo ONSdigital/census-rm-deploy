@@ -39,8 +39,12 @@ Expect that all files in the pipelines folder reportedly look good.
 #### How to fly manually
 To access fly locally, you'll now need to access it through a bastion.  Run the following at the start of a session then log into your Google account when prompted:
 ```bash
-gcloud compute ssh bastion --project census-ci --zone europe-west2-a -- -D 1080 -f -N
-export HTTPS_PROXY=socks5://localhost:1080
+gcloud compute start-iap-tunnel bastion 8118 --local-host-port=localhost:8118 --project census-ci --zone europe-west2-a
+```
+Then in a new window:
+```bash
+export HTTPS_PROXY=localhost:8118
+fly login -t <target> -c <concourse URL> --team-name <team name>
 ```
 
 Run the fly command:
