@@ -98,21 +98,18 @@ resources:
     private_key: ((github.service_account_private_key))
 
 - name: census-rm-terraform-release
-  type: git
+  type: github-release
   source:
-    uri: git@github.com:ONSdigital/census-rm-terraform.git
-    private_key: ((github.service_account_private_key))
-    tag_filter: v*.*.*
-    branch: master
+    owner: ONSdigital
+    repository: census-rm-terraform
+    access_token: ((github.access_token))
 
 - name: census-rm-kubernetes-release
-  type: git
+  type: github-release
   source:
-    uri: git@github.com:ONSdigital/census-rm-kubernetes.git
-    private_key: ((github.service_account_private_key))
-    paths: [release/*]
-    tag_filter: v*.*.*
-    branch: master
+    owner: ONSdigital
+    repository: census-rm-kubernetes
+    access_token: ((github.access_token))
 
 - name: whitelist-master
   type: git
