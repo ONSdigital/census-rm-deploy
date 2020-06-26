@@ -296,10 +296,10 @@ jobs:
     trigger: true
     passed: ["Trigger Deployment"]
   - get: census-rm-deploy
-  - task: unpack-release
+  - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
-    output_mapping: {unpacked-release: census-rm-kubernetes-release-unpacked}     
+    output_mapping: {unpacked-release: census-rm-kubernetes-release-unpacked}
   - task: apply-database-patches
     file: census-rm-deploy/tasks/kubectl-apply-ddl-patches.yml
     params:
@@ -324,7 +324,7 @@ jobs:
   - get: every-minute
     trigger: true
     passed: ["Apply Database Patches"]
-  - task: unpack-release
+  - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
     output_mapping: {unpacked-release: census-rm-kubernetes-release-unpacked} 
@@ -355,7 +355,7 @@ jobs:
   - get: every-minute
     trigger: true
     passed: ["Apply Database Patches"]
-  - task: unpack-release
+  - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
     output_mapping: {unpacked-release: census-rm-kubernetes-release-unpacked}
@@ -386,7 +386,7 @@ jobs:
   - get: every-minute
     trigger: true
     passed: ["Apply Database Patches"]
-  - task: unpack-release
+  - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
     output_mapping: {unpacked-release: census-rm-kubernetes-release-unpacked}
@@ -417,7 +417,7 @@ jobs:
   - get: every-minute
     trigger: true
     passed: ["Apply Database Patches"]
-  - task: unpack-release
+  - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
     output_mapping: {unpacked-release: census-rm-kubernetes-release-unpacked}
@@ -448,7 +448,7 @@ jobs:
   - get: every-minute
     trigger: true
     passed: ["Apply Database Patches"]
-  - task: unpack-release
+  - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
     output_mapping: {unpacked-release: census-rm-kubernetes-release-unpacked}
@@ -479,7 +479,7 @@ jobs:
   - get: every-minute
     trigger: true
     passed: ["Apply Database Patches"]
-  - task: unpack-release
+  - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
     output_mapping: {unpacked-release: census-rm-kubernetes-release-unpacked}
@@ -510,7 +510,7 @@ jobs:
   - get: every-minute
     trigger: true
     passed: ["Apply Database Patches"]
-  - task: unpack-release
+  - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
     output_mapping: {unpacked-release: census-rm-kubernetes-release-unpacked}
@@ -541,7 +541,7 @@ jobs:
   - get: every-minute
     trigger: true
     passed: ["Apply Database Patches"]
-  - task: unpack-release
+  - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
     output_mapping: {unpacked-release: census-rm-kubernetes-release-unpacked}   
@@ -572,7 +572,7 @@ jobs:
   - get: every-minute
     trigger: true
     passed: ["Apply Database Patches"]
-  - task: unpack-release
+  - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
     output_mapping: {unpacked-release: census-rm-kubernetes-release-unpacked}
@@ -603,7 +603,7 @@ jobs:
   - get: every-minute
     trigger: true
     passed: ["Apply Database Patches"]
-  - task: unpack-release
+  - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
     output_mapping: {unpacked-release: census-rm-kubernetes-release-unpacked}
@@ -634,7 +634,7 @@ jobs:
   - get: every-minute
     trigger: true
     passed: ["Apply Database Patches"]
-  - task: unpack-release
+  - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
     output_mapping: {unpacked-release: census-rm-kubernetes-release-unpacked}
@@ -665,7 +665,7 @@ jobs:
   - get: every-minute
     trigger: true
     passed: ["Apply Database Patches"]
-  - task: unpack-release
+  - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
     output_mapping: {unpacked-release: census-rm-kubernetes-release-unpacked}
@@ -696,7 +696,7 @@ jobs:
   - get: every-minute
     trigger: true
     passed: ["Apply Database Patches"]
-  - task: unpack-release
+  - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
     output_mapping: {unpacked-release: census-rm-kubernetes-release-unpacked}
@@ -727,7 +727,7 @@ jobs:
   - get: every-minute
     trigger: true
     passed: ["Apply Database Patches"]
-  - task: unpack-release
+  - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
     output_mapping: {unpacked-release: census-rm-kubernetes-release-unpacked}
@@ -758,7 +758,7 @@ jobs:
   - get: every-minute
     trigger: true
     passed: ["Apply Database Patches"]
-  - task: unpack-release
+  - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
     output_mapping: {unpacked-release: census-rm-kubernetes-release-unpacked}
@@ -789,7 +789,7 @@ jobs:
   - get: every-minute
     trigger: true
     passed: ["Apply Database Patches"]
-  - task: unpack-release
+  - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
     output_mapping: {unpacked-release: census-rm-kubernetes-release-unpacked}
@@ -820,7 +820,7 @@ jobs:
   - get: every-minute
     trigger: true
     passed: ["Apply Database Patches"]
-  - task: unpack-release
+  - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
     output_mapping: {unpacked-release: census-rm-kubernetes-release-unpacked}
