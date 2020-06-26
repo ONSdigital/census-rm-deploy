@@ -668,7 +668,7 @@ jobs:
       KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
       KUBERNETES_FILE_PREFIX: action-worker
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    {kubernetes-repo: census-rm-kubernetes-release-unpacked}
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release-unpacked}
 
 - name: "Action Processor"
   disable_manual_trigger: true
@@ -697,7 +697,7 @@ jobs:
       KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
       KUBERNETES_FILE_PREFIX: action-processor
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    {kubernetes-repo: census-rm-kubernetes-release-unpacked}
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release-unpacked}
 
 - name: "Case API"
   disable_manual_trigger: true
@@ -726,7 +726,7 @@ jobs:
       KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
       KUBERNETES_FILE_PREFIX: case-api
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    {kubernetes-repo: census-rm-kubernetes-release-unpacked}
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release-unpacked}
 
 - name: "Case Processor"
   disable_manual_trigger: true
@@ -755,7 +755,7 @@ jobs:
       KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
       KUBERNETES_FILE_PREFIX: case-processor
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    {kubernetes-repo: census-rm-kubernetes-release-unpacked}
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release-unpacked}
 
 - name: "UAC QID Service"
   disable_manual_trigger: true
@@ -784,7 +784,7 @@ jobs:
       KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
       KUBERNETES_FILE_PREFIX: uac-qid-service
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    {kubernetes-repo: census-rm-kubernetes-release-unpacked}
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release-unpacked}
 
 - name: "PubSub Adapter"
   disable_manual_trigger: true
@@ -813,7 +813,7 @@ jobs:
       KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
       KUBERNETES_FILE_PREFIX: pubsub-adapter
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    {kubernetes-repo: census-rm-kubernetes-release-unpacked}
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release-unpacked}
 
 - name: "Print File Service"
   disable_manual_trigger: true
@@ -842,7 +842,7 @@ jobs:
       KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
       KUBERNETES_FILE_PREFIX: print-file-service
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    {kubernetes-repo: census-rm-kubernetes-release-unpacked}
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release-unpacked}
 
 - name: "Fieldwork Adapter"
   disable_manual_trigger: true
@@ -871,7 +871,7 @@ jobs:
       KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
       KUBERNETES_FILE_PREFIX: fieldwork-adapter
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    {kubernetes-repo: census-rm-kubernetes-release-unpacked}
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release-unpacked}
 
 - name: "Notify Processor"
   disable_manual_trigger: true
@@ -900,7 +900,7 @@ jobs:
       KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
       KUBERNETES_FILE_PREFIX: notify-processor
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    {kubernetes-repo: census-rm-kubernetes-release-unpacked}
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release-unpacked}
 
 - name: "Exception Manager"
   disable_manual_trigger: true
@@ -929,7 +929,7 @@ jobs:
       KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
       KUBERNETES_FILE_PREFIX: exception-manager
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    {kubernetes-repo: census-rm-kubernetes-release-unpacked}
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release-unpacked}
 
 - name: "Toolbox"
   disable_manual_trigger: true
@@ -958,7 +958,7 @@ jobs:
       KUBERNETES_FILE_PATH: kubernetes-repo/release/optional
       KUBERNETES_FILE_PREFIX: census-rm-toolbox
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    {kubernetes-repo: census-rm-kubernetes-release-unpacked}
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release-unpacked}
 
 - name: "Database Monitor"
   disable_manual_trigger: true
@@ -987,7 +987,7 @@ jobs:
       KUBERNETES_FILE_PATH: kubernetes-repo/release/optional
       KUBERNETES_FILE_PREFIX: database-monitor
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    {kubernetes-repo: census-rm-kubernetes-release-unpacked}
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release-unpacked}
 
 - name: "Rabbit Monitor"
   disable_manual_trigger: true
@@ -1016,7 +1016,7 @@ jobs:
       KUBERNETES_FILE_PATH: kubernetes-repo/release/optional
       KUBERNETES_FILE_PREFIX: rabbitmonitor
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
-    {kubernetes-repo: census-rm-kubernetes-release-unpacked}
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release-unpacked}
 
 - name: "Scale Up Apps"
   disable_manual_trigger: true
