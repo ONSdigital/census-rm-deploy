@@ -37,13 +37,10 @@ Expect that all files in the pipelines folder reportedly look good.
 
 
 #### How to fly manually
-To access fly locally, you'll now need to access it through a bastion.  Run the following at the start of a session then log into your Google account when prompted:
+To access Concourse via a proxy, follow the instructions [here](https://github.com/ONSdigital/census-terraform/blob/master/DEVELOPERS.md#using-fly-with-the-proxy).
+
+Login to fly:
 ```bash
-gcloud compute start-iap-tunnel bastion 8118 --local-host-port=localhost:8118 --project census-ci --zone europe-west2-a
-```
-Then in a new window:
-```bash
-export HTTPS_PROXY=localhost:8118
 fly login -t <target> -c <concourse URL> --team-name <team name>
 ```
 
