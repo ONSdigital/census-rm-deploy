@@ -576,7 +576,7 @@ jobs:
       input_mapping: {census-rm-kubernetes-monitoring-repo: census-rm-kubernetes-monitoring-repo}
 
   # Run Helm
-- name: " "
+- name: "Run Helm"
   disable_manual_trigger: true
   serial: true
   on_failure: *slack_failure_alert
