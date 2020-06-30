@@ -1023,7 +1023,7 @@ jobs:
     - task: unpack-kubernetes-release
       file: census-rm-deploy/tasks/unpack-release.yml
       input_mapping: {release: census-rm-kubernetes-release}
-      output_mapping: {unpacked-release: census-rm-terraform-kubernetes-unpacked}
+      output_mapping: {unpacked-release: census-rm-kubernetes-release-unpacked}
     - task: "Deploy Monitoring"
       file: census-rm-deploy/tasks/monitoring.yml
       params:
