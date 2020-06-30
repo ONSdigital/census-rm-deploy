@@ -10,4 +10,7 @@ outputs:
   name: unpacked-release
 run:
   path: bash
-  args: [-c, tar -xvf release/*.tar.gz -C unpacked-release --strip-components=1]
+  args: 
+    - -exc
+    - |
+      tar -xvf release/*.tar.gz -C unpacked-release --strip-components=1
