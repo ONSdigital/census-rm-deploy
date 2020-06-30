@@ -12,5 +12,4 @@ run:
   path: sh
   args: 
     - -exc
-    - |
-      tar -xvf release/*.tar.gz -C unpacked-release --strip-components=1
+    - tar -xvf release/*.tar.gz -C unpacked-release --strip-components=1
