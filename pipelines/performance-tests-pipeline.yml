@@ -484,7 +484,7 @@ jobs:
   - get: performance-tests-docker-image
   - get: census-rm-deploy
   - get: census-rm-kubernetes-release
-    include_source_tarball: true
+    params: {include_source_tarball: true}
   - get: every-minute
     trigger: true
     passed: ["Run Terraform"]
@@ -621,7 +621,7 @@ jobs:
   on_error: *slack_error_alert
   plan:
   - get: census-rm-kubernetes-release
-    include_source_tarball: true
+    params: {include_source_tarball: true}
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
@@ -651,7 +651,7 @@ jobs:
   on_error: *slack_error_alert
   plan:
   - get: census-rm-kubernetes-release
-    include_source_tarball: true
+    params: {include_source_tarball: true}
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
@@ -681,7 +681,7 @@ jobs:
   on_error: *slack_error_alert
   plan:
   - get: census-rm-kubernetes-release
-    include_source_tarball: true
+    params: {include_source_tarball: true}
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
@@ -711,7 +711,7 @@ jobs:
   on_error: *slack_error_alert
   plan:
   - get: census-rm-kubernetes-release
-    include_source_tarball: true
+    params: {include_source_tarball: true}
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
@@ -741,7 +741,7 @@ jobs:
   on_error: *slack_error_alert
   plan:
   - get: census-rm-kubernetes-release
-    include_source_tarball: true
+    params: {include_source_tarball: true}
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
@@ -771,7 +771,7 @@ jobs:
   on_error: *slack_error_alert
   plan:
   - get: census-rm-kubernetes-release
-    include_source_tarball: true
+    params: {include_source_tarball: true}
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
@@ -801,7 +801,7 @@ jobs:
   on_error: *slack_error_alert
   plan:
   - get: census-rm-kubernetes-release
-    include_source_tarball: true
+    params: {include_source_tarball: true}
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
@@ -831,7 +831,7 @@ jobs:
   on_error: *slack_error_alert
   plan:
   - get: census-rm-kubernetes-release
-    include_source_tarball: true
+    params: {include_source_tarball: true}
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
@@ -861,7 +861,7 @@ jobs:
   on_error: *slack_error_alert
   plan:
   - get: census-rm-kubernetes-release
-    include_source_tarball: true
+    params: {include_source_tarball: true}
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
@@ -891,7 +891,7 @@ jobs:
   on_error: *slack_error_alert
   plan:
   - get: census-rm-kubernetes-release
-    include_source_tarball: true
+    params: {include_source_tarball: true}
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
@@ -921,7 +921,7 @@ jobs:
   on_error: *slack_error_alert
   plan:
   - get: census-rm-kubernetes-release
-    include_source_tarball: true
+    params: {include_source_tarball: true}
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
@@ -951,7 +951,7 @@ jobs:
   on_error: *slack_error_alert
   plan:
   - get: census-rm-kubernetes-release
-    include_source_tarball: true
+    params: {include_source_tarball: true}
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
@@ -981,7 +981,7 @@ jobs:
   on_error: *slack_error_alert
   plan:
   - get: census-rm-kubernetes-release
-    include_source_tarball: true
+    params: {include_source_tarball: true}
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
@@ -1011,7 +1011,7 @@ jobs:
   on_error: *slack_error_alert
   plan:
   - get: census-rm-kubernetes-release
-    include_source_tarball: true
+    params: {include_source_tarball: true}
   - get: census-rm-deploy
   - get: every-minute
     trigger: true

@@ -293,7 +293,7 @@ jobs:
     trigger: true
     passed: ["Trigger Deployment"]
   - get: census-rm-kubernetes-release
-    include_source_tarball: true
+    params: {include_source_tarball: true}
     trigger: true
     passed: ["Trigger Deployment"]
   - get: census-rm-deploy
@@ -319,7 +319,7 @@ jobs:
   on_failure: *slack_failure_alert
   plan:
   - get: census-rm-kubernetes-release
-    include_source_tarball: true
+    params: {include_source_tarball: true}
     trigger: true
     passed: [ "Apply Database Patches"]
   - get: census-rm-deploy
@@ -351,7 +351,7 @@ jobs:
   on_failure: *slack_failure_alert
   plan:
   - get: census-rm-kubernetes-release
-    include_source_tarball: true
+    params: {include_source_tarball: true}
     trigger: true
     passed: ["Apply Database Patches"]
   - get: census-rm-deploy
@@ -383,7 +383,7 @@ jobs:
   on_failure: *slack_failure_alert
   plan:
   - get: census-rm-kubernetes-release
-    include_source_tarball: true
+    params: {include_source_tarball: true}
     trigger: true
     passed: [ "Apply Database Patches"]
   - get: census-rm-deploy
@@ -415,7 +415,7 @@ jobs:
   on_failure: *slack_failure_alert
   plan:
   - get: census-rm-kubernetes-release
-    include_source_tarball: true
+    params: {include_source_tarball: true}
     trigger: true
     passed: ["Apply Database Patches"]
   - get: census-rm-deploy
@@ -447,7 +447,7 @@ jobs:
   on_failure: *slack_failure_alert
   plan:
   - get: census-rm-kubernetes-release
-    include_source_tarball: true
+    params: {include_source_tarball: true}
     trigger: true
     passed: ["Apply Database Patches"]
   - get: census-rm-deploy
@@ -479,7 +479,7 @@ jobs:
   on_failure: *slack_failure_alert
   plan:
   - get: census-rm-kubernetes-release
-    include_source_tarball: true
+    params: {include_source_tarball: true}
     trigger: true
     passed: ["Apply Database Patches"]
   - get: census-rm-deploy
@@ -511,7 +511,7 @@ jobs:
   on_failure: *slack_failure_alert
   plan:
   - get: census-rm-kubernetes-release
-    include_source_tarball: true
+    params: {include_source_tarball: true}
     trigger: true
     passed: ["Apply Database Patches"]
   - get: census-rm-deploy
@@ -543,7 +543,7 @@ jobs:
   on_failure: *slack_failure_alert
   plan:
   - get: census-rm-kubernetes-release
-    include_source_tarball: true
+    params: {include_source_tarball: true}
     trigger: true
     passed: ["Apply Database Patches"]
   - get: census-rm-deploy
@@ -575,7 +575,7 @@ jobs:
   on_failure: *slack_failure_alert
   plan:
   - get: census-rm-kubernetes-release
-    include_source_tarball: true
+    params: {include_source_tarball: true}
     trigger: true
     passed: ["Apply Database Patches"]
   - get: census-rm-deploy
@@ -607,7 +607,7 @@ jobs:
   on_failure: *slack_failure_alert
   plan:
   - get: census-rm-kubernetes-release
-    include_source_tarball: true
+    params: {include_source_tarball: true}
     trigger: true
     passed: ["Apply Database Patches"]
   - get: census-rm-deploy
@@ -639,7 +639,7 @@ jobs:
   on_failure: *slack_failure_alert
   plan:
   - get: census-rm-kubernetes-release
-    include_source_tarball: true
+    params: {include_source_tarball: true}
     trigger: true
     passed: ["Apply Database Patches"]
   - get: census-rm-deploy
@@ -671,7 +671,7 @@ jobs:
   on_failure: *slack_failure_alert
   plan:
   - get: census-rm-kubernetes-release
-    include_source_tarball: true
+    params: {include_source_tarball: true}
     trigger: true
     passed: ["Apply Database Patches"]
   - get: census-rm-deploy
@@ -703,7 +703,7 @@ jobs:
   on_failure: *slack_failure_alert
   plan:
   - get: census-rm-kubernetes-release
-    include_source_tarball: true
+    params: {include_source_tarball: true}
     trigger: true
     passed: ["Apply Database Patches"]
   - get: census-rm-deploy
@@ -735,7 +735,7 @@ jobs:
   on_failure: *slack_failure_alert
   plan:
   - get: census-rm-kubernetes-release
-    include_source_tarball: true
+    params: {include_source_tarball: true}
     trigger: true
     passed: ["Apply Database Patches"]
   - get: census-rm-deploy
@@ -767,7 +767,7 @@ jobs:
   on_failure: *slack_failure_alert
   plan:
   - get: census-rm-kubernetes-release
-    include_source_tarball: true
+    params: {include_source_tarball: true}
     trigger: true
     passed: ["Apply Database Patches"]
   - get: census-rm-deploy
@@ -799,7 +799,7 @@ jobs:
   on_failure: *slack_failure_alert
   plan:
   - get: census-rm-kubernetes-release
-    include_source_tarball: true
+    params: {include_source_tarball: true}
     trigger: true
     passed: ["Apply Database Patches"]
   - get: census-rm-deploy
@@ -831,7 +831,7 @@ jobs:
   on_failure: *slack_failure_alert
   plan:
   - get: census-rm-kubernetes-release
-    include_source_tarball: true
+    params: {include_source_tarball: true}
     trigger: true
     passed: ["Apply Database Patches"]
   - get: census-rm-deploy
@@ -904,7 +904,7 @@ jobs:
 - name: "Preview Terraform Changes"
   plan:
   - get: census-rm-terraform-release
-    include_source_tarball: true
+    params: {include_source_tarball: true}
   - get: census-rm-deploy
   - task: unpack-terraform-release
     file: census-rm-deploy/tasks/unpack-release.yml
@@ -943,7 +943,7 @@ jobs:
     trigger: true
     passed: ["Trigger Terraform"]
   - get: census-rm-terraform-release
-    include_source_tarball: true
+    params: {include_source_tarball: true}
   - get: census-rm-deploy
   - task: unpack-terraform-release
     file: census-rm-deploy/tasks/unpack-release.yml
@@ -956,6 +956,7 @@ jobs:
       ENV: ((gcp-environment-name))
       VAR_FILE: ./tfvars/((gcp-project-name)).tfvars
       KUBERNETES_CLUSTER: rm-k8s-cluster
+    input_mapping: {census-rm-terraform: census-rm-terraform-release-unpacked}
 
 - name: "Run Helm"
   disable_manual_trigger: true
@@ -980,12 +981,12 @@ jobs:
     trigger: true
     passed: ["Run Terraform"]
   - get: census-rm-kubernetes-release
-    include_source_tarball: true
+    params: {include_source_tarball: true}
   - get: census-rm-deploy
   - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
-    output_mapping: {unpacked-release: census-rm-terraform-kubernetes-unpacked}
+    output_mapping: {unpacked-release: census-rm-kubernetes-release-unpacked}
   - task: "Run Helm"
     file: census-rm-deploy/tasks/helm.yml
     params:
@@ -1017,7 +1018,7 @@ jobs:
       trigger: true
       passed: ["Run Helm"]
     - get: census-rm-kubernetes-release
-      include_source_tarball: true
+      params: {include_source_tarball: true}
     - get: census-rm-deploy
     - task: unpack-kubernetes-release
       file: census-rm-deploy/tasks/unpack-release.yml
