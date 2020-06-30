@@ -1,0 +1,10 @@
+
+platform: linux
+image_resource:
+type: docker-image
+source: {repository:  alpine}
+inputs: [name: release]
+outputs: [name: unpacked-release]
+run:
+path: bash
+args: [-c, tar -xvf release/*.tar.gz -C unpacked-release --strip-components=1]
