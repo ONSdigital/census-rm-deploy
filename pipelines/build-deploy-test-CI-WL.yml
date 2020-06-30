@@ -46,6 +46,7 @@ groups:
   - "CI Deploy Database Monitor"
   - "CI Deploy Rabbit Monitor"
   - "CI Deploy Regional Counts"
+  - "CI Deploy QID Batch Runner"
   - "CI Acceptance Tests"
   - "CI Nightly Regression ATs"
   - "WL Terraform"
@@ -120,6 +121,7 @@ groups:
   - "CI Deploy Database Monitor"
   - "CI Deploy Rabbit Monitor"
   - "CI Deploy Regional Counts"
+  - "CI Deploy QID Batch Runner"
   - "CI Acceptance Tests"
   - "CI Nightly Regression ATs"
 
@@ -1971,6 +1973,8 @@ jobs:
   - get: census-rm-terraform
     trigger: true
   - get: census-rm-deploy
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
   - get: action-scheduler-master
     trigger: true
     passed: ["Build Action Scheduler Latest"]
@@ -2046,6 +2050,9 @@ jobs:
   - get: toolbox-master
     trigger: true
     passed: ["Build Toolbox Latest"]
+  - get: census-rm-ddl-master
+    trigger: true
+    passed: ["Build DDL Latest"]
   - get: toolbox-docker-image-gcr
     params:
       skip_download: true
@@ -2141,6 +2148,9 @@ jobs:
       trigger: true
     - get: census-rm-deploy
     - get: every-minute
+    - get: census-rm-kubernetes-microservices-repo
+      passed: ["CI Terraform"]
+      trigger: true
     - get: census-rm-terraform
       passed: ["CI Terraform"]
       trigger: true
@@ -2183,6 +2193,9 @@ jobs:
     - get: toolbox-master
       passed: ["CI Terraform"]
       trigger: true
+    - get: census-rm-ddl-master
+      trigger: true
+      passed: ["CI Terraform"]
     - task: "CI Helm"
       file: census-rm-deploy/tasks/helm.yml
       params:
@@ -2231,50 +2244,56 @@ jobs:
   on_error: *slack_error_alert_ci
   plan:
   - get: census-rm-ddl-master
+    trigger: true
+    passed: ["CI Helm"]
   - get: census-rm-kubernetes-optional-repo
   - get: census-rm-deploy
   - get: every-minute
+    passed: ["CI Helm"]
+  - get: census-rm-kubernetes-microservices-repo
+    passed: ["CI Helm"]
+    trigger: true
   - get: action-scheduler-master
-    passed: ["CI Terraform"]
+    passed: ["CI Helm"]
     trigger: true
   - get: action-worker-master
-    passed: ["CI Terraform"]
+    passed: ["CI Helm"]
     trigger: true
   - get: action-processor-master
-    passed: ["CI Terraform"]
+    passed: ["CI Helm"]
     trigger: true
   - get: case-api-master
-    passed: ["CI Terraform"]
+    passed: ["CI Helm"]
     trigger: true
   - get: case-processor-master
-    passed: ["CI Terraform"]
+    passed: ["CI Helm"]
     trigger: true
   - get: uac-qid-service-master
-    passed: ["CI Terraform"]
+    passed: ["CI Helm"]
     trigger: true
   - get: pubsub-adapter
-    passed: ["CI Terraform"]
+    passed: ["CI Helm"]
     trigger: true
   - get: print-file-service-master
-    passed: ["CI Terraform"]
+    passed: ["CI Helm"]
     trigger: true
   - get: fieldwork-adapter-master
-    passed: ["CI Terraform"]
+    passed: ["CI Helm"]
     trigger: true
   - get: notify-processor-master
-    passed: ["CI Terraform"]
+    passed: ["CI Helm"]
     trigger: true
   - get: notify-stub-master
-    passed: ["CI Terraform"]
+    passed: ["CI Helm"]
     trigger: true
   - get: exception-manager-master
-    passed: ["CI Terraform"]
+    passed: ["CI Helm"]
     trigger: true
   - get: toolbox-master
-    passed: ["CI Terraform"]
+    passed: ["CI Helm"]
     trigger: true
   - get: census-rm-terraform
-    passed: ["CI Terraform"]
+    passed: ["CI Helm"]
     trigger: true
   - get: ddl-docker-image-gcr
     params:
@@ -2298,17 +2317,16 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Helm", "CI Apply Database Patches"]
-  - get: every-minute
-    trigger: true
-    passed: ["CI Helm", "CI Apply Database Patches"]
+    passed: ["CI Apply Database Patches"]
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["CI Helm"]
   - get: census-rm-kubernetes-microservices-repo
+    passed: ["CI Apply Database Patches"]
     trigger: true
   - get: action-scheduler-master
-    passed: ["CI Helm", "CI Apply Database Patches"]
+    passed: ["CI Apply Database Patches"]
+    trigger: true
   - get: census-rm-ddl-master
     trigger: true
     passed: ["CI Apply Database Patches"]
@@ -2340,10 +2358,7 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Helm", "CI Apply Database Patches"]
-  - get: every-minute
-    trigger: true
-    passed: ["CI Helm", "CI Apply Database Patches"]
+    passed: ["CI Apply Database Patches"]
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["CI Helm"]
@@ -2351,9 +2366,11 @@ jobs:
     trigger: true
     passed: ["CI Apply Database Patches"]
   - get: census-rm-kubernetes-microservices-repo
+    passed: ["CI Apply Database Patches"]
     trigger: true
   - get: action-worker-master
-    passed: ["CI Helm", "CI Apply Database Patches"]
+    passed: ["CI Apply Database Patches"]
+    trigger: true
   - get: action-worker-docker-image-gcr
     params:
       skip_download: true
@@ -2382,17 +2399,16 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Helm", "CI Apply Database Patches"]
-  - get: every-minute
-    trigger: true
-    passed: ["CI Helm", "CI Apply Database Patches"]
+    passed: ["CI Apply Database Patches"]
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["CI Helm"]
   - get: census-rm-kubernetes-microservices-repo
+    passed: ["CI Apply Database Patches"]
     trigger: true
   - get: action-processor-master
-    passed: ["CI Helm", "CI Apply Database Patches"]
+    passed: ["CI Apply Database Patches"]
+    trigger: true
   - get: census-rm-ddl-master
     trigger: true
     passed: ["CI Apply Database Patches"]
@@ -2424,10 +2440,7 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Helm", "CI Apply Database Patches"]
-  - get: every-minute
-    trigger: true
-    passed: ["CI Helm", "CI Apply Database Patches"]
+    passed: ["CI Apply Database Patches"]
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["CI Helm"]
@@ -2435,9 +2448,11 @@ jobs:
     trigger: true
     passed: ["CI Apply Database Patches"]
   - get: census-rm-kubernetes-microservices-repo
+    passed: ["CI Apply Database Patches"]
     trigger: true
   - get: case-api-master
-    passed: ["CI Helm", "CI Apply Database Patches"]
+    passed: ["CI Apply Database Patches"]
+    trigger: true
   - get: case-api-docker-image-gcr
     params:
       skip_download: true
@@ -2466,10 +2481,7 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Helm", "CI Apply Database Patches"]
-  - get: every-minute
-    trigger: true
-    passed: ["CI Helm", "CI Apply Database Patches"]
+    passed: ["CI Apply Database Patches"]
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["CI Helm"]
@@ -2477,9 +2489,11 @@ jobs:
     trigger: true
     passed: ["CI Apply Database Patches"]
   - get: census-rm-kubernetes-microservices-repo
+    passed: ["CI Apply Database Patches"]
     trigger: true
   - get: case-processor-master
-    passed: ["CI Helm", "CI Apply Database Patches"]
+    passed: ["CI Apply Database Patches"]
+    trigger: true
   - get: case-processor-docker-image-gcr
     params:
       skip_download: true
@@ -2508,10 +2522,7 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Helm", "CI Apply Database Patches"]
-  - get: every-minute
-    trigger: true
-    passed: ["CI Helm", "CI Apply Database Patches"]
+    passed: ["CI Apply Database Patches"]
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["CI Helm"]
@@ -2519,9 +2530,11 @@ jobs:
     trigger: true
     passed: ["CI Apply Database Patches"]
   - get: census-rm-kubernetes-microservices-repo
+    passed: ["CI Apply Database Patches"]
     trigger: true
   - get: uac-qid-service-master
-    passed: ["CI Helm", "CI Apply Database Patches"]
+    passed: ["CI Apply Database Patches"]
+    trigger: true
   - get: uac-qid-service-docker-image-gcr
     params:
       skip_download: true
@@ -2550,10 +2563,7 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Helm", "CI Apply Database Patches"]
-  - get: every-minute
-    trigger: true
-    passed: ["CI Helm", "CI Apply Database Patches"]
+    passed: ["CI Apply Database Patches"]
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["CI Helm"]
@@ -2561,9 +2571,11 @@ jobs:
     trigger: true
     passed: ["CI Apply Database Patches"]
   - get: census-rm-kubernetes-microservices-repo
+    passed: ["CI Apply Database Patches"]
     trigger: true
   - get: pubsub-adapter
-    passed: ["CI Helm", "CI Apply Database Patches"]
+    passed: ["CI Apply Database Patches"]
+    trigger: true
   - get: pubsub-adapter-docker-image-gcr
     params:
       skip_download: true
@@ -2592,10 +2604,7 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Helm", "CI Apply Database Patches"]
-  - get: every-minute
-    trigger: true
-    passed: ["CI Helm", "CI Apply Database Patches"]
+    passed: ["CI Apply Database Patches"]
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["CI Helm"]
@@ -2635,20 +2644,19 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Helm", "CI Apply Database Patches"]
-  - get: every-minute
-    trigger: true
-    passed: ["CI Helm", "CI Apply Database Patches"]
+    passed: ["CI Apply Database Patches"]
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["CI Helm"]
   - get: census-rm-kubernetes-microservices-repo
+    passed: ["CI Apply Database Patches"]
     trigger: true
   - get: census-rm-ddl-master
     trigger: true
     passed: ["CI Apply Database Patches"]
   - get: print-file-service-master
-    passed: ["CI Helm", "CI Apply Database Patches"]
+    passed: ["CI Apply Database Patches"]
+    trigger: true
   - get: print-file-service-docker-image-gcr
     params:
       skip_download: true
@@ -2677,10 +2685,7 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Helm", "CI Apply Database Patches"]
-  - get: every-minute
-    trigger: true
-    passed: ["CI Helm", "CI Apply Database Patches"]
+    passed: ["CI Apply Database Patches"]
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["CI Helm"]
@@ -2688,9 +2693,11 @@ jobs:
     trigger: true
     passed: ["CI Apply Database Patches"]
   - get: census-rm-kubernetes-microservices-repo
+    passed: ["CI Apply Database Patches"]
     trigger: true
   - get: fieldwork-adapter-master
-    passed: ["CI Helm", "CI Apply Database Patches"]
+    passed: ["CI Apply Database Patches"]
+    trigger: true
   - get: fieldwork-adapter-docker-image-gcr
     params:
       skip_download: true
@@ -2719,10 +2726,7 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Helm", "CI Apply Database Patches"]
-  - get: every-minute
-    trigger: true
-    passed: ["CI Helm", "CI Apply Database Patches"]
+    passed: ["CI Apply Database Patches"]
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["CI Helm"]
@@ -2730,9 +2734,11 @@ jobs:
     trigger: true
     passed: ["CI Apply Database Patches"]
   - get: census-rm-kubernetes-microservices-repo
+    passed: ["CI Apply Database Patches"]
     trigger: true
   - get: notify-processor-master
-    passed: ["CI Helm", "CI Apply Database Patches"]
+    passed: ["CI Apply Database Patches"]
+    trigger: true
   - get: notify-processor-docker-image-gcr
     params:
       skip_download: true
@@ -2761,20 +2767,19 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Helm", "CI Apply Database Patches"]
-  - get: every-minute
-    trigger: true
-    passed: ["CI Helm", "CI Apply Database Patches"]
+    passed: ["CI Apply Database Patches"]
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["CI Helm"]
   - get: census-rm-kubernetes-microservices-repo
+    passed: ["CI Apply Database Patches"]
     trigger: true
   - get: census-rm-ddl-master
     trigger: true
     passed: ["CI Apply Database Patches"]
   - get: notify-stub-master
-    passed: ["CI Helm", "CI Apply Database Patches"]
+    passed: ["CI Apply Database Patches"]
+    trigger: true
   - get: notify-stub-docker-image-gcr
     params:
       skip_download: true
@@ -2803,20 +2808,19 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Helm", "CI Apply Database Patches"]
-  - get: every-minute
-    trigger: true
-    passed: ["CI Helm", "CI Apply Database Patches"]
+    passed: ["CI Apply Database Patches"]
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["CI Helm"]
   - get: census-rm-kubernetes-microservices-repo
+    passed: ["CI Apply Database Patches"]
     trigger: true
   - get: census-rm-ddl-master
     trigger: true
     passed: ["CI Apply Database Patches"]
   - get: exception-manager-master
-    passed: ["CI Helm", "CI Apply Database Patches"]
+    passed: ["CI Apply Database Patches"]
+    trigger: true
   - get: exception-manager-docker-image-gcr
     params:
       skip_download: true
@@ -2845,17 +2849,15 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Helm", "CI Apply Database Patches"]
-  - get: every-minute
-    trigger: true
-    passed: ["CI Helm", "CI Apply Database Patches"]
+    passed: ["CI Apply Database Patches"]
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["CI Helm"]
   - get: census-rm-kubernetes-optional-repo
     trigger: true
   - get: toolbox-master
-    passed: ["CI Helm", "CI Apply Database Patches"]
+    passed: ["CI Apply Database Patches"]
+    trigger: true
   - get: census-rm-ddl-master
     trigger: true
     passed: ["CI Apply Database Patches"]
@@ -2887,10 +2889,7 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Helm", "CI Apply Database Patches"]
-  - get: every-minute
-    trigger: true
-    passed: ["CI Helm", "CI Apply Database Patches"]
+    passed: ["CI Apply Database Patches"]
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["CI Helm"]
@@ -2900,7 +2899,8 @@ jobs:
     trigger: true
     passed: ["CI Apply Database Patches"]
   - get: toolbox-master
-    passed: ["CI Helm", "CI Apply Database Patches"]
+    passed: ["CI Apply Database Patches"]
+    trigger: true
   - get: toolbox-docker-image-gcr
     params:
       skip_download: true
@@ -2929,10 +2929,7 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Helm", "CI Apply Database Patches"]
-  - get: every-minute
-    trigger: true
-    passed: ["CI Helm", "CI Apply Database Patches"]
+    passed: ["CI Apply Database Patches"]
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["CI Helm"]
@@ -2942,7 +2939,8 @@ jobs:
   - get: census-rm-kubernetes-optional-repo
     trigger: true
   - get: toolbox-master
-    passed: ["CI Helm", "CI Apply Database Patches"]
+    passed: ["CI Apply Database Patches"]
+    trigger: true
   - get: toolbox-docker-image-gcr
     params:
       skip_download: true
@@ -2971,10 +2969,7 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["CI Helm", "CI Apply Database Patches"]
-  - get: every-minute
-    trigger: true
-    passed: ["CI Helm", "CI Apply Database Patches"]
+    passed: ["CI Apply Database Patches"]
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["CI Helm"]
@@ -2984,7 +2979,8 @@ jobs:
   - get: census-rm-kubernetes-optional-repo
     trigger: true
   - get: toolbox-master
-    passed: ["CI Helm", "CI Apply Database Patches"]
+    passed: ["CI Apply Database Patches"]
+    trigger: true
   - get: toolbox-docker-image-gcr
     params:
       skip_download: true
@@ -3004,6 +3000,46 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
       docker-image-resource: toolbox-docker-image-gcr,
+      kubernetes-repo: census-rm-kubernetes-optional-repo}
+
+- name: "CI Deploy QID Batch Runner"	
+  serial: true	
+  serial_groups: [qid-batch-runner-build,	
+                  qid-batch-runner-deploy]	
+  plan:	
+  - get: census-rm-terraform
+    trigger: true
+    passed: ["CI Apply Database Patches"]
+  - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["CI Helm"]
+  - get: census-rm-kubernetes-optional-repo	
+    trigger: true	
+  - get: qid-batch-runner-master
+    trigger: true
+    passed: ["Build QID Batch Runner Latest"]
+  - get: census-rm-ddl-master	
+    trigger: true	
+    passed: ["CI Apply Database Patches"]	
+  - get: qid-batch-runner-docker-image-gcr	
+    params:	
+      skip_download: true	
+  - get: census-rm-deploy	
+  - task: apply-deployment	
+    file: census-rm-deploy/tasks/kubectl-apply-deployment.yml	
+    on_failure: *slack_failure_alert_ci	
+    on_error: *slack_error_alert_ci	
+    params:	
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))	
+      GCP_PROJECT_NAME: ((ci-gcp-project-name))	
+      KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))	
+      KUBERNETES_DEPLOYMENT_NAME: qid-batch-runner	
+      KUBERNETES_SELECTOR: app=qid-batch-runner	
+      KUBERNETES_FILE_PATH: kubernetes-repo/optional	
+      KUBERNETES_FILE_PREFIX: qid-batch-runner	
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s	
+    input_mapping: {	
+      docker-image-resource: qid-batch-runner-docker-image-gcr,	
       kubernetes-repo: census-rm-kubernetes-optional-repo}
 
 
