@@ -491,7 +491,7 @@ jobs:
   - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
-    output_mapping: {unpacked-release: census-rm-terraform-kubernetes-unpacked}
+    output_mapping: {unpacked-release: census-rm-kubernetes-release-unpacked}
   - task: "Scale down apps"
     config:
       platform: linux
@@ -629,7 +629,7 @@ jobs:
   - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
-    output_mapping: {unpacked-release: census-rm-terraform-kubernetes-unpacked}
+    output_mapping: {unpacked-release: census-rm-kubernetes-release-unpacked}
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
     params:
@@ -659,7 +659,7 @@ jobs:
   - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
-    output_mapping: {unpacked-release: census-rm-terraform-kubernetes-unpacked}
+    output_mapping: {unpacked-release: census-rm-kubernetes-release-unpacked}
   - task: apply-service-and-deploy
     file: census-rm-deploy/tasks/kubectl-apply-deployment-no-patch.yml
     params:
