@@ -451,7 +451,7 @@ jobs:
     - get: census-rm-terraform
     - get: census-rm-deploy
     - task: "Run Terraform"
-      file: census-rm-deploy/tasks/terraform-db-ssl-create-env.yml
+      file: census-rm-deploy/tasks/terraform-env.yml
       params:
         ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
         ENV: performance
