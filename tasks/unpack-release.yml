@@ -5,9 +5,9 @@ image_resource:
   source: 
     repository: alpine
 inputs: 
-  name: release
+  - name: release
 outputs: 
-  name: unpacked-release
+  - name: unpacked-release
 run:
   path: bash
   args: 
