@@ -9,7 +9,7 @@ inputs:
 outputs: 
   - name: unpacked-release
 run:
-  path: bash
+  path: sh
   args: 
     - -exc
     - |
