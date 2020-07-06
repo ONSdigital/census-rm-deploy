@@ -29,4 +29,6 @@ run:
       helm plugin install https://github.com/rimusz/helm-tiller
 
       cd census-rm-kubernetes-dependencies-repo
+      set +x
       ENV=${ENV} RABBITMQ_CONFIG_VALUES_FILE=${RABBITMQ_CONFIG_VALUES_FILE} ./setup-dependencies.sh
+      set -x
