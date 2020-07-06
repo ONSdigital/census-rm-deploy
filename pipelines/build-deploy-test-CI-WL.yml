@@ -3371,8 +3371,8 @@ jobs:
     file: census-rm-deploy/tasks/terraform-env.yml
     params:
       ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-      ENV: ryangrundy
-      VAR_FILE: ./tfvars/census-rm-ryangrundy.tfvars
+      ENV: whitelodge
+      VAR_FILE: ./tfvars/census-rm-whitelodge.tfvars
       KUBERNETES_CLUSTER: rm-k8s-cluster
     input_mapping: {census-rm-terraform: census-rm-terraform}
 
