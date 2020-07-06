@@ -32,5 +32,7 @@ run:
       touch secret.tfvars
       set +x
       echo "db_user_password" >> secret.tfvars
-      set -x
+      echo "Testing logging"
+      echo "Shouldn't output logging"
       ENV=${ENV} RABBITMQ_CONFIG_VALUES_FILE=${RABBITMQ_CONFIG_VALUES_FILE} ./setup-dependencies.sh
+      set -x
