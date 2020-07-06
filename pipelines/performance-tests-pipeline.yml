@@ -39,7 +39,7 @@ resources:
 - name: census-rm-terraform
   type: git
   source:
-    branch: perf-resource-workaround # TO DO: use github release resource when this temporary branch is finished (remove branch option)
+    branch: ((terraform-branch))
     uri: git@github.com:ONSdigital/census-rm-terraform.git
     private_key: ((github.service_account_private_key))
 
