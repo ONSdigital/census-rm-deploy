@@ -3103,6 +3103,19 @@ jobs:
     params:
       skip_download: true
   - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["CI Deploy Action-Scheduler",
+              "CI Deploy Action-Worker",
+              "CI Deploy Action-Processor",
+              "CI Deploy Case-API",
+              "CI Deploy Case-Processor",
+              "CI Deploy UAC QID Service",
+              "CI Deploy PubSub Adapter",
+              "CI Deploy Print File Service",
+              "CI Deploy Fieldwork Adapter",
+              "CI Deploy Notify Processor",
+              "CI Deploy Notify Stub",
+              "CI Deploy Exception Manager"]
   - get: census-rm-ddl-master
     trigger: true
     passed: ["CI Deploy Action-Scheduler",
@@ -3305,6 +3318,15 @@ jobs:
   - get: census-rm-terraform
     trigger: true
     passed: ["CI Acceptance Tests"]
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+    passed: ["CI Acceptance Tests"]
+  - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["CI Acceptance Tests"]
+  - get: census-rm-kubernetes-optional-repo
+    trigger: true
+    passed: ["CI Acceptance Tests"]
   - get: action-scheduler-master
     passed: ["CI Acceptance Tests"]
     trigger: true
@@ -3417,7 +3439,13 @@ jobs:
   plan:
     - get: census-rm-kubernetes-dependencies-repo
       trigger: true
-      passed: ["CI Acceptance Tests"]
+      passed: ["WL Terraform"]
+    - get: census-rm-kubernetes-microservices-repo
+      trigger: true
+      passed: ["WL Terraform"]
+    - get: census-rm-kubernetes-optional-repo
+      trigger: true
+      passed: ["WL Terraform"]
     - get: census-rm-terraform
       passed: ["WL Terraform"]
       trigger: true
@@ -3493,52 +3521,60 @@ jobs:
   on_failure: *slack_failure_alert_wl
   on_error: *slack_error_alert_wl
   plan:
+  - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["WL Helm"]
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+    passed: ["WL Helm"]
   - get: census-rm-kubernetes-optional-repo
+    trigger: true
+    passed: ["WL Helm"]
   - get: census-rm-deploy
   - get: census-rm-ddl-master
     trigger: true
     passed: ["CI Acceptance Tests"]
   - get: census-rm-terraform
-    passed: ["WL Terraform"]
+    passed: ["WL Helm"]
     trigger: true
   - get: action-scheduler-master
-    passed: ["WL Terraform"]
+    passed: ["WL Helm"]
     trigger: true
   - get: action-worker-master
-    passed: ["WL Terraform"]
+    passed: ["WL Helm"]
     trigger: true
   - get: action-processor-master
-    passed: ["WL Terraform"]
+    passed: ["WL Helm"]
     trigger: true
   - get: case-api-master
-    passed: ["WL Terraform"]
+    passed: ["WL Helm"]
     trigger: true
   - get: case-processor-master
-    passed: ["WL Terraform"]
+    passed: ["WL Helm"]
     trigger: true
   - get: uac-qid-service-master
-    passed: ["WL Terraform"]
+    passed: ["WL Helm"]
     trigger: true
   - get: pubsub-adapter
-    passed: ["WL Terraform"]
+    passed: ["WL Helm"]
     trigger: true
   - get: print-file-service-master
-    passed: ["WL Terraform"]
+    passed: ["WL Helm"]
     trigger: true
   - get: fieldwork-adapter-master
-    passed: ["WL Terraform"]
+    passed: ["WL Helm"]
     trigger: true
   - get: notify-processor-master
-    passed: ["WL Terraform"]
+    passed: ["WL Helm"]
     trigger: true
   - get: notify-stub-master
-    passed: ["WL Terraform"]
+    passed: ["WL Helm"]
     trigger: true
   - get: exception-manager-master
-    passed: ["WL Terraform"]
+    passed: ["WL Helm"]
     trigger: true
   - get: toolbox-master
-    passed: ["WL Terraform"]
+    passed: ["WL Helm"]
     trigger: true
   - get: ddl-docker-image-gcr
     params:
@@ -3561,15 +3597,18 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["WL Apply Database Patches", "WL Helm"]
+    passed: ["WL Apply Database Patches"]
   - get: census-rm-kubernetes-dependencies-repo
-    passed: ["WL Helm"]
+    trigger: true
+    passed: ["WL Apply Database Patches"]
   - get: census-rm-kubernetes-microservices-repo
-    passed: ["CI Acceptance Tests"]
+    passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: census-rm-ddl-master
     passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: action-scheduler-master
-    passed: ["WL Helm", "WL Apply Database Patches"]
+    passed: ["WL Apply Database Patches"]
     trigger: true
   - get: action-scheduler-docker-image-gcr
     params:
@@ -3598,15 +3637,18 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["WL Apply Database Patches", "WL Helm"]
+    passed: ["WL Apply Database Patches"]
   - get: census-rm-kubernetes-dependencies-repo
-    passed: ["WL Helm"]
+    passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: census-rm-ddl-master
     passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: census-rm-kubernetes-microservices-repo
-    passed: ["CI Acceptance Tests"]
+    passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: action-worker-master
-    passed: ["WL Helm", "WL Apply Database Patches"]
+    passed: ["WL Apply Database Patches"]
     trigger: true
   - get: action-worker-docker-image-gcr
     params:
@@ -3635,16 +3677,19 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["WL Apply Database Patches", "WL Helm"]
+    passed: ["WL Apply Database Patches"]
   - get: census-rm-kubernetes-dependencies-repo
-    passed: ["WL Helm"]
+    passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: census-rm-kubernetes-microservices-repo
-    passed: ["CI Acceptance Tests"]
+    passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: census-rm-ddl-master
     passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: action-processor-master
     trigger: true
-    passed: ["WL Helm", "WL Apply Database Patches"]
+    passed: ["WL Apply Database Patches"]
   - get: action-processor-docker-image-gcr
     params:
       skip_download: true
@@ -3672,15 +3717,18 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["WL Apply Database Patches", "WL Helm"]
+    passed: ["WL Apply Database Patches"]
   - get: census-rm-kubernetes-dependencies-repo
-    passed: ["WL Helm"]
+    passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: census-rm-kubernetes-microservices-repo
-    passed: ["CI Acceptance Tests"]
+    passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: census-rm-ddl-master
     passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: print-file-service-master
-    passed: ["WL Helm", "WL Apply Database Patches"]
+    passed: ["WL Apply Database Patches"]
     trigger: true
   - get: print-file-service-docker-image-gcr
     params:
@@ -3709,15 +3757,18 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["WL Apply Database Patches", "WL Helm"]
+    passed: ["WL Apply Database Patches"]
   - get: census-rm-kubernetes-dependencies-repo
-    passed: ["WL Helm"]
+    passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: census-rm-kubernetes-microservices-repo
-    passed: ["CI Acceptance Tests"]
+    passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: census-rm-ddl-master
     passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: case-api-master
-    passed: ["WL Helm", "WL Apply Database Patches"]
+    passed: ["WL Apply Database Patches"]
     trigger: true
   - get: case-api-docker-image-gcr
     params:
@@ -3746,15 +3797,18 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["WL Apply Database Patches", "WL Helm"]
+    passed: ["WL Apply Database Patches"]
   - get: census-rm-kubernetes-dependencies-repo
-    passed: ["WL Helm"]
+    passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: census-rm-ddl-master
     passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: census-rm-kubernetes-microservices-repo
-    passed: ["CI Acceptance Tests"]
+    passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: case-processor-master
-    passed: ["WL Helm", "WL Apply Database Patches"]
+    passed: ["WL Apply Database Patches"]
     trigger: true
   - get: case-processor-docker-image-gcr
     params:
@@ -3783,15 +3837,18 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["WL Apply Database Patches", "WL Helm"]
+    passed: ["WL Apply Database Patches"]
   - get: census-rm-kubernetes-dependencies-repo
-    passed: ["WL Helm"]
+    passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: census-rm-ddl-master
     passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: census-rm-kubernetes-microservices-repo
-    passed: ["CI Acceptance Tests"]
+    passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: uac-qid-service-master
-    passed: ["WL Helm", "WL Apply Database Patches"]
+    passed: ["WL Apply Database Patches"]
     trigger: true
   - get: uac-qid-service-docker-image-gcr
     params:
@@ -3820,15 +3877,18 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["WL Apply Database Patches", "WL Helm"]
+    passed: ["WL Apply Database Patches"]
   - get: census-rm-kubernetes-dependencies-repo
-    passed: ["WL Helm"]
+    passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: census-rm-ddl-master
     passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: census-rm-kubernetes-microservices-repo
-    passed: ["CI Acceptance Tests"]
+    passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: pubsub-adapter
-    passed: ["WL Helm", "WL Apply Database Patches"]
+    passed: ["WL Apply Database Patches"]
     trigger: true
   - get: pubsub-adapter-docker-image-gcr
     params:
@@ -3857,13 +3917,14 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["WL Apply Database Patches", "WL Helm"]
+    passed: ["WL Apply Database Patches"]
   - get: census-rm-kubernetes-dependencies-repo
-    passed: ["WL Helm"]
+    passed: ["WL Apply Database Patches"]
   - get: census-rm-ddl-master
     passed: ["WL Apply Database Patches"]
   - get: census-rm-kubernetes-ops-repo
   - get: ops-master
+    trigger: true
   - get: ops-docker-image-gcr
     params:
       skip_download: true
@@ -3891,15 +3952,18 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["WL Apply Database Patches", "WL Helm"]
+    passed: ["WL Apply Database Patches"]
   - get: census-rm-kubernetes-dependencies-repo
-    passed: ["WL Helm"]
+    passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: census-rm-ddl-master
     passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: census-rm-kubernetes-microservices-repo
-    passed: ["CI Acceptance Tests"]
+    passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: fieldwork-adapter-master
-    passed: ["WL Helm", "WL Apply Database Patches"]
+    passed: ["WL Apply Database Patches"]
     trigger: true
   - get: fieldwork-adapter-docker-image-gcr
     params:
@@ -3928,15 +3992,18 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["WL Apply Database Patches", "WL Helm"]
+    passed: ["WL Apply Database Patches"]
   - get: census-rm-kubernetes-dependencies-repo
-    passed: ["WL Helm"]
+    passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: census-rm-ddl-master
     passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: census-rm-kubernetes-microservices-repo
-    passed: ["CI Acceptance Tests"]
+    passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: notify-processor-master
-    passed: ["WL Helm", "WL Apply Database Patches"]
+    passed: ["WL Apply Database Patches"]
     trigger: true
   - get: notify-processor-docker-image-gcr
     params:
@@ -3965,15 +4032,18 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["WL Apply Database Patches", "WL Helm"]
+    passed: ["WL Apply Database Patches"]
   - get: census-rm-kubernetes-dependencies-repo
-    passed: ["WL Helm"]
+    passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: census-rm-ddl-master
     passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: census-rm-kubernetes-microservices-repo
-    passed: ["CI Acceptance Tests"]
+    passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: exception-manager-master
-    passed: ["WL Helm", "WL Apply Database Patches"]
+    passed: ["WL Apply Database Patches"]
     trigger: true
   - get: exception-manager-docker-image-gcr
     params:
@@ -4002,15 +4072,18 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["WL Apply Database Patches", "WL Helm"]
+    passed: ["WL Apply Database Patches"]
   - get: census-rm-kubernetes-dependencies-repo
-    passed: ["WL Helm"]
+    passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: census-rm-ddl-master
     passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: census-rm-kubernetes-optional-repo
-    passed: ["CI Acceptance Tests"]
+    passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: toolbox-master
-    passed: ["WL Helm", "WL Apply Database Patches"]
+    passed: ["WL Apply Database Patches"]
     trigger: true
   - get: toolbox-docker-image-gcr
     params:
@@ -4039,15 +4112,18 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["WL Apply Database Patches", "WL Helm"]
+    passed: ["WL Apply Database Patches"]
   - get: census-rm-kubernetes-dependencies-repo
-    passed: ["WL Helm"]
+    passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: census-rm-ddl-master
     passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: census-rm-kubernetes-optional-repo
-    passed: ["CI Acceptance Tests"]
+    passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: toolbox-master
-    passed: ["WL Helm", "WL Apply Database Patches"]
+    passed: ["WL Apply Database Patches"]
     trigger: true
   - get: toolbox-docker-image-gcr
     params:
@@ -4076,15 +4152,18 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["WL Apply Database Patches", "WL Helm"]
+    passed: ["WL Apply Database Patches"]
   - get: census-rm-kubernetes-dependencies-repo
-    passed: ["WL Helm"]
+    passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: census-rm-ddl-master
     passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: census-rm-kubernetes-optional-repo
-    passed: ["CI Acceptance Tests"]
+    passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: toolbox-master
-    passed: ["WL Helm", "WL Apply Database Patches"]
+    passed: ["WL Apply Database Patches"]
     trigger: true
   - get: toolbox-docker-image-gcr
     params:
@@ -4113,15 +4192,16 @@ jobs:
   plan:
   - get: census-rm-terraform
     trigger: true
-    passed: ["WL Apply Database Patches", "WL Helm"]
+    passed: ["WL Apply Database Patches"]
   - get: census-rm-kubernetes-dependencies-repo
   - get: census-rm-ddl-master
     trigger: true
     passed: ["WL Apply Database Patches"]
   - get: census-rm-kubernetes-optional-repo
-    passed: ["CI Acceptance Tests"]
+    passed: ["WL Apply Database Patches"]
+    trigger: true
   - get: toolbox-master
-    passed: ["WL Helm", "WL Apply Database Patches"]
+    passed: ["WL Apply Database Patches"]
     trigger: true
   - get: toolbox-docker-image-gcr
     params:
