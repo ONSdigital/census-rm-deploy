@@ -29,9 +29,8 @@ run:
       helm plugin install https://github.com/rimusz/helm-tiller
 
       cd census-rm-kubernetes-dependencies-repo
+      touch secret.tfvars
       set +x
-      echo "Testing I shouldn't see this"
-      echo ${KUBERNETES_CLUSTER}
-      
-      ENV=${ENV} RABBITMQ_CONFIG_VALUES_FILE=${RABBITMQ_CONFIG_VALUES_FILE} ./setup-dependencies.sh
+      echo "db_user_password" >> secret.tfvars
       set -x
+      ENV=${ENV} RABBITMQ_CONFIG_VALUES_FILE=${RABBITMQ_CONFIG_VALUES_FILE} ./setup-dependencies.sh
