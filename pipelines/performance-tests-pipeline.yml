@@ -433,6 +433,7 @@ jobs:
       trigger: true
       passed: ["Trigger Selected Test"]
     - get: census-rm-terraform-release
+      params: {include_source_tarball: true}
     - get: census-rm-deploy
     - task: unpack-terraform-release
       file: census-rm-deploy/tasks/unpack-release.yml
@@ -552,6 +553,7 @@ jobs:
       trigger: true
       passed: ["Scale Down Apps and Reset DB"]
     - get: census-rm-kubernetes-release
+      params: {include_source_tarball: true}
     - get: census-rm-deploy
     - task: unpack-kubernetes-release
         file: census-rm-deploy/tasks/unpack-release.yml
@@ -595,6 +597,7 @@ jobs:
       trigger: true
       passed: ["Monitoring"]
     - get: census-rm-kubernetes-release
+      params: {include_source_tarball: true}
     - get: census-rm-deploy
     - task: unpack-kubernetes-release
       file: census-rm-deploy/tasks/unpack-release.yml
