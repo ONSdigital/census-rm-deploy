@@ -36,28 +36,12 @@ resources:
     username: _json_key
     password: ((gcp.service_account_json))
 
-- name: census-rm-terraform
-  type: git
+- name: census-rm-terraform-release
+  type: github-release
   source:
-    branch: ((terraform-branch))
-    uri: git@github.com:ONSdigital/census-rm-terraform.git
-    private_key: ((github.service_account_private_key))
-
-- name: census-rm-kubernetes-dependencies-repo
-  type: git
-  source:
-    uri: git@github.com:ONSdigital/census-rm-kubernetes.git
-    private_key: ((github.service_account_private_key))
-    paths: [dependencies/*, rabbitmq/*, setup-dependencies.sh]
-    tag_filter: v*.*.*
-
-- name: census-rm-kubernetes-monitoring-repo
-  type: git
-  source:
-    uri: git@github.com:ONSdigital/census-rm-kubernetes.git
-    private_key: ((github.service_account_private_key))
-    paths: [release/monitoring/*, grafana-dashboards/*, setup-monitoring.sh]
-    tag_filter: v*.*.*
+    owner: ONSdigital
+    repository: census-rm-terraform
+    access_token: ((github.access_token))
 
 - name: census-rm-kubernetes-release
   type: github-release
@@ -448,8 +432,13 @@ jobs:
     - get: every-minute
       trigger: true
       passed: ["Trigger Selected Test"]
-    - get: census-rm-terraform
+    - get: census-rm-terraform-release
+      params: {include_source_tarball: true}
     - get: census-rm-deploy
+    - task: unpack-terraform-release
+      file: census-rm-deploy/tasks/unpack-release.yml
+      input_mapping: {release: census-rm-terraform-release}
+      output_mapping: {unpacked-release: census-rm-terraform-release-unpacked}
     - task: "Run Terraform"
       file: census-rm-deploy/tasks/terraform-env.yml
       params:
@@ -457,7 +446,7 @@ jobs:
         ENV: performance
         VAR_FILE: ./tfvars/census-rm-performance.tfvars
         KUBERNETES_CLUSTER: rm-k8s-cluster
-      input_mapping: {census-rm-terraform: census-rm-terraform}
+      input_mapping: {census-rm-terraform: census-rm-terraform-release-unpacked}
 
 - name: "Scale Down Apps and Reset DB"
   disable_manual_trigger: true
@@ -563,8 +552,13 @@ jobs:
     - get: every-minute
       trigger: true
       passed: ["Scale Down Apps and Reset DB"]
-    - get: census-rm-kubernetes-monitoring-repo
+    - get: census-rm-kubernetes-release
+      params: {include_source_tarball: true}
     - get: census-rm-deploy
+    - task: unpack-kubernetes-release
+      file: census-rm-deploy/tasks/unpack-release.yml
+      input_mapping: {release: census-rm-kubernetes-release}
+      output_mapping: {unpacked-release: census-rm-kubernetes-release-unpacked}
     - task: "Monitoring"
       file: census-rm-deploy/tasks/monitoring.yml
       params:
@@ -573,7 +567,7 @@ jobs:
         KUBERNETES_CLUSTER: rm-k8s-cluster
         PROMETHEUS_CONFIG_VALUES_FILE: release/monitoring/prometheus-values.yml
         GRAFANA_CONFIG_VALUES_FILE: release/monitoring/grafana-deployment.yml
-      input_mapping: {census-rm-kubernetes-monitoring-repo: census-rm-kubernetes-monitoring-repo}
+      input_mapping: {census-rm-kubernetes-monitoring-repo: census-rm-kubernetes-release-unpacked}
 
   # Run Helm
 - name: "Run Helm"
@@ -602,8 +596,13 @@ jobs:
     - get: every-minute
       trigger: true
       passed: ["Monitoring"]
-    - get: census-rm-kubernetes-dependencies-repo
+    - get: census-rm-kubernetes-release
+      params: {include_source_tarball: true}
     - get: census-rm-deploy
+    - task: unpack-kubernetes-release
+      file: census-rm-deploy/tasks/unpack-release.yml
+      input_mapping: {release: census-rm-kubernetes-release}
+      output_mapping: {unpacked-release: census-rm-kubernetes-release-unpacked}
     - task: "Run Helm"
       file: census-rm-deploy/tasks/helm.yml
       params:
@@ -611,7 +610,7 @@ jobs:
         ENV: performance
         KUBERNETES_CLUSTER: rm-k8s-cluster
         RABBITMQ_CONFIG_VALUES_FILE: release/rabbitmq/values_prod.yml
-      input_mapping: {census-rm-kubernetes-dependencies-repo: census-rm-kubernetes-dependencies-repo}
+      input_mapping: {census-rm-kubernetes-dependencies-repo: census-rm-kubernetes-release-unpacked}
 
 - name: "Action Scheduler"
   disable_manual_trigger: true
