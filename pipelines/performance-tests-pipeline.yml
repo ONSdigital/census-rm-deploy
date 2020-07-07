@@ -556,9 +556,9 @@ jobs:
       params: {include_source_tarball: true}
     - get: census-rm-deploy
     - task: unpack-kubernetes-release
-        file: census-rm-deploy/tasks/unpack-release.yml
-        input_mapping: {release: census-rm-kubernetes-release}
-        output_mapping: {unpacked-release: census-rm-kubernetes-release-unpacked}
+      file: census-rm-deploy/tasks/unpack-release.yml
+      input_mapping: {release: census-rm-kubernetes-release}
+      output_mapping: {unpacked-release: census-rm-kubernetes-release-unpacked}
     - task: "Monitoring"
       file: census-rm-deploy/tasks/monitoring.yml
       params:
