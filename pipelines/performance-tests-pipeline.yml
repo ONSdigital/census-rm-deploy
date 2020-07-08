@@ -26,7 +26,6 @@ resources:
   type: git
   source:
     uri: git@github.com:ONSdigital/census-rm-performance-tests.git
-    paths: [kubernetes.env, tasks/*]
     private_key: ((github.service_account_private_key))
 
 - name: performance-tests-docker-image
