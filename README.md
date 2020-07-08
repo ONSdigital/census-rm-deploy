@@ -87,3 +87,10 @@ Presently there are three tests which can be run, by running these selection job
 
  Once you have run one of the selection jobs, you can then run Trigger Selected Test to run the test.
 
+## RM sandbox environment
+If you'd like to deploy a pipeline to the RM Sandbox concourse:
+- You'll need to set your fly target to the sandbox environment e.g `fly login -t main -c <sandbox-url>`
+- To run terraform you'll need to whitelist the `census-rm-concourse` ip from the Cloud Nat section in GCP
+- You'll need to give the `census-rm-concourse` service account owner permission in your environment. This can be done in the IAM section in GCP.
+- A terraform branch will need to be created with a `.tfvars` file for the GCP project you're using. You then reference that branch in the secrets yaml with the `terraform-branch` secret.
+- For the CI/WL pipeline, you'll need a secrets file similar to the example CI/WL secrets. You'll have to change some of the `ENV` params in the pipeline itself to point towards your own project as they're hard-coded in the yaml.
