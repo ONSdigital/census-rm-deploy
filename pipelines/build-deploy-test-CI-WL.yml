@@ -2247,8 +2247,6 @@ jobs:
     trigger: true
     passed: ["CI Helm"]
   - get: census-rm-deploy
-  - get: every-minute
-    passed: ["CI Helm"]
   - get: census-rm-kubernetes-microservices-repo
     passed: ["CI Helm"]
     trigger: true
