@@ -1932,6 +1932,7 @@ jobs:
   serial: true
   serial_groups: [ci-terraform,
                   ci-acceptance-tests,
+                  acceptance-tests-build,
                   action-scheduler-build,
                   action-scheduler-deploy,
                   action-worker-build,
@@ -2108,6 +2109,9 @@ jobs:
   serial: true
   serial_groups: [ci-terraform,
                   ci-acceptance-tests,
+                  ci-helm,
+                  ci-patch,
+                  acceptance-tests-build,
                   ci-monitoring,
                   action-scheduler-build,
                   action-scheduler-deploy,
@@ -2207,6 +2211,9 @@ jobs:
   serial: true
   serial_groups: [ci-monitoring,
                   ci-acceptance-tests,
+                  ci-helm,
+                  ci-patch,
+                  acceptance-tests-build,
                   action-scheduler-build,
                   action-scheduler-deploy,
                   action-worker-build,
@@ -3044,6 +3051,8 @@ jobs:
   serial: true
   serial_groups: [ci-deploy-infrastructure,
                   ci-acceptance-tests,
+                  ci-helm,
+                  ci-patch,
                   action-scheduler-build,
                   action-scheduler-deploy,
                   action-processor-build,
