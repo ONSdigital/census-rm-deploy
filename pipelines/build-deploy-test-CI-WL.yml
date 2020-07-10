@@ -3412,7 +3412,6 @@ jobs:
     - get: census-rm-deploy
     - get: census-rm-terraform
       passed: ["WL Terraform"]
-      trigger: true
     - task: "WL Monitoring"
       file: census-rm-deploy/tasks/monitoring.yml
       params:
