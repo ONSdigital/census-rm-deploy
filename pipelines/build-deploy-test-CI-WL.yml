@@ -2067,9 +2067,7 @@ jobs:
 - name: "CI Monitoring"
   serial: true
   serial_groups: [ci-terraform,
-                  ci-helm,
                   ci-monitoring,
-                  ci-database-patches,
                   ci-acceptance-tests,
                   action-scheduler-deploy,
                   action-worker-deploy,
