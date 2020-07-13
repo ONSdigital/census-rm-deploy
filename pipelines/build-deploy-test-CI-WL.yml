@@ -3376,7 +3376,6 @@ jobs:
     trigger: true
     passed: ["CI Acceptance Tests"]
   - get: census-rm-deploy
-  - get: whitelist-master
   - task: "WL Terraform"
     file: census-rm-deploy/tasks/terraform-env.yml
     params:
@@ -3385,17 +3384,6 @@ jobs:
       VAR_FILE: ./tfvars/census-rm-whitelodge.tfvars
       KUBERNETES_CLUSTER: rm-k8s-cluster
     input_mapping: {census-rm-terraform: census-rm-terraform}
-  - task: apply-whitelist
-    file: census-rm-deploy/tasks/whitelist-env.yml
-    on_failure: *slack_failure_alert_wl
-    on_error: *slack_error_alert_wl
-    params:
-      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-      GCP_PROJECT_NAME: ((wl-gcp-project-name))
-      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
-    input_mapping: {
-      census-rm-whitelist: whitelist-master
-      }
 
 # Deploy monitoring apps
 - name: "WL Monitoring"
@@ -4306,9 +4294,6 @@ jobs:
   - get: census-rm-terraform
     trigger: true
     passed: ["WL Terraform"]
-  - get: census-rm-kubernetes-dependencies-repo
-    trigger: true
-    passed: ["WL Helm"]
   - get: census-rm-kubernetes-ops-repo
     trigger: true
     passed: ["WL Deploy Ops Tool"]
@@ -4318,6 +4303,57 @@ jobs:
   - get: whitelist-master
     trigger: true
   - get: census-rm-deploy
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+    passed: ["WL Terraform"]
+  - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["WL Terraform"]
+  - get: census-rm-kubernetes-optional-repo
+    trigger: true
+    passed: ["WL Terraform"]
+  - get: action-scheduler-master
+    passed: ["WL Terraform"]
+    trigger: true
+  - get: action-worker-master
+    passed: ["WL Terraform"]
+    trigger: true
+  - get: action-processor-master
+    passed: ["WL Terraform"]
+    trigger: true
+  - get: case-processor-master
+    passed: ["WL Terraform"]
+    trigger: true
+  - get: uac-qid-service-master
+    passed: ["WL Terraform"]
+    trigger: true
+  - get: pubsub-adapter
+    passed: ["WL Terraform"]
+    trigger: true
+  - get: print-file-service-master
+    passed: ["WL Terraform"]
+    trigger: true
+  - get: fieldwork-adapter-master
+    passed: ["WL Terraform"]
+    trigger: true
+  - get: notify-processor-master
+    passed: ["WL Terraform"]
+    trigger: true
+  - get: notify-stub-master
+    passed: ["WL Terraform"]
+    trigger: true
+  - get: exception-manager-master
+    passed: ["WL Terraform"]
+    trigger: true
+  - get: toolbox-master
+    passed: ["WL Terraform"]
+    trigger: true
+  - get: qid-batch-runner-master
+    passed: ["WL Terraform"]
+    trigger: true
+  - get: census-rm-ddl-master
+    trigger: true
+    passed: ["WL Terraform"]
   - task: apply-whitelist
     file: census-rm-deploy/tasks/whitelist-env.yml
     on_failure: *slack_failure_alert_wl
