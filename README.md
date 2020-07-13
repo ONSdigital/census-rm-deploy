@@ -93,4 +93,4 @@ If you'd like to deploy a pipeline to the RM Sandbox concourse:
 - To run terraform you'll need to whitelist the `census-rm-concourse` ip from the Cloud Nat section in GCP
 - You'll need to give the `census-rm-concourse` service account owner permission in your environment. This can be done in the IAM section in GCP.
 - A terraform branch will need to be created with a `.tfvars` file for the GCP project you're using. You then reference that branch in the secrets yaml with the `terraform-branch` secret.
-- For the CI/WL pipeline, you'll need a secrets file similar to the example CI/WL secrets. You'll have to change some of the `ENV` params in the pipeline itself to point towards your own project as they're hard-coded in the yaml. 
+- For the CI/WL pipeline, you'll need a secrets file similar to the example CI/WL secrets. You'll have to change some of the `ENV` params in the pipeline itself to point towards your own project as they're hard-coded in the yaml.
