@@ -4294,9 +4294,6 @@ jobs:
   - get: census-rm-terraform
     trigger: true
     passed: ["WL Terraform"]
-  - get: census-rm-kubernetes-dependencies-repo
-    trigger: true
-    passed: ["WL Helm"]
   - get: census-rm-kubernetes-ops-repo
     trigger: true
     passed: ["WL Deploy Ops Tool"]
@@ -4306,6 +4303,57 @@ jobs:
   - get: whitelist-master
     trigger: true
   - get: census-rm-deploy
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+    passed: ["WL Terraform"]
+  - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["WL Terraform"]
+  - get: census-rm-kubernetes-optional-repo
+    trigger: true
+    passed: ["WL Terraform"]
+  - get: action-scheduler-master
+    passed: ["WL Terraform"]
+    trigger: true
+  - get: action-worker-master
+    passed: ["WL Terraform"]
+    trigger: true
+  - get: action-processor-master
+    passed: ["WL Terraform"]
+    trigger: true
+  - get: case-processor-master
+    passed: ["WL Terraform"]
+    trigger: true
+  - get: uac-qid-service-master
+    passed: ["WL Terraform"]
+    trigger: true
+  - get: pubsub-adapter
+    passed: ["WL Terraform"]
+    trigger: true
+  - get: print-file-service-master
+    passed: ["WL Terraform"]
+    trigger: true
+  - get: fieldwork-adapter-master
+    passed: ["WL Terraform"]
+    trigger: true
+  - get: notify-processor-master
+    passed: ["WL Terraform"]
+    trigger: true
+  - get: notify-stub-master
+    passed: ["WL Terraform"]
+    trigger: true
+  - get: exception-manager-master
+    passed: ["WL Terraform"]
+    trigger: true
+  - get: toolbox-master
+    passed: ["WL Terraform"]
+    trigger: true
+  - get: qid-batch-runner-master
+    passed: ["WL Terraform"]
+    trigger: true
+  - get: census-rm-ddl-master
+    trigger: true
+    passed: ["WL Terraform"]
   - task: apply-whitelist
     file: census-rm-deploy/tasks/whitelist-env.yml
     on_failure: *slack_failure_alert_wl
