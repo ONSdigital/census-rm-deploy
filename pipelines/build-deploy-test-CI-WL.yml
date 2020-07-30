@@ -24,6 +24,7 @@ groups:
   - "Build PubSub Adapter Latest"
   - "Build Sample Loader Latest"
   - "Build Toolbox Latest"
+  - "Build Monitoring Latest"
   - "Build UAC QID Service Latest"
   - "CI Terraform"
   - "CI Monitoring"
@@ -96,6 +97,7 @@ groups:
   - "Build PubSub Latest"
   - "Build Sample Loader Latest"
   - "Build Toolbox Latest"
+  - "Build Monitoring Latest"
   - "Build UAC QID Service Latest"
 
 - name: "CI"
