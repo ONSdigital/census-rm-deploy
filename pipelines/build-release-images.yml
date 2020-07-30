@@ -99,6 +99,14 @@ resources:
       access_token: ((github.access_token))
       order_by: time
 
+  - name: monitoring-release
+    type: github-release-latest
+    source:
+      owner: ONSdigital
+      repository: census-rm-monitoring
+      access_token: ((github.access_token))
+      order_by: time
+
   - name: pubsub-adapter-release
     type: github-release-latest
     source:
@@ -320,6 +328,19 @@ resources:
       username: _json_key
       password: ((gcp.service_account_json))
 
+  - name: monitoring-docker-image-ci
+    type: docker-image
+    source:
+      repository: ((docker-registry-ci))/rm/census-rm-monitoring
+      username: _json_key
+      password: ((gcp.service_account_json))
+
+  - name: monitoring-docker-image-gcr
+    type: docker-image
+    source:
+      repository: ((docker-registry-gcr))/rm/census-rm-monitoring
+      username: _json_key
+      password: ((gcp.service_account_json))
 
   - name: pubsub-adapter-docker-image-ci
     type: docker-image
@@ -1103,6 +1124,52 @@ jobs:
       get_params:
         skip_download: true
 
+  - name: build-monitoring-release
+    plan:
+    - get: monitoring-release
+      params:
+        include_source_tarball: true
+      trigger: true
+    - task: Build RM-toolbox Image (release)
+      on_failure: *slack_failure_alert_prebuild
+      on_error: *slack_error_alert_prebuild
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: alpine
+        inputs:
+          - name: monitoring-release
+        outputs:
+          - name: extracted-monitoring
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              cd monitoring-release
+              tar -xzf source.tar.gz -C ../extracted-monitoring --strip-components=1
+    - put: monitoring-docker-image-ci
+      on_failure: *slack_failure_alert_ci
+      on_error: *slack_error_alert_ci
+      params:
+        build: extracted-monitoring
+        tag_file: monitoring-release/tag
+        tag_as_latest: false
+      get_params:
+        save: true
+    - put: monitoring-docker-image-gcr
+      on_failure: *slack_failure_alert_gcr
+      on_error: *slack_error_alert_gcr
+      params:
+        build: extracted-monitoring
+        cache_from:
+          - monitoring-docker-image-ci
+        tag_file: monitoring-release/tag
+        tag_as_latest: false
+      get_params:
+        skip_download: true
 
   - name: build-pubsub-adapter-release
     plan:
