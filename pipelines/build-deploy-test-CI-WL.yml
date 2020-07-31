@@ -4472,9 +4472,6 @@ jobs:
   - get: toolbox-master
     passed: ["WL Terraform"]
     trigger: true
-  - get: dev-tools-master
-    passed: ["WL Terraform"]
-    trigger: true
   - get: qid-batch-runner-master
     passed: ["WL Terraform"]
     trigger: true
