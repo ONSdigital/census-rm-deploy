@@ -25,6 +25,7 @@ groups:
   - "Build Sample Loader Latest"
   - "Build Toolbox Latest"
   - "Build Monitoring Latest"
+  - "Build Dev Tools Latest"
   - "Build UAC QID Service Latest"
   - "CI Terraform"
   - "CI Monitoring"
@@ -98,6 +99,7 @@ groups:
   - "Build Sample Loader Latest"
   - "Build Toolbox Latest"
   - "Build Monitoring Latest"
+  - "Build Dev Tools Latest"
   - "Build UAC QID Service Latest"
 
 - name: "CI"
@@ -291,6 +293,12 @@ resources:
   type: git
   source:
     uri: git@github.com:ONSdigital/census-rm-monitoring.git
+    private_key: ((github.service_account_private_key))
+
+- name: dev-tools-master
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-dev-tools.git
     private_key: ((github.service_account_private_key))
 
 - name: pubsub-adapter
@@ -509,6 +517,20 @@ resources:
   type: docker-image
   source:
     repository: ((docker-registry-gcr))/rm/census-rm-monitoring
+    username: _json_key
+    password: ((gcp.service_account_json))
+
+- name: dev-tools-docker-image-ci
+  type: docker-image
+  source:
+    repository: ((docker-registry-ci))/rm/census-rm-dev-tools
+    username: _json_key
+    password: ((gcp.service_account_json))
+
+- name: dev-tools-docker-image-gcr
+  type: docker-image
+  source:
+    repository: ((docker-registry-gcr))/rm/census-rm-dev-tools
     username: _json_key
     password: ((gcp.service_account_json))
 
@@ -1570,6 +1592,32 @@ jobs:
       cache_from:
         - monitoring-docker-image-ci
       tag_file: monitoring-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      skip_download: true
+
+- name: "Build Dev Tools Latest"
+  serial_groups: [dev-tools-build]
+  plan:
+  - get: dev-tools-master
+    trigger: true
+  - put: dev-tools-docker-image-ci
+    on_failure: *slack_docker_build_failure_ci
+    on_error: *slack_docker_build_error_ci
+    params:
+      build: dev-tools-master
+      tag_file: dev-tools-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      save: true
+  - put: dev-tools-docker-image-gcr
+    on_failure: *slack_docker_build_failure_gcr
+    on_error: *slack_docker_build_error_gcr
+    params:
+      build: dev-tools-master
+      cache_from:
+        - dev-tools-docker-image-ci
+      tag_file: dev-tools-master/.git/ref
       tag_as_latest: true
     get_params:
       skip_download: true
