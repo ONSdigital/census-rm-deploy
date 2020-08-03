@@ -3392,7 +3392,6 @@ jobs:
   - get: toolbox-master
     passed: ["CI Deploy Toolbox"]
   - get: monitoring-master
-    trigger: true
     passed: ["CI Deploy Database Monitor",
              "CI Deploy Rabbit Monitor",
              "CI Deploy Regional Counts"]
