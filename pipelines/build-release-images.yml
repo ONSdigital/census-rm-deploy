@@ -91,6 +91,14 @@ resources:
       access_token: ((github.access_token))
       order_by: time
 
+  - name: ops-ui-release
+    type: github-release-latest
+    source:
+      owner: ONSdigital
+      repository: census-rm-ops-ui
+      access_token: ((github.access_token))
+      order_by: time
+
   - name: rm-toolbox-release
     type: github-release-latest
     source:
@@ -319,6 +327,20 @@ resources:
     type: docker-image
     source:
       repository: ((docker-registry-gcr))/rm/census-rm-ops
+      username: _json_key
+      password: ((gcp.service_account_json))
+
+  - name: ops-ui-docker-image-ci
+    type: docker-image
+    source:
+      repository: ((docker-registry-ci))/rm/census-rm-ops-ui
+      username: _json_key
+      password: ((gcp.service_account_json))
+
+  - name: ops-ui-docker-image-gcr
+    type: docker-image
+    source:
+      repository: ((docker-registry-gcr))/rm/census-rm-ops-ui
       username: _json_key
       password: ((gcp.service_account_json))
 
@@ -1095,6 +1117,53 @@ jobs:
         cache_from:
           - ops-docker-image-ci
         tag_file: ops-release/tag
+        tag_as_latest: false
+      get_params:
+        skip_download: true
+
+  - name: build-ops-ui-release
+    plan:
+    - get: ops-ui-release
+      params:
+        include_source_tarball: true
+      trigger: true
+    - task: Build Ops UI Image (release)
+      on_failure: *slack_failure_alert_prebuild
+      on_error: *slack_error_alert_prebuild
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: alpine
+        inputs:
+          - name: ops-ui-release
+        outputs:
+          - name: extracted-ops-ui
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              cd ops-ui-release
+              tar -xzf source.tar.gz -C ../extracted-ops-ui --strip-components=1
+    - put: ops-ui-docker-image-ci
+      on_failure: *slack_failure_alert_ci
+      on_error: *slack_error_alert_ci
+      params:
+        build: extracted-ops-ui
+        tag_file: ops-ui-release/tag
+        tag_as_latest: false
+      get_params:
+        save: true
+    - put: ops-ui-docker-image-gcr
+      on_failure: *slack_failure_alert_gcr
+      on_error: *slack_error_alert_gcr
+      params:
+        build: extracted-ops-ui
+        cache_from:
+          - ops-ui-docker-image-ci
+        tag_file: ops-ui-release/tag
         tag_as_latest: false
       get_params:
         skip_download: true
