@@ -2208,6 +2208,9 @@ jobs:
   - get: toolbox-docker-image-gcr
     params:
       skip_download: true
+  - get: ops-ui-master
+    trigger: true
+    passed: ["Build Ops UI Latest"]
   - task: "CI Terraform"
     file: census-rm-deploy/tasks/terraform-env.yml
     params:
@@ -2294,7 +2297,9 @@ jobs:
                   monitoring-build,
                   database-monitor-deploy,
                   rabbitmonitor-deploy,
-                  regional-counts-deploy]
+                  regional-counts-deploy,
+                  ops-ui-build,
+                  ops-ui-deploy]
   on_failure: *slack_failure_alert_ci
   on_error: *slack_error_alert_ci
   plan:
@@ -2350,6 +2355,9 @@ jobs:
       passed: ["CI Terraform"]
       trigger: true
     - get: census-rm-ddl-master
+      trigger: true
+      passed: ["CI Terraform"]
+    - get: ops-ui-master
       trigger: true
       passed: ["CI Terraform"]
     - task: "CI Helm"
@@ -3289,7 +3297,9 @@ jobs:
                   monitoring-build,
                   database-monitor-deploy,
                   rabbitmonitor-deploy,
-                  regional-counts-deploy]
+                  regional-counts-deploy,
+                  ops-ui-build,
+                  ops-ui-deploy]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -3308,7 +3318,8 @@ jobs:
              "CI Deploy Toolbox",
              "CI Deploy Database Monitor",
              "CI Deploy Rabbit Monitor",
-             "CI Deploy Regional Counts"]
+             "CI Deploy Regional Counts",
+             "CI Deploy Ops UI Tool"]
   - get: acceptance-tests-master
     trigger: true
     passed: ["Build Acceptance Tests Latest"]
@@ -3328,7 +3339,8 @@ jobs:
               "CI Deploy Fieldwork Adapter",
               "CI Deploy Notify Processor",
               "CI Deploy Notify Stub",
-              "CI Deploy Exception Manager"]
+              "CI Deploy Exception Manager",
+              "CI Deploy Ops UI Tool"]
   - get: census-rm-ddl-master
     trigger: true
     passed: ["CI Deploy Action-Scheduler",
@@ -3342,7 +3354,8 @@ jobs:
              "CI Deploy Fieldwork Adapter",
              "CI Deploy Notify Processor",
              "CI Deploy Notify Stub",
-             "CI Deploy Exception Manager"]
+             "CI Deploy Exception Manager",
+             "CI Deploy Ops UI Tool"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
     passed: ["CI Deploy Action-Scheduler",
@@ -3356,7 +3369,8 @@ jobs:
              "CI Deploy Fieldwork Adapter",
              "CI Deploy Notify Processor",
              "CI Deploy Notify Stub",
-             "CI Deploy Exception Manager"]
+             "CI Deploy Exception Manager",
+             "CI Deploy Ops UI Tool"]
   - get: census-rm-kubernetes-optional-repo
     trigger: true
     passed: ["CI Deploy Toolbox",
@@ -3404,6 +3418,9 @@ jobs:
   - get: toolbox-master
     trigger: true
     passed: ["CI Deploy Toolbox"]
+  - get: ops-ui-master
+    trigger: true
+    passed: ["CI Deploy Ops UI Tool"]
   - get: monitoring-master
     trigger: true
     passed: ["CI Deploy Database Monitor",
@@ -3528,7 +3545,8 @@ jobs:
                   wl-toolbox,
                   wl-database-monitor,
                   wl-rabbitmonitor,
-                  wl-regional-counts]
+                  wl-regional-counts,
+                  wl-ops-ui]
   on_failure: *slack_failure_alert_wl
   on_error: *slack_error_alert_wl
   plan:
@@ -3590,6 +3608,9 @@ jobs:
     passed: ["CI Acceptance Tests"]
     trigger: true
   - get: census-rm-ddl-master
+    trigger: true
+    passed: ["CI Acceptance Tests"]
+  - get: ops-ui-master
     trigger: true
     passed: ["CI Acceptance Tests"]
   - get: census-rm-deploy
@@ -3659,7 +3680,8 @@ jobs:
                   wl-toolbox,
                   wl-database-monitor,
                   wl-rabbitmonitor,
-                  wl-regional-counts
+                  wl-regional-counts,
+                  wl-ops-ui
                   ]
   on_failure: *slack_failure_alert_wl
   on_error: *slack_error_alert_wl
@@ -3723,6 +3745,9 @@ jobs:
       passed: ["WL Terraform"]
       trigger: true
     - get: census-rm-ddl-master
+      trigger: true
+      passed: ["WL Terraform"]
+    - get: ops-ui-master
       trigger: true
       passed: ["WL Terraform"]
     - task: "WL Helm"
