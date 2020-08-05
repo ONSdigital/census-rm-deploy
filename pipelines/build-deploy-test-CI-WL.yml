@@ -2399,7 +2399,9 @@ jobs:
                   monitoring-build,
                   database-monitor-deploy,
                   rabbitmonitor-deploy,
-                  regional-counts-deploy
+                  regional-counts-deploy,
+                  ops-ui-build,
+                  ops-ui-deploy
                   ]
   on_failure: *slack_failure_alert_ci
   on_error: *slack_error_alert_ci
@@ -3751,7 +3753,8 @@ jobs:
                   wl-toolbox,
                   wl-database-monitor,
                   wl-rabbitmonitor,
-                  wl-regional-counts]
+                  wl-regional-counts,
+                  wl-ops-ui]
   on_failure: *slack_failure_alert_wl
   on_error: *slack_error_alert_wl
   plan:
