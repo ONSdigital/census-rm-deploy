@@ -597,7 +597,7 @@ jobs:
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: ops-ui
       KUBERNETES_SELECTOR: app=ops-ui
-      KUBERNETES_FILE_PATH: kubernetes-repo/release/optional
+      KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
       KUBERNETES_FILE_PREFIX: ops-ui
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release-unpacked}

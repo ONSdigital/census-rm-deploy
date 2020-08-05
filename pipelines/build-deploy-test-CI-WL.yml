@@ -207,13 +207,6 @@ resources:
     private_key: ((github.service_account_private_key))
     paths: [optional/ops-*]
 
-- name: census-rm-kubernetes-ops-ui-repo
-  type: git
-  source:
-    uri: git@github.com:ONSdigital/census-rm-kubernetes.git
-    private_key: ((github.service_account_private_key))
-    paths: [optional/ops-ui-*]
-
 - name: census-rm-kubernetes-optional-repo
   type: git
   source:
@@ -2121,9 +2114,8 @@ jobs:
                   monitoring-build,
                   database-monitor-deploy,
                   rabbitmonitor-deploy,
-                  regional-counts-deploy,
-                  ops-deploy,
-                  ops-ui-deploy]
+                  regional-counts-deploy
+                  ]
   on_failure: *slack_failure_alert_ci
   on_error: *slack_error_alert_ci
   plan:
@@ -2820,14 +2812,15 @@ jobs:
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
     passed: ["CI Apply Database Patches"]
-  - get: census-rm-kubernetes-ops-ui-repo
+  - get: census-rm-kubernetes-microservices-repo
     trigger: true
+    passed: ["CI Apply Database Patches"]
   - get: census-rm-ddl-master
     trigger: true
     passed: ["CI Apply Database Patches"]
   - get: ops-ui-master
     trigger: true
-    passed: ["Build Ops UI Latest"]
+    passed: ["CI Apply Database Patches"]
   - get: ops-ui-docker-image-gcr
     params:
       skip_download: true
@@ -2842,12 +2835,12 @@ jobs:
       KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: ops-ui
       KUBERNETES_SELECTOR: app=ops-ui
-      KUBERNETES_FILE_PATH: kubernetes-repo/optional
+      KUBERNETES_FILE_PATH: kubernetes-repo/microservices
       KUBERNETES_FILE_PREFIX: ops-ui
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
       docker-image-resource: ops-ui-docker-image-gcr,
-      kubernetes-repo: census-rm-kubernetes-ops-ui-repo}
+      kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
 - name: "CI Deploy Print File Service"
   serial: true
@@ -4195,13 +4188,14 @@ jobs:
   - get: census-rm-terraform
     trigger: true
     passed: ["WL Apply Database Patches"]
-  - get: census-rm-kubernetes-dependencies-repo
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
     passed: ["WL Apply Database Patches"]
   - get: census-rm-ddl-master
     passed: ["WL Apply Database Patches"]
-  - get: census-rm-kubernetes-ops-ui-repo
   - get: ops-ui-master
     trigger: true
+    passed: ["WL Apply Database Patches"]
   - get: ops-ui-docker-image-gcr
     params:
       skip_download: true
@@ -4216,12 +4210,12 @@ jobs:
       KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
       KUBERNETES_DEPLOYMENT_NAME: ops-ui
       KUBERNETES_SELECTOR: app=ops-ui
-      KUBERNETES_FILE_PATH: kubernetes-repo/optional
+      KUBERNETES_FILE_PATH: kubernetes-repo/microservices
       KUBERNETES_FILE_PREFIX: ops-ui
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {
       docker-image-resource: ops-ui-docker-image-gcr,
-      kubernetes-repo: census-rm-kubernetes-ops-ui-repo}
+      kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
 - name: "WL Deploy Fieldwork Adapter"
   serial: true
