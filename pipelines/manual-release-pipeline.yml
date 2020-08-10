@@ -1095,9 +1095,7 @@ jobs:
   - get: census-rm-kubernetes-release
     trigger: true
     passed: ["Case API",
-             "Ops Tool",
-             "Ops UI Tool"
-             ]
+             "Ops Tool"]
   - get: whitelist-master
     trigger: true
   - get: census-rm-deploy
