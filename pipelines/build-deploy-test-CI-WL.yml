@@ -40,7 +40,7 @@ groups:
   - "CI Deploy UAC QID Service"
   - "CI Deploy PubSub Adapter"
   - "CI Deploy Ops Tool"
-  - "CI Deploy Ops UI Tool"
+  - "CI Deploy Ops UI"
   - "CI Deploy Print File Service"
   - "CI Deploy Fieldwork Adapter"
   - "CI Deploy Notify Processor"
@@ -65,7 +65,7 @@ groups:
   - "WL Deploy UAC QID Service"
   - "WL Deploy PubSub Adapter"
   - "WL Deploy Ops Tool"
-  - "WL Deploy Ops UI Tool"
+  - "WL Deploy Ops UI"
   - "WL Deploy Print File Service"
   - "WL Deploy Fieldwork Adapter"
   - "WL Deploy Notify Processor"
@@ -121,7 +121,7 @@ groups:
   - "CI Deploy UAC QID Service"
   - "CI Deploy PubSub Adapter"
   - "CI Deploy Ops Tool"
-  - "CI Deploy Ops UI Tool"
+  - "CI Deploy Ops UI"
   - "CI Deploy Print File Service"
   - "CI Deploy Fieldwork Adapter"
   - "CI Deploy Notify Processor"
@@ -149,7 +149,7 @@ groups:
   - "WL Deploy UAC QID Service"
   - "WL Deploy PubSub Adapter"
   - "WL Deploy Ops Tool"
-  - "WL Deploy Ops UI Tool"
+  - "WL Deploy Ops UI"
   - "WL Deploy Print File Service"
   - "WL Deploy Fieldwork Adapter"
   - "WL Deploy Notify Processor"
@@ -2815,7 +2815,7 @@ jobs:
       docker-image-resource: ops-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-ops-repo}
 
-- name: "CI Deploy Ops UI Tool"
+- name: "CI Deploy Ops UI"
   serial: true
   serial_groups: [ops-ui-build,
                   ops-ui-deploy]
@@ -3319,7 +3319,7 @@ jobs:
              "CI Deploy Database Monitor",
              "CI Deploy Rabbit Monitor",
              "CI Deploy Regional Counts",
-             "CI Deploy Ops UI Tool"]
+             "CI Deploy Ops UI"]
   - get: acceptance-tests-master
     trigger: true
     passed: ["Build Acceptance Tests Latest"]
@@ -3340,7 +3340,7 @@ jobs:
               "CI Deploy Notify Processor",
               "CI Deploy Notify Stub",
               "CI Deploy Exception Manager",
-              "CI Deploy Ops UI Tool"]
+              "CI Deploy Ops UI"]
   - get: census-rm-ddl-master
     trigger: true
     passed: ["CI Deploy Action-Scheduler",
@@ -3355,7 +3355,7 @@ jobs:
              "CI Deploy Notify Processor",
              "CI Deploy Notify Stub",
              "CI Deploy Exception Manager",
-             "CI Deploy Ops UI Tool"]
+             "CI Deploy Ops UI"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
     passed: ["CI Deploy Action-Scheduler",
@@ -3370,7 +3370,7 @@ jobs:
              "CI Deploy Notify Processor",
              "CI Deploy Notify Stub",
              "CI Deploy Exception Manager",
-             "CI Deploy Ops UI Tool"]
+             "CI Deploy Ops UI"]
   - get: census-rm-kubernetes-optional-repo
     trigger: true
     passed: ["CI Deploy Toolbox",
@@ -3420,7 +3420,7 @@ jobs:
     passed: ["CI Deploy Toolbox"]
   - get: ops-ui-master
     trigger: true
-    passed: ["CI Deploy Ops UI Tool"]
+    passed: ["CI Deploy Ops UI"]
   - get: monitoring-master
     trigger: true
     passed: ["CI Deploy Database Monitor",
@@ -4217,9 +4217,9 @@ jobs:
       docker-image-resource: ops-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-ops-repo}
 
-- name: "WL Deploy Ops UI Tool"
+- name: "WL Deploy Ops UI"
   serial: true
-  serial_groups: [wl-ops-ui-tool]
+  serial_groups: [wl-ops-ui]
   plan:
   - get: census-rm-terraform
     trigger: true

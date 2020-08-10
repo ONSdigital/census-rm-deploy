@@ -1037,7 +1037,7 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release-unpacked}
 
-- name: "Ops UI Tool"
+- name: "Ops UI"
   disable_manual_trigger: true
   serial: true
   serial_groups: [ops-ui]
@@ -1111,7 +1111,7 @@ jobs:
       "Toolbox",
       "Database Monitor",
       "Rabbit Monitor",
-      "Ops UI Tool"]
+      "Ops UI"]
   - task: "Scale apps"
     config:
       platform: linux
