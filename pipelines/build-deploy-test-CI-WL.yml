@@ -18,6 +18,7 @@ groups:
   - "Build Notify Processor Latest"
   - "Build Notify Stub Latest"
   - "Build Ops Latest"
+  - "Build Ops UI Latest"
   - "Build Performance Tests Latest"
   - "Build Print File Service Latest"
   - "Build PubSub Latest"
@@ -39,6 +40,7 @@ groups:
   - "CI Deploy UAC QID Service"
   - "CI Deploy PubSub Adapter"
   - "CI Deploy Ops Tool"
+  - "CI Deploy Ops UI"
   - "CI Deploy Print File Service"
   - "CI Deploy Fieldwork Adapter"
   - "CI Deploy Notify Processor"
@@ -63,6 +65,7 @@ groups:
   - "WL Deploy UAC QID Service"
   - "WL Deploy PubSub Adapter"
   - "WL Deploy Ops Tool"
+  - "WL Deploy Ops UI"
   - "WL Deploy Print File Service"
   - "WL Deploy Fieldwork Adapter"
   - "WL Deploy Notify Processor"
@@ -92,6 +95,7 @@ groups:
   - "Build Notify Processor Latest"
   - "Build Notify Stub Latest"
   - "Build Ops Latest"
+  - "Build Ops UI Latest"
   - "Build Performance Tests Latest"
   - "Build Print File Service Latest"
   - "Build PubSub Adapter Latest"
@@ -117,6 +121,7 @@ groups:
   - "CI Deploy UAC QID Service"
   - "CI Deploy PubSub Adapter"
   - "CI Deploy Ops Tool"
+  - "CI Deploy Ops UI"
   - "CI Deploy Print File Service"
   - "CI Deploy Fieldwork Adapter"
   - "CI Deploy Notify Processor"
@@ -144,6 +149,7 @@ groups:
   - "WL Deploy UAC QID Service"
   - "WL Deploy PubSub Adapter"
   - "WL Deploy Ops Tool"
+  - "WL Deploy Ops UI"
   - "WL Deploy Print File Service"
   - "WL Deploy Fieldwork Adapter"
   - "WL Deploy Notify Processor"
@@ -281,6 +287,12 @@ resources:
   type: git
   source:
     uri: git@github.com:ONSdigital/census-rm-ops.git
+    private_key: ((github.service_account_private_key))
+
+- name: ops-ui-master
+  type: git
+  source:
+    uri: git@github.com:ONSdigital/census-rm-ops-ui.git
     private_key: ((github.service_account_private_key))
 
 - name: toolbox-master
@@ -489,6 +501,20 @@ resources:
   type: docker-image
   source:
     repository: ((docker-registry-gcr))/rm/census-rm-ops
+    username: _json_key
+    password: ((gcp.service_account_json))
+
+- name: ops-ui-docker-image-ci
+  type: docker-image
+  source:
+    repository: ((docker-registry-ci))/rm/census-rm-ops-ui
+    username: _json_key
+    password: ((gcp.service_account_json))
+
+- name: ops-ui-docker-image-gcr
+  type: docker-image
+  source:
+    repository: ((docker-registry-gcr))/rm/census-rm-ops-ui
     username: _json_key
     password: ((gcp.service_account_json))
 
@@ -1544,6 +1570,32 @@ jobs:
     get_params:
       skip_download: true
 
+- name: "Build Ops UI Latest"
+  serial_groups: [ops-ui-build]
+  plan:
+  - get: ops-ui-master
+    trigger: true
+  - put: ops-ui-docker-image-ci
+    on_failure: *slack_docker_build_failure_ci
+    on_error: *slack_docker_build_error_ci
+    params:
+      build: ops-ui-master
+      tag_file: ops-ui-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      save: true
+  - put: ops-ui-docker-image-gcr
+    on_failure: *slack_docker_build_failure_gcr
+    on_error: *slack_docker_build_error_gcr
+    params:
+      build: ops-ui-master
+      cache_from:
+        - ops-ui-docker-image-ci
+      tag_file: ops-ui-master/.git/ref
+      tag_as_latest: true
+    get_params:
+      skip_download: true
+
 - name: "Build Toolbox Latest"
   serial_groups: [toolbox-build]
   plan:
@@ -2053,6 +2105,8 @@ jobs:
                   notify-stub-deploy,
                   ops-build,
                   ops-deploy,
+                  ops-ui-build,
+                  ops-ui-deploy,
                   exception-manager-build,
                   exception-manager-deploy,
                   toolbox-build,
@@ -2060,8 +2114,8 @@ jobs:
                   monitoring-build,
                   database-monitor-deploy,
                   rabbitmonitor-deploy,
-                  regional-counts-deploy,
-                  ops-deploy]
+                  regional-counts-deploy
+                  ]
   on_failure: *slack_failure_alert_ci
   on_error: *slack_error_alert_ci
   plan:
@@ -2093,7 +2147,7 @@ jobs:
     passed: ["Build Case API Latest"]
   - get: case-api-docker-image-gcr
     params:
-      skip_download: true  
+      skip_download: true
   - get: case-processor-master
     trigger: true
     passed: ["Build Case Processor Latest"]
@@ -2154,6 +2208,9 @@ jobs:
   - get: toolbox-docker-image-gcr
     params:
       skip_download: true
+  - get: ops-ui-master
+    trigger: true
+    passed: ["Build Ops UI Latest"]
   - task: "CI Terraform"
     file: census-rm-deploy/tasks/terraform-env.yml
     params:
@@ -2240,7 +2297,9 @@ jobs:
                   monitoring-build,
                   database-monitor-deploy,
                   rabbitmonitor-deploy,
-                  regional-counts-deploy]
+                  regional-counts-deploy,
+                  ops-ui-build,
+                  ops-ui-deploy]
   on_failure: *slack_failure_alert_ci
   on_error: *slack_error_alert_ci
   plan:
@@ -2298,6 +2357,9 @@ jobs:
     - get: census-rm-ddl-master
       trigger: true
       passed: ["CI Terraform"]
+    - get: ops-ui-master
+      trigger: true
+      passed: ["CI Terraform"]
     - task: "CI Helm"
       file: census-rm-deploy/tasks/helm.yml
       params:
@@ -2345,7 +2407,10 @@ jobs:
                   monitoring-build,
                   database-monitor-deploy,
                   rabbitmonitor-deploy,
-                  regional-counts-deploy]
+                  regional-counts-deploy,
+                  ops-ui-build,
+                  ops-ui-deploy
+                  ]
   on_failure: *slack_failure_alert_ci
   on_error: *slack_error_alert_ci
   plan:
@@ -2403,6 +2468,9 @@ jobs:
     passed: ["CI Helm"]
     trigger: true
   - get: census-rm-terraform
+    passed: ["CI Helm"]
+    trigger: true
+  - get: ops-ui-master
     passed: ["CI Helm"]
     trigger: true
   - get: ddl-docker-image-gcr
@@ -2746,6 +2814,47 @@ jobs:
     input_mapping: {
       docker-image-resource: ops-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-ops-repo}
+
+- name: "CI Deploy Ops UI"
+  serial: true
+  serial_groups: [ops-ui-build,
+                  ops-ui-deploy]
+  plan:
+  - get: census-rm-terraform
+    trigger: true
+    passed: ["CI Apply Database Patches"]
+  - get: census-rm-kubernetes-dependencies-repo
+    trigger: true
+    passed: ["CI Apply Database Patches"]
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+    passed: ["CI Apply Database Patches"]
+  - get: census-rm-ddl-master
+    trigger: true
+    passed: ["CI Apply Database Patches"]
+  - get: ops-ui-master
+    trigger: true
+    passed: ["CI Apply Database Patches"]
+  - get: ops-ui-docker-image-gcr
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-deployment
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
+    on_failure: *slack_failure_alert_ci
+    on_error: *slack_error_alert_ci
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((ci-gcp-project-name))
+      KUBERNETES_CLUSTER: ((ci-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: ops-ui
+      KUBERNETES_SELECTOR: app=ops-ui
+      KUBERNETES_FILE_PATH: kubernetes-repo/microservices
+      KUBERNETES_FILE_PREFIX: ops-ui
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {
+      docker-image-resource: ops-ui-docker-image-gcr,
+      kubernetes-repo: census-rm-kubernetes-microservices-repo}
 
 - name: "CI Deploy Print File Service"
   serial: true
@@ -3188,7 +3297,9 @@ jobs:
                   monitoring-build,
                   database-monitor-deploy,
                   rabbitmonitor-deploy,
-                  regional-counts-deploy]
+                  regional-counts-deploy,
+                  ops-ui-build,
+                  ops-ui-deploy]
   plan:
   - get: census-rm-terraform
     trigger: true
@@ -3207,7 +3318,8 @@ jobs:
              "CI Deploy Toolbox",
              "CI Deploy Database Monitor",
              "CI Deploy Rabbit Monitor",
-             "CI Deploy Regional Counts"]
+             "CI Deploy Regional Counts",
+             "CI Deploy Ops UI"]
   - get: acceptance-tests-master
     trigger: true
     passed: ["Build Acceptance Tests Latest"]
@@ -3227,7 +3339,8 @@ jobs:
               "CI Deploy Fieldwork Adapter",
               "CI Deploy Notify Processor",
               "CI Deploy Notify Stub",
-              "CI Deploy Exception Manager"]
+              "CI Deploy Exception Manager",
+              "CI Deploy Ops UI"]
   - get: census-rm-ddl-master
     trigger: true
     passed: ["CI Deploy Action-Scheduler",
@@ -3241,7 +3354,8 @@ jobs:
              "CI Deploy Fieldwork Adapter",
              "CI Deploy Notify Processor",
              "CI Deploy Notify Stub",
-             "CI Deploy Exception Manager"]
+             "CI Deploy Exception Manager",
+             "CI Deploy Ops UI"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
     passed: ["CI Deploy Action-Scheduler",
@@ -3255,7 +3369,8 @@ jobs:
              "CI Deploy Fieldwork Adapter",
              "CI Deploy Notify Processor",
              "CI Deploy Notify Stub",
-             "CI Deploy Exception Manager"]
+             "CI Deploy Exception Manager",
+             "CI Deploy Ops UI"]
   - get: census-rm-kubernetes-optional-repo
     trigger: true
     passed: ["CI Deploy Toolbox",
@@ -3303,6 +3418,9 @@ jobs:
   - get: toolbox-master
     trigger: true
     passed: ["CI Deploy Toolbox"]
+  - get: ops-ui-master
+    trigger: true
+    passed: ["CI Deploy Ops UI"]
   - get: monitoring-master
     trigger: true
     passed: ["CI Deploy Database Monitor",
@@ -3427,7 +3545,8 @@ jobs:
                   wl-toolbox,
                   wl-database-monitor,
                   wl-rabbitmonitor,
-                  wl-regional-counts]
+                  wl-regional-counts,
+                  wl-ops-ui]
   on_failure: *slack_failure_alert_wl
   on_error: *slack_error_alert_wl
   plan:
@@ -3489,6 +3608,9 @@ jobs:
     passed: ["CI Acceptance Tests"]
     trigger: true
   - get: census-rm-ddl-master
+    trigger: true
+    passed: ["CI Acceptance Tests"]
+  - get: ops-ui-master
     trigger: true
     passed: ["CI Acceptance Tests"]
   - get: census-rm-deploy
@@ -3558,7 +3680,9 @@ jobs:
                   wl-toolbox,
                   wl-database-monitor,
                   wl-rabbitmonitor,
-                  wl-regional-counts]
+                  wl-regional-counts,
+                  wl-ops-ui
+                  ]
   on_failure: *slack_failure_alert_wl
   on_error: *slack_error_alert_wl
   plan:
@@ -3623,6 +3747,9 @@ jobs:
     - get: census-rm-ddl-master
       trigger: true
       passed: ["WL Terraform"]
+    - get: ops-ui-master
+      trigger: true
+      passed: ["WL Terraform"]
     - task: "WL Helm"
       file: census-rm-deploy/tasks/helm.yml
       params:
@@ -3651,7 +3778,8 @@ jobs:
                   wl-toolbox,
                   wl-database-monitor,
                   wl-rabbitmonitor,
-                  wl-regional-counts]
+                  wl-regional-counts,
+                  wl-ops-ui]
   on_failure: *slack_failure_alert_wl
   on_error: *slack_error_alert_wl
   plan:
@@ -3714,6 +3842,9 @@ jobs:
     passed: ["WL Helm"]
     trigger: true
   - get: qid-batch-runner-master
+    passed: ["WL Helm"]
+    trigger: true
+  - get: ops-ui-master
     passed: ["WL Helm"]
     trigger: true
   - get: ddl-docker-image-gcr
@@ -4086,6 +4217,42 @@ jobs:
       docker-image-resource: ops-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-ops-repo}
 
+- name: "WL Deploy Ops UI"
+  serial: true
+  serial_groups: [wl-ops-ui]
+  plan:
+  - get: census-rm-terraform
+    trigger: true
+    passed: ["WL Apply Database Patches"]
+  - get: census-rm-kubernetes-microservices-repo
+    trigger: true
+    passed: ["WL Apply Database Patches"]
+  - get: census-rm-ddl-master
+    passed: ["WL Apply Database Patches"]
+  - get: ops-ui-master
+    trigger: true
+    passed: ["WL Apply Database Patches"]
+  - get: ops-ui-docker-image-gcr
+    params:
+      skip_download: true
+  - get: census-rm-deploy
+  - task: apply-deployment
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy.yml
+    on_failure: *slack_failure_alert_wl
+    on_error: *slack_error_alert_wl
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((wl-gcp-project-name))
+      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: ops-ui
+      KUBERNETES_SELECTOR: app=ops-ui
+      KUBERNETES_FILE_PATH: kubernetes-repo/microservices
+      KUBERNETES_FILE_PREFIX: ops-ui
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {
+      docker-image-resource: ops-ui-docker-image-gcr,
+      kubernetes-repo: census-rm-kubernetes-microservices-repo}
+
 - name: "WL Deploy Fieldwork Adapter"
   serial: true
   serial_groups: [wl-fieldwork-adapter]
@@ -4365,23 +4532,23 @@ jobs:
       kubernetes-repo: census-rm-kubernetes-optional-repo}
 
 - name: "WL Deploy QID Batch Runner"
-  serial: true	
+  serial: true
   serial_groups: [wl-qid-batch-runner]
   plan:
-  - get: census-rm-terraform	
-    trigger: true	
+  - get: census-rm-terraform
+    trigger: true
     passed: ["WL Apply Database Patches"]
   - get: census-rm-kubernetes-dependencies-repo
-    trigger: true	
+    trigger: true
     passed: ["WL Apply Database Patches"]
-  - get: census-rm-ddl-master	
-    trigger: true	
+  - get: census-rm-ddl-master
+    trigger: true
     passed: ["WL Apply Database Patches"]
   - get: census-rm-kubernetes-optional-repo
-    trigger: true	
+    trigger: true
     passed: ["WL Apply Database Patches"]
-  - get: qid-batch-runner-master	
-    trigger: true	
+  - get: qid-batch-runner-master
+    trigger: true
     passed: ["WL Apply Database Patches"]
   - get: census-rm-kubernetes-microservices-repo
     passed: ["WL Apply Database Patches"]

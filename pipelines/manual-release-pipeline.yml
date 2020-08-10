@@ -12,6 +12,7 @@ groups:
   - "UAC QID Service"
   - "PubSub Adapter"
   - "Ops Tool"
+  - "Ops UI"
   - "Print File Service"
   - "Fieldwork Adapter"
   - "Notify Processor"
@@ -54,6 +55,7 @@ groups:
   - "UAC QID Service"
   - "PubSub Adapter"
   - "Ops Tool"
+  - "Ops UI"
   - "Print File Service"
   - "Fieldwork Adapter"
   - "Notify Processor"
@@ -279,6 +281,7 @@ jobs:
                   uac-qid-service,
                   pubsub-adapter,
                   ops,
+                  ops-ui,
                   print-file-service,
                   fieldwork-adapter,
                   notify-processor,
@@ -564,6 +567,38 @@ jobs:
       KUBERNETES_SELECTOR: app=ops
       KUBERNETES_FILE_PATH: kubernetes-repo/release/optional
       KUBERNETES_FILE_PREFIX: ops
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release-unpacked}
+
+- name: "Ops UI"
+  disable_manual_trigger: true
+  serial: true
+  serial_groups: [ops-ui]
+  on_error: *slack_error_alert
+  on_failure: *slack_failure_alert
+  plan:
+  - get: census-rm-kubernetes-release
+    params: {include_source_tarball: true}
+    trigger: true
+    passed: ["Apply Database Patches"]
+  - get: census-rm-deploy
+  - get: every-minute
+    trigger: true
+    passed: ["Apply Database Patches"]
+  - task: unpack-kubernetes-release
+    file: census-rm-deploy/tasks/unpack-release.yml
+    input_mapping: {release: census-rm-kubernetes-release}
+    output_mapping: {unpacked-release: census-rm-kubernetes-release-unpacked}
+  - task: apply-deployment
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-deploy-no-patch.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: ops-ui
+      KUBERNETES_SELECTOR: app=ops-ui
+      KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
+      KUBERNETES_FILE_PREFIX: ops-ui
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release-unpacked}
 
@@ -871,6 +906,7 @@ jobs:
             "PubSub Adapter",
             "Print File Service",
             "Ops Tool",
+            "Ops UI",
             "Fieldwork Adapter",
             "Notify Processor",
             "Exception Manager",
@@ -1059,8 +1095,7 @@ jobs:
   - get: census-rm-kubernetes-release
     trigger: true
     passed: ["Case API",
-             "Ops Tool",
-             ]
+             "Ops Tool"]
   - get: whitelist-master
     trigger: true
   - get: census-rm-deploy
