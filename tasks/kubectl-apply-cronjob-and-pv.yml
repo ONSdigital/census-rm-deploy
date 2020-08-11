@@ -29,11 +29,11 @@ run:
       gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
       gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
 
-      # Apply service config
+      # Apply persistent volume config
       kubectl apply -f ${KUBERNETES_FILE_PATH}/${KUBERNETES_FILE_PREFIX}-persistentvolume.yml --record
 
-      # Apply deployment config
+      # Apply cronjob config
       kubectl apply -f ${KUBERNETES_FILE_PATH}/${KUBERNETES_FILE_PREFIX}-cronjob.yml --record
 
-      # Get deployment status
+      # Get cronjob status
       kubectl get cronjobs --field-selector metadata.name=${KUBERNETES_DEPLOYMENT_NAME} -o wide
