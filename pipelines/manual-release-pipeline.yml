@@ -22,6 +22,7 @@ groups:
   - "Database Monitor"
   - "Rabbit Monitor"
   - "Regional Counts"
+  - "Data Exporter"
   - "Report Deployment Success"
   - "Trigger Terraform"
   - "Preview Terraform Changes"
@@ -65,6 +66,7 @@ groups:
   - "Database Monitor"
   - "Rabbit Monitor"
   - "Regional Counts"
+  - "Data Exporter"
   - "Report Deployment Success"
   - "Whitelist"
 
@@ -289,7 +291,8 @@ jobs:
                   toolbox,
                   database-monitor,
                   rabbitmonitor,
-                  regionalcounts]
+                  regionalcounts,
+                  dataexporter]
   on_failure: *slack_failure_alert
   plan:
   - get: every-minute
@@ -890,6 +893,37 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release-unpacked}
 
+- name: "Data Exporter"
+  disable_manual_trigger: true
+  serial: true
+  serial_groups: [dataexporter]
+  on_error: *slack_error_alert
+  on_failure: *slack_failure_alert
+  plan:
+  - get: census-rm-kubernetes-release
+    params: {include_source_tarball: true}
+    trigger: true
+    passed: ["Apply Database Patches"]
+  - get: census-rm-deploy
+  - get: every-minute
+    trigger: true
+    passed: ["Apply Database Patches"]
+  - task: unpack-kubernetes-release
+    file: census-rm-deploy/tasks/unpack-release.yml
+    input_mapping: {release: census-rm-kubernetes-release}
+    output_mapping: {unpacked-release: census-rm-kubernetes-release-unpacked}
+  - task: apply-deployment
+    file: census-rm-deploy/tasks/kubectl-apply-cronjob-and-pv.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((gcp-project-name))
+      KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: data-exporter
+      KUBERNETES_FILE_PATH: kubernetes-repo/release/optional
+      KUBERNETES_FILE_PREFIX: dataexporter
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-release-unpacked}
+
 - name: "Report Deployment Success"
   disable_manual_trigger: true
   serial: true
@@ -913,7 +947,8 @@ jobs:
             "Toolbox",
             "Database Monitor",
             "Rabbit Monitor",
-            "Regional Counts"]
+            "Regional Counts",
+            "Data Exporter"]
 
 # Infrastructure
 - name: "Trigger Terraform"
@@ -931,7 +966,8 @@ jobs:
     print-file-service,
     exception-manager,
     toolbox,
-    rabbitmonitor]
+    rabbitmonitor,
+    dataexporter]
   on_error: *slack_error_alert
   on_failure: *slack_failure_alert
   plan:
@@ -971,7 +1007,8 @@ jobs:
                   print-file-service,
                   exception-manager,
                   toolbox,
-                  rabbitmonitor]
+                  rabbitmonitor,
+                  dataexporter]
   on_error: *slack_error_alert
   on_failure: *slack_failure_alert
   plan:
@@ -1009,7 +1046,8 @@ jobs:
                   print-file-service,
                   exception-manager,
                   toolbox,
-                  rabbitmonitor]
+                  rabbitmonitor,
+                  dataexporter]
   on_error: *slack_error_alert
   on_failure: *slack_failure_alert
   plan:
@@ -1046,7 +1084,8 @@ jobs:
                   print-file-service,
                   exception-manager,
                   toolbox,
-                  rabbitmonitor]
+                  rabbitmonitor,
+                  dataexporter]
   on_error: *slack_error_alert
   on_failure: *slack_failure_alert
   plan:

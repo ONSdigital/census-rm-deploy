@@ -164,3 +164,14 @@ jobs:
             rabbit-config: release/rabbitmq/values_prod.yml
             prometheus-config: release/monitoring/prometheus-values.yml
             grafana-config: release/monitoring/grafana-deployment.yml
+
+        - name: census-rm-greylodge
+          team: rm
+          config_file: census-rm-deploy/pipelines/manual-release-pipeline.yml
+          vars:
+            gcp-environment-name: greylodge
+            gcp-project-name: census-rm-greylodge
+            kubernetes-cluster-name: rm-k8s-cluster
+            rabbit-config: release/rabbitmq/values.yml
+            prometheus-config: release/monitoring/prometheus-values.yml
+            grafana-config: release/monitoring/grafana-deployment.yml
