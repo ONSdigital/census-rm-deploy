@@ -4,12 +4,29 @@ resource_types:
   source:
     repository: cfcommunity/slack-notification-resource
 
+- name: cron-resource
+  type: docker-image
+  source:
+    repository: cftoolsmiths/cron-resource
+
 resources:
 
 - name: slack-alert
   type: slack-notification
   source:
     url: ((slack.webhook))
+
+- name: every-weekday-midnight
+  type: cron-resource
+  source:
+    expression: "0 0 * * 1-5"
+    fire_immediately: true
+
+- name: every-weekend
+  type: cron-resource
+  source:
+    expression: "0 0 * * 0"
+    fire_immediately: true
 
 - name: census-rm-deploy
   type: git
@@ -243,6 +260,8 @@ jobs:
 
 - name: "Select Test - 30 million"
   plan:
+  - get: every-weekend
+    trigger: true
   - task: "Select test scenario"
     config:
         platform: linux
@@ -271,6 +290,8 @@ jobs:
 
 - name: "Select Test - 3.5 million"
   plan:
+  - get: every-weekday-midnight
+    trigger: true
   - task: "Select test scenario"
     config:
         platform: linux
@@ -405,6 +426,12 @@ jobs:
     params:
       skip_download: true
   - get: every-minute
+  - get: every-weekday-midnight
+    trigger: true
+    passed: ["Select Test - 3.5 million"]
+  - get: every-weekend
+    trigger: true
+    passed: ["Select Test - 30 million"]
 
 # Run Terraform
 - name: "Run Terraform"
