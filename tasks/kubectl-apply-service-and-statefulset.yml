@@ -1,0 +1,50 @@
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: eu.gcr.io/census-gcr/gcloud-kubectl
+
+params:
+  GCP_PROJECT_NAME:
+  KUBERNETES_CLUSTER:
+  KUBERNETES_STATEFULSET_NAME:
+  KUBERNETES_FILE_PATH:
+  KUBERNETES_FILE_PREFIX:
+  KUBERNETES_SELECTOR:
+  SERVICE_ACCOUNT_JSON:
+  WAIT_UNTIL_AVAILABLE_TIMEOUT:
+
+inputs:
+  - name: kubernetes-repo
+  - name: docker-image-resource
+run:
+  path: sh
+  args:
+    - -exc
+    - |
+      cat >~/gcloud-service-key.json <<EOL
+      $SERVICE_ACCOUNT_JSON
+      EOL
+
+      # Use gcloud service account to configure kubectl
+      gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
+      gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
+
+      # Apply service config
+      kubectl apply -f ${KUBERNETES_FILE_PATH}/${KUBERNETES_FILE_PREFIX}-service.yml --record
+
+      # Apply statefulset config
+      kubectl apply -f ${KUBERNETES_FILE_PATH}/${KUBERNETES_FILE_PREFIX}-statefulset.yml --record
+
+      # Patch statefulset to use docker image specified in pipeline rather than statefulset script
+      kubectl patch sts ${KUBERNETES_STATEFULSET_NAME} --type='json' -p="[{\"op\":\"replace\",\"path\":\"/spec/template/spec/containers/0/image\",\"value\":\"$(cat docker-image-resource/repository)\"}]" --record
+
+      # Patch statefulset with timestamp/image digest to force pod recreation
+      kubectl patch sts ${KUBERNETES_STATEFULSET_NAME} -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\",\"image-digest\":\"$(cat docker-image-resource/digest | cut -d':' -f2 | cut -c1-60)\"}}}}}" --record
+
+      # Wait for rollout to finish
+      kubectl rollout status sts ${KUBERNETES_STATEFULSET_NAME} --watch=true --timeout=${WAIT_UNTIL_AVAILABLE_TIMEOUT}
+
+      # Get statefulset status
+      kubectl get sts "-l ${KUBERNETES_SELECTOR}" -o wide
