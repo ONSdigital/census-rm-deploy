@@ -667,7 +667,7 @@ jobs:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((performance-gcp-project-name))
       KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
-      KUBERNETES_DEPLOYMENT_NAME: action-scheduler
+      KUBERNETES_STATEFULSET_NAME: action-scheduler
       KUBERNETES_SELECTOR: app=action-scheduler
       KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
       KUBERNETES_FILE_PREFIX: action-scheduler
@@ -967,7 +967,7 @@ jobs:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((performance-gcp-project-name))
       KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
-      KUBERNETES_DEPLOYMENT_NAME: exception-manager
+      KUBERNETES_STATEFULSET_NAME: exception-manager
       KUBERNETES_SELECTOR: app=exception-manager
       KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
       KUBERNETES_FILE_PREFIX: exception-manager
