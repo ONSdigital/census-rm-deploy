@@ -536,7 +536,7 @@ jobs:
             gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
 
             # Scale apps down
-            kubectl scale deployment action-scheduler --replicas=0
+            kubectl scale statefulset action-scheduler --replicas=0
             kubectl scale deployment action-worker --replicas=0
             kubectl scale deployment action-processor --replicas=0
             kubectl scale deployment case-api --replicas=0
@@ -1168,7 +1168,7 @@ jobs:
             gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
 
             # Scale apps up
-            kubectl scale deployment action-scheduler --replicas=1
+            kubectl scale statefulset action-scheduler --replicas=1
             kubectl scale deployment action-worker --replicas=$ACTION_WORKER_REPLICAS
             kubectl scale deployment action-processor --replicas=$ACTION_PROCESSOR_REPLICAS
             kubectl scale deployment case-api --replicas=1
