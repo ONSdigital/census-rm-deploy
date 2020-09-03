@@ -1177,7 +1177,7 @@ jobs:
             kubectl scale deployment uacqidservice --replicas=$UAC_QID_REPLICAS
 
             # Wait for rollout to finish
-            kubectl rollout status deploy action-scheduler --watch=true --timeout=200s
+            kubectl rollout status sts action-scheduler --watch=true --timeout=200s
             kubectl rollout status deploy action-worker --watch=true --timeout=400s
             kubectl rollout status deploy action-processor --watch=true --timeout=200s
             kubectl rollout status deploy case-api --watch=true --timeout=200s
