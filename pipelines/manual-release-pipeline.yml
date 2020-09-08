@@ -337,7 +337,7 @@ jobs:
     input_mapping: {release: census-rm-kubernetes-release}
     output_mapping: {unpacked-release: census-rm-kubernetes-release-unpacked} 
   - task: apply-statefulset-and-service
-    file: census-rm-deploy/task/kubectl-apply-service-and-statefulset-no-patch.yml
+    file: census-rm-deploy/tasks/kubectl-apply-service-and-statefulset-no-patch.yml
     params:
       SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
       GCP_PROJECT_NAME: ((gcp-project-name))
