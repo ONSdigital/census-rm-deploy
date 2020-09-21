@@ -40,9 +40,10 @@ resources:
 
 jobs:
 
-  - name: fly-pipelines
+  - name: fly-dev-pipelines
     plan:
     - get: census-rm-deploy
+      trigger: true
     - put: pipelines
       on_failure:
         put: slack-alert
@@ -99,29 +100,67 @@ jobs:
       params:
         pipelines:
 
-        - name: fly-pipelines
+        - name: fly-dev-pipelines
           team: rm
-          config_file: census-rm-deploy/pipelines/concourse-pipelines.yml
+          config_file: census-rm-deploy/pipelines/concourse-pipelines-dev.yml
           unpaused: true
 
-        - name: census-rm-preprod
+        - name: CI-Whitelodge Deploy
+          team: rm
+          config_file: census-rm-deploy/pipelines/build-deploy-test-CI-WL.yml
+          unpaused: true
+          vars:
+            acceptance-tests-image: eu.gcr.io/census-gcr-rm/rm/census-rm-acceptance-tests:latest
+            ci-gcp-environment-name: ci
+            ci-gcp-project-name: census-rm-ci
+            ci-kubernetes-cluster-name: rm-k8s-cluster
+            wl-gcp-environment-name: whitelodge
+            wl-gcp-project-name: census-rm-whitelodge
+            wl-kubernetes-cluster-name: rm-k8s-cluster
+            terraform-branch: master
+            docker-registry-ci: eu.gcr.io/census-rm-ci
+            docker-registry-gcr: eu.gcr.io/census-gcr-rm
+
+        - name: census-rm-blacklodge
           team: rm
           config_file: census-rm-deploy/pipelines/manual-release-pipeline.yml
           vars:
-            gcp-environment-name: preprod
-            gcp-project-name: census-rm-preprod
+            gcp-environment-name: blacklodge
+            gcp-project-name: census-rm-blacklodge
             kubernetes-cluster-name: rm-k8s-cluster
-            rabbit-config: release/rabbitmq/values_prod.yml
+            rabbit-config: release/rabbitmq/values.yml
             prometheus-config: release/monitoring/prometheus-values.yml
             grafana-config: release/monitoring/grafana-deployment.yml
 
-        - name: census-rm-prod
+        - name: release-images
+          team: rm
+          config_file: census-rm-deploy/pipelines/build-release-images.yml
+          unpaused: true
+          vars:
+            docker-registry-ci: eu.gcr.io/census-rm-ci
+            docker-registry-gcr: eu.gcr.io/census-gcr-rm
+
+        - name: census-rm-performance
+          team: rm
+          config_file: census-rm-deploy/pipelines/performance-tests-pipeline.yml
+          unpaused: true
+          vars:
+            performance-gcp-project-name: census-rm-performance
+            performance-kubernetes-cluster-name: rm-k8s-cluster
+            performance-tests-image: eu.gcr.io/census-gcr-rm/rm/census-rm-performance-tests
+            case-processor-replicas: 4
+            action-worker-replicas: 10
+            action-processor-replicas: 2
+            uac-qid-replicas: 2
+            terraform-branch: master
+
+        - name: census-rm-greylodge
           team: rm
           config_file: census-rm-deploy/pipelines/manual-release-pipeline.yml
           vars:
-            gcp-environment-name: prod
-            gcp-project-name: census-rm-prod
+            gcp-environment-name: greylodge
+            gcp-project-name: census-rm-greylodge
             kubernetes-cluster-name: rm-k8s-cluster
-            rabbit-config: release/rabbitmq/values_prod.yml
+            rabbit-config: release/rabbitmq/values.yml
             prometheus-config: release/monitoring/prometheus-values.yml
             grafana-config: release/monitoring/grafana-deployment.yml
