@@ -34,8 +34,8 @@ resources:
     source:
       target: http://concourse-web:8080/
       teams:
-      - name: rm
-        username: rm
+      - name: rm-dev
+        username: ((concourse.team-user))
         password: ((concourse.team-pass))
 
 jobs:
@@ -101,12 +101,12 @@ jobs:
         pipelines:
 
         - name: fly-dev-pipelines
-          team: rm
+          team: rm-dev
           config_file: census-rm-deploy/pipelines/concourse-pipelines-dev.yml
           unpaused: true
 
         - name: CI-Whitelodge Deploy
-          team: rm
+          team: rm-dev
           config_file: census-rm-deploy/pipelines/build-deploy-test-CI-WL.yml
           unpaused: true
           vars:
@@ -122,7 +122,7 @@ jobs:
             docker-registry-gcr: eu.gcr.io/census-gcr-rm
 
         - name: census-rm-blacklodge
-          team: rm
+          team: rm-dev
           config_file: census-rm-deploy/pipelines/manual-release-pipeline.yml
           vars:
             gcp-environment-name: blacklodge
@@ -133,7 +133,7 @@ jobs:
             grafana-config: release/monitoring/grafana-deployment.yml
 
         - name: release-images
-          team: rm
+          team: rm-dev
           config_file: census-rm-deploy/pipelines/build-release-images.yml
           unpaused: true
           vars:
@@ -141,7 +141,7 @@ jobs:
             docker-registry-gcr: eu.gcr.io/census-gcr-rm
 
         - name: census-rm-performance
-          team: rm
+          team: rm-dev
           config_file: census-rm-deploy/pipelines/performance-tests-pipeline.yml
           unpaused: true
           vars:
@@ -155,7 +155,7 @@ jobs:
             terraform-branch: master
 
         - name: census-rm-greylodge
-          team: rm
+          team: rm-dev
           config_file: census-rm-deploy/pipelines/manual-release-pipeline.yml
           vars:
             gcp-environment-name: greylodge
