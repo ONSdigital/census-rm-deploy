@@ -105,7 +105,7 @@ jobs:
           unpaused: true
 
         - name: census-rm-greylodge
-          team: rm-dev
+          team: rm
           config_file: census-rm-deploy/pipelines/manual-release-pipeline.yml
           vars:
             gcp-environment-name: greylodge
