@@ -153,14 +153,3 @@ jobs:
             action-processor-replicas: 2
             uac-qid-replicas: 2
             terraform-branch: master
-
-        - name: census-rm-greylodge
-          team: rm-dev
-          config_file: census-rm-deploy/pipelines/manual-release-pipeline.yml
-          vars:
-            gcp-environment-name: greylodge
-            gcp-project-name: census-rm-greylodge
-            kubernetes-cluster-name: rm-k8s-cluster
-            rabbit-config: release/rabbitmq/values.yml
-            prometheus-config: release/monitoring/prometheus-values.yml
-            grafana-config: release/monitoring/grafana-deployment.yml
