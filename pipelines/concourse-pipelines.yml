@@ -117,7 +117,7 @@ jobs:
 
         - name: census-rm-preprod
           team: rm
-          config_file: census-rm-deploy/pipelines/manual-release-pipeline.yml
+          config_file: census-rm-deploy/pipelines/prod-manual-release-pipeline.yml
           vars:
             gcp-environment-name: preprod
             gcp-project-name: census-rm-preprod
@@ -128,7 +128,7 @@ jobs:
 
         - name: census-rm-prod
           team: rm
-          config_file: census-rm-deploy/pipelines/manual-release-pipeline.yml
+          config_file: census-rm-deploy/pipelines/prod-manual-release-pipeline.yml
           vars:
             gcp-environment-name: prod
             gcp-project-name: census-rm-prod
