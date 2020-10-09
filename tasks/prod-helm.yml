@@ -1,0 +1,36 @@
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: google/cloud-sdk
+params:
+  ENV:
+  ADMIN_SERVICE_ACCOUNT_JSON:
+  KUBERNETES_CLUSTER:
+  RABBITMQ_CONFIG_VALUES_FILE:
+inputs:
+  - name: census-rm-kubernetes-dependencies-repo
+run:
+  path: bash
+  args:
+    - -exc
+    - |
+      export GOOGLE_APPLICATION_CREDENTIALS=/root/gcloud-service-key.json
+      export GCP_PROJECT=census-rm-$ENV
+      cat >$GOOGLE_APPLICATION_CREDENTIALS <<EOL
+      $ADMIN_SERVICE_ACCOUNT_JSON
+      EOL
+      gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
+      gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT}
+
+      apt-get install -y procps  # NB: procps is used by Helm
+      curl -L https://git.io/get_helm.sh | bash -s -- --version v2.16.3
+      helm init --client-only
+      helm plugin install https://github.com/rimusz/helm-tiller
+
+      cd census-rm-kubernetes-dependencies-repo
+      export HELM_TILLER_SILENT=true
+
+      cd release
+      
+      ENV=${ENV} RABBITMQ_CONFIG_VALUES_FILE=${RABBITMQ_CONFIG_VALUES_FILE} ./setup-dependencies.sh
