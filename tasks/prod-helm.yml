@@ -31,6 +31,4 @@ run:
       cd census-rm-kubernetes-dependencies-repo
       export HELM_TILLER_SILENT=true
 
-      cd release
-      
-      ENV=${ENV} RABBITMQ_CONFIG_VALUES_FILE=${RABBITMQ_CONFIG_VALUES_FILE} ./setup-dependencies.sh
+      ENV=${ENV} RABBITMQ_CONFIG_VALUES_FILE=${RABBITMQ_CONFIG_VALUES_FILE} ./prod-setup-dependencies.sh
