@@ -26,7 +26,7 @@ groups:
   - "Trigger Terraform"
   - "Preview Terraform Changes"
   - "Run Terraform"
-  - "Run Helm"
+  - "Run Rabbitmq"
   - "Deploy Monitoring"
   - "Report Terraform Success"
   - "Dewhitelist Nightly"
@@ -36,7 +36,7 @@ groups:
   - "Trigger Terraform"
   - "Preview Terraform Changes"
   - "Run Terraform"
-  - "Run Helm"
+  - "Run Rabbitmq"
   - "Deploy Monitoring"
   - "Report Terraform Success"
   - "Dewhitelist Nightly"
@@ -986,7 +986,7 @@ jobs:
       KUBERNETES_CLUSTER: rm-k8s-cluster
     input_mapping: {census-rm-terraform: census-rm-terraform-release-unpacked}
 
-- name: "Run Helm"
+- name: "Run Rabbitmq"
   disable_manual_trigger: true
   serial: true
   serial_groups: [action-scheduler,
@@ -1016,7 +1016,7 @@ jobs:
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
     output_mapping: {unpacked-release: census-rm-kubernetes-release-unpacked}
-  - task: "Run Helm"
+  - task: "Run Rabbitmq"
     file: census-rm-deploy/tasks/rabbitmq-provision.yml
     params:
       ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
@@ -1045,7 +1045,7 @@ jobs:
   plan:
     - get: every-minute
       trigger: true
-      passed: ["Run Helm"]
+      passed: ["Run Rabbitmq"]
     - get: census-rm-kubernetes-release
       params: {include_source_tarball: true}
     - get: census-rm-deploy
@@ -1072,7 +1072,7 @@ jobs:
     trigger: true
     passed: [
       "Run Terraform",
-      "Run Helm"]
+      "Run Rabbitmq"]
 
 - name: "Dewhitelist Nightly"
   serial: true

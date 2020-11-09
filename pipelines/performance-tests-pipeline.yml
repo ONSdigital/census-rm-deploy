@@ -600,8 +600,8 @@ jobs:
         GRAFANA_CONFIG_VALUES_FILE: release/monitoring/grafana-deployment.yml
       input_mapping: {census-rm-kubernetes-monitoring-repo: census-rm-kubernetes-release-unpacked}
 
-  # Run Helm
-- name: "Run Helm"
+  # Run Rabbitmq
+- name: "Run Rabbitmq"
   disable_manual_trigger: true
   serial: true
   on_failure: *slack_failure_alert
@@ -635,7 +635,7 @@ jobs:
       file: census-rm-deploy/tasks/unpack-release.yml
       input_mapping: {release: census-rm-kubernetes-release}
       output_mapping: {unpacked-release: census-rm-kubernetes-release-unpacked}
-    - task: "Run Helm"
+    - task: "Run Rabbitmq"
       file: census-rm-deploy/tasks/rabbitmq-provision.yml
       params:
         ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
@@ -655,7 +655,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Helm"]
+    passed: ["Run Rabbitmq"]
   - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
@@ -686,7 +686,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Helm"]
+    passed: ["Run Rabbitmq"]
   - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
@@ -716,7 +716,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Helm"]
+    passed: ["Run Rabbitmq"]
   - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
@@ -746,7 +746,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Helm"]
+    passed: ["Run Rabbitmq"]
   - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
@@ -776,7 +776,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Helm"]
+    passed: ["Run Rabbitmq"]
   - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
@@ -806,7 +806,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Helm"]
+    passed: ["Run Rabbitmq"]
   - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
@@ -836,7 +836,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Helm"]
+    passed: ["Run Rabbitmq"]
   - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
@@ -866,7 +866,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Helm"]
+    passed: ["Run Rabbitmq"]
   - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
@@ -896,7 +896,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Helm"]
+    passed: ["Run Rabbitmq"]
   - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
@@ -926,7 +926,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Helm"]
+    passed: ["Run Rabbitmq"]
   - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
@@ -956,7 +956,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Helm"]
+    passed: ["Run Rabbitmq"]
   - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
@@ -986,7 +986,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Helm"]
+    passed: ["Run Rabbitmq"]
   - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
@@ -1016,7 +1016,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Helm"]
+    passed: ["Run Rabbitmq"]
   - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
@@ -1046,7 +1046,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Helm"]
+    passed: ["Run Rabbitmq"]
   - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
@@ -1077,7 +1077,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Helm"]
+    passed: ["Run Rabbitmq"]
   - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
