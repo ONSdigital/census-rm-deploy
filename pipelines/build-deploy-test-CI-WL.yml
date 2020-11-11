@@ -192,6 +192,7 @@ resources:
   source:
     uri: git@github.com:ONSdigital/census-rm-deploy.git
     private_key: ((github.service_account_private_key))
+    branch: feature/rabbitmq-kubernetes-operator
 
 - name: census-rm-kubernetes-microservices-repo
   type: git
@@ -199,6 +200,7 @@ resources:
     uri: git@github.com:ONSdigital/census-rm-kubernetes.git
     private_key: ((github.service_account_private_key))
     paths: [microservices/*]
+    branch: feature/rabbitmq-kubernetes-operator
 
 - name: census-rm-kubernetes-ops-repo
   type: git
@@ -206,6 +208,8 @@ resources:
     uri: git@github.com:ONSdigital/census-rm-kubernetes.git
     private_key: ((github.service_account_private_key))
     paths: [optional/ops-*]
+    branch: feature/rabbitmq-kubernetes-operator
+
 
 - name: census-rm-kubernetes-optional-repo
   type: git
@@ -213,6 +217,7 @@ resources:
     uri: git@github.com:ONSdigital/census-rm-kubernetes.git
     private_key: ((github.service_account_private_key))
     paths: [optional/*]
+    branch: feature/rabbitmq-kubernetes-operator
 
 - name: census-rm-kubernetes-dependencies-repo
   type: git
@@ -220,6 +225,7 @@ resources:
     uri: git@github.com:ONSdigital/census-rm-kubernetes.git
     private_key: ((github.service_account_private_key))
     paths: [rabbitmq/*, setup-rabbitmq.sh]
+    branch: feature/rabbitmq-kubernetes-operator
 
 - name: census-rm-kubernetes-monitoring-repo
   type: git
@@ -227,6 +233,7 @@ resources:
     uri: git@github.com:ONSdigital/census-rm-kubernetes.git
     private_key: ((github.service_account_private_key))
     paths: [monitoring/*, grafana-dashboards/*, setup-monitoring.sh]
+    branch: feature/rabbitmq-kubernetes-operator
 
 - name: census-rm-terraform
   type: git
@@ -2215,8 +2222,8 @@ jobs:
     file: census-rm-deploy/tasks/terraform-env.yml
     params:
       ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-      ENV: ci
-      VAR_FILE: ./tfvars/census-rm-ci.tfvars
+      ENV: ryangrundy
+      VAR_FILE: ./tfvars/census-rm-ryangrundy.tfvars
       KUBERNETES_CLUSTER: rm-k8s-cluster
     input_mapping: {census-rm-terraform: census-rm-terraform}
 
@@ -2253,7 +2260,7 @@ jobs:
       file: census-rm-deploy/tasks/monitoring.yml
       params:
         ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-        ENV: ci
+        ENV: ryangrundy
         KUBERNETES_CLUSTER: rm-k8s-cluster
         PROMETHEUS_CONFIG_VALUES_FILE: monitoring/prometheus-values.yml
         GRAFANA_CONFIG_VALUES_FILE: monitoring/grafana-deployment.yml
@@ -2361,10 +2368,10 @@ jobs:
       trigger: true
       passed: ["CI Terraform"]
     - task: "CI Rabbitmq"
-      file: census-rm-deploy/tasks/rabbitmq-provision.yml
+      file: census-rm-deploy/tasks/prod-rabbitmq-provision.yml
       params:
         ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-        ENV: ci
+        ENV: ryangrundy
         KUBERNETES_CLUSTER: rm-k8s-cluster
       input_mapping: {census-rm-kubernetes-dependencies-repo: census-rm-kubernetes-dependencies-repo}
 
@@ -3618,8 +3625,8 @@ jobs:
     attempts: 3
     params:
       ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-      ENV: whitelodge
-      VAR_FILE: ./tfvars/census-rm-whitelodge.tfvars
+      ENV: ryangrundy-5
+      VAR_FILE: ./tfvars/census-rm-ryangrundy-5.tfvars
       KUBERNETES_CLUSTER: rm-k8s-cluster
     input_mapping: {census-rm-terraform: census-rm-terraform}
 
@@ -3654,7 +3661,7 @@ jobs:
       file: census-rm-deploy/tasks/monitoring.yml
       params:
         ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-        ENV: whitelodge
+        ENV: ryangrundy-5
         KUBERNETES_CLUSTER: rm-k8s-cluster
         PROMETHEUS_CONFIG_VALUES_FILE: monitoring/prometheus-values.yml
         GRAFANA_CONFIG_VALUES_FILE: monitoring/grafana-deployment.yml
@@ -3753,7 +3760,7 @@ jobs:
       file: census-rm-deploy/tasks/rabbitmq-provision.yml
       params:
         ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-        ENV: whitelodge
+        ENV: ryangrundy-5
         KUBERNETES_CLUSTER: rm-k8s-cluster
       input_mapping: {census-rm-kubernetes-dependencies-repo: census-rm-kubernetes-dependencies-repo}
 

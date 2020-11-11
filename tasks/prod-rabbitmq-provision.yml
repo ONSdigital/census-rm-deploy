@@ -24,4 +24,4 @@ run:
 
       cd census-rm-kubernetes-dependencies-repo
 
-      ./setup-rabbitmq.sh
+      RABBIT_NODE_POOL=true ./setup-rabbitmq.sh
