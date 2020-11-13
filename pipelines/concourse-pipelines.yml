@@ -113,6 +113,7 @@ jobs:
             kubernetes-cluster-name: rm-k8s-cluster
             prometheus-config: release/monitoring/prometheus-values.yml
             grafana-config: release/monitoring/grafana-deployment.yml
+            rabbitmq-file: census-rm-deploy/tasks/prod-helm.yml
 
         - name: census-rm-preprod
           team: rm
@@ -123,6 +124,7 @@ jobs:
             kubernetes-cluster-name: rm-k8s-cluster
             prometheus-config: release/monitoring/prometheus-values.yml
             grafana-config: release/monitoring/grafana-deployment.yml
+            rabbitmq-file: census-rm-deploy/tasks/prod-helm.yml
 
         - name: census-rm-prod
           team: rm
@@ -133,3 +135,4 @@ jobs:
             kubernetes-cluster-name: rm-k8s-cluster
             prometheus-config: release/monitoring/prometheus-values.yml
             grafana-config: release/monitoring/grafana-deployment.yml
+            rabbitmq-file: census-rm-deploy/tasks/prod-helm.yml
