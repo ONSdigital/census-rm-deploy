@@ -192,7 +192,7 @@ resources:
   source:
     uri: git@github.com:ONSdigital/census-rm-deploy.git
     private_key: ((github.service_account_private_key))
-    branch: feature/rabbitmq-kubernetes-operator
+    branch: concourse-branch-for-testing-rabbit
 
 - name: census-rm-kubernetes-microservices-repo
   type: git
@@ -200,7 +200,7 @@ resources:
     uri: git@github.com:ONSdigital/census-rm-kubernetes.git
     private_key: ((github.service_account_private_key))
     paths: [microservices/*]
-    branch: feature/rabbitmq-kubernetes-operator
+    branch: concourse-branch-for-testing-rabbit
 
 - name: census-rm-kubernetes-ops-repo
   type: git
@@ -208,7 +208,7 @@ resources:
     uri: git@github.com:ONSdigital/census-rm-kubernetes.git
     private_key: ((github.service_account_private_key))
     paths: [optional/ops-*]
-    branch: feature/rabbitmq-kubernetes-operator
+    branch: concourse-branch-for-testing-rabbit
 
 
 - name: census-rm-kubernetes-optional-repo
@@ -217,7 +217,7 @@ resources:
     uri: git@github.com:ONSdigital/census-rm-kubernetes.git
     private_key: ((github.service_account_private_key))
     paths: [optional/*]
-    branch: feature/rabbitmq-kubernetes-operator
+    branch: concourse-branch-for-testing-rabbit
 
 - name: census-rm-kubernetes-dependencies-repo
   type: git
@@ -225,7 +225,7 @@ resources:
     uri: git@github.com:ONSdigital/census-rm-kubernetes.git
     private_key: ((github.service_account_private_key))
     paths: [rabbitmq/*, setup-rabbitmq.sh]
-    branch: feature/rabbitmq-kubernetes-operator
+    branch: concourse-branch-for-testing-rabbit
 
 - name: census-rm-kubernetes-monitoring-repo
   type: git
@@ -233,7 +233,7 @@ resources:
     uri: git@github.com:ONSdigital/census-rm-kubernetes.git
     private_key: ((github.service_account_private_key))
     paths: [monitoring/*, grafana-dashboards/*, setup-monitoring.sh]
-    branch: feature/rabbitmq-kubernetes-operator
+    branch: concourse-branch-for-testing-rabbit
 
 - name: census-rm-terraform
   type: git
@@ -337,6 +337,7 @@ resources:
   source:
     uri: git@github.com:ONSdigital/census-rm-qid-batch-runner.git
     private_key: ((github.service_account_private_key))
+    branch: feature/rabbitmq-kubernetes-operator
 
 - name: sample-loader-master
   type: git
@@ -349,6 +350,7 @@ resources:
   source:
     uri: git@github.com:ONSdigital/census-rm-acceptance-tests.git
     private_key: ((github.service_account_private_key))
+    branch: feature/rabbitmq-kubernetes-operator
 
 - name: fieldwork-adapter-master
   type: git
@@ -2368,7 +2370,7 @@ jobs:
       trigger: true
       passed: ["CI Terraform"]
     - task: "CI Rabbitmq"
-      file: census-rm-deploy/tasks/prod-rabbitmq-provision.yml
+      file: ((rabbitmq-file))
       params:
         ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
         ENV: ryangrundy

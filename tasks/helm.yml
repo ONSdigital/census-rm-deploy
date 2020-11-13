@@ -1,0 +1,22 @@
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: google/cloud-sdk
+params:
+  ENV:
+  ADMIN_SERVICE_ACCOUNT_JSON:
+  KUBERNETES_CLUSTER:
+  RABBITMQ_CONFIG_VALUES_FILE:
+inputs:
+  - name: census-rm-kubernetes-dependencies-repo
+run:
+  path: bash
+  args:
+    - -exc
+    - |
+      echo "I'm going to use the helm file instead of the brand new rabbit operator"
+      echo ${ENV}
+      echo ${KUBERNETES_CLUSTER}
+      echo ${RABBITMQ_CONFIG_VALUES_FILE}
+      
