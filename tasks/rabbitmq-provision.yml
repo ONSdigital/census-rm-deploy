@@ -7,6 +7,7 @@ params:
   ENV:
   ADMIN_SERVICE_ACCOUNT_JSON:
   KUBERNETES_CLUSTER:
+  RABBITMQ_PRODUCTION_SETUP:
 inputs:
   - name: census-rm-kubernetes-dependencies-repo
 run:
@@ -23,4 +24,5 @@ run:
       gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT}
 
       cd census-rm-kubernetes-dependencies-repo
-      ENV=${ENV} ./setup-rabbitmq.sh
+
+      RABBITMQ_PRODUCTION_SETUP=${RABBITMQ_PRODUCTION_SETUP} ./setup-rabbitmq.sh

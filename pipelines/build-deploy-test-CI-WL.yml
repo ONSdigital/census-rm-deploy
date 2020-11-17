@@ -219,7 +219,8 @@ resources:
   source:
     uri: git@github.com:ONSdigital/census-rm-kubernetes.git
     private_key: ((github.service_account_private_key))
-    paths: [rabbitmq/*, setup-rabbitmq.sh]
+    paths: [rabbitmq/*, setup-rabbitmq.sh, rabbitmq-install.sh, rabbitmq-update.sh]
+    branch: concourse-branch-for-testing-rabbit
 
 - name: census-rm-kubernetes-monitoring-repo
   type: git
@@ -2367,6 +2368,7 @@ jobs:
         ENV: ci
         KUBERNETES_CLUSTER: rm-k8s-cluster
         RABBITMQ_CONFIG_VALUES_FILE: rabbitmq/values.yml
+        RABBITMQ_PRODUCTION_SETUP: ((rabbitmq-production-setup))
       input_mapping: {census-rm-kubernetes-dependencies-repo: census-rm-kubernetes-dependencies-repo}
 
 
@@ -3757,6 +3759,7 @@ jobs:
         ENV: whitelodge
         KUBERNETES_CLUSTER: rm-k8s-cluster
         RABBITMQ_CONFIG_VALUES_FILE: rabbitmq/values.yml
+        RABBITMQ_PRODUCTION_SETUP: ((rabbitmq-production-setup))
       input_mapping: {census-rm-kubernetes-dependencies-repo: census-rm-kubernetes-dependencies-repo}
 
 # Apply Database Patches
