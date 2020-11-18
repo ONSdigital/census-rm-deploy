@@ -200,7 +200,7 @@ resources:
     uri: git@github.com:ONSdigital/census-rm-kubernetes.git
     private_key: ((github.service_account_private_key))
     paths: [microservices/*]
-    branch: concourse-branch-for-testing-rabbit
+    branch: feature/rabbitmq-kubernetes-operator
 
 - name: census-rm-kubernetes-ops-repo
   type: git
@@ -217,15 +217,15 @@ resources:
     uri: git@github.com:ONSdigital/census-rm-kubernetes.git
     private_key: ((github.service_account_private_key))
     paths: [optional/*]
-    branch: concourse-branch-for-testing-rabbit
+    branch: feature/rabbitmq-kubernetes-operator
 
 - name: census-rm-kubernetes-dependencies-repo
   type: git
   source:
     uri: git@github.com:ONSdigital/census-rm-kubernetes.git
     private_key: ((github.service_account_private_key))
-    paths: [rabbitmq/*, setup-rabbitmq.sh]
-    branch: concourse-branch-for-testing-rabbit
+    paths: [rabbitmq/*, setup-rabbitmq.sh, rabbitmq-install.sh, rabbitmq-update.sh]
+    branch: feature/rabbitmq-kubernetes-operator
 
 - name: census-rm-kubernetes-monitoring-repo
   type: git
@@ -233,7 +233,7 @@ resources:
     uri: git@github.com:ONSdigital/census-rm-kubernetes.git
     private_key: ((github.service_account_private_key))
     paths: [monitoring/*, grafana-dashboards/*, setup-monitoring.sh]
-    branch: concourse-branch-for-testing-rabbit
+    branch: feature/rabbitmq-kubernetes-operator
 
 - name: census-rm-terraform
   type: git
@@ -2373,7 +2373,7 @@ jobs:
       file: ((rabbitmq-file))
       params:
         ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-        ENV: ryangrundy
+        ENV: ryangrundy-7
         KUBERNETES_CLUSTER: rm-k8s-cluster
         RABBITMQ_CONFIG_VALUES_FILE: rabbitmq/values.yml
         RABBITMQ_PRODUCTION_SETUP: ((rabbitmq-production-setup))
@@ -3767,6 +3767,7 @@ jobs:
         ENV: ryangrundy-5
         KUBERNETES_CLUSTER: rm-k8s-cluster
         RABBITMQ_CONFIG_VALUES_FILE: rabbitmq/values.yml
+        RABBITMQ_PRODUCTION_SETUP: ((rabbitmq-production-setup))
       input_mapping: {census-rm-kubernetes-dependencies-repo: census-rm-kubernetes-dependencies-repo}
 
 # Apply Database Patches
