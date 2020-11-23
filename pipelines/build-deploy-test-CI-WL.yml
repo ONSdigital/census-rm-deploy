@@ -2366,7 +2366,6 @@ jobs:
         ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
         ENV: ci
         KUBERNETES_CLUSTER: rm-k8s-cluster
-        RABBITMQ_CONFIG_VALUES_FILE: rabbitmq/values.yml
         RABBITMQ_PRODUCTION_SETUP: ((rabbitmq-production-setup))
       input_mapping: {census-rm-kubernetes-dependencies-repo: census-rm-kubernetes-dependencies-repo}
 
@@ -3757,7 +3756,6 @@ jobs:
         ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
         ENV: whitelodge
         KUBERNETES_CLUSTER: rm-k8s-cluster
-        RABBITMQ_CONFIG_VALUES_FILE: rabbitmq/values.yml
         RABBITMQ_PRODUCTION_SETUP: ((rabbitmq-production-setup))
       input_mapping: {census-rm-kubernetes-dependencies-repo: census-rm-kubernetes-dependencies-repo}
 
