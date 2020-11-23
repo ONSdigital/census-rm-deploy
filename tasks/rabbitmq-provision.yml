@@ -25,4 +25,4 @@ run:
 
       cd census-rm-kubernetes-dependencies-repo
 
-      RABBITMQ_PRODUCTION_SETUP=${RABBITMQ_PRODUCTION_SETUP} ./setup-rabbitmq.sh
+      ENV=${ENV} RABBITMQ_PRODUCTION_SETUP=${RABBITMQ_PRODUCTION_SETUP} ./setup-rabbitmq.sh
