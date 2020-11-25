@@ -1,0 +1,28 @@
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: google/cloud-sdk
+params:
+  ENV:
+  ADMIN_SERVICE_ACCOUNT_JSON:
+  KUBERNETES_CLUSTER:
+  RABBITMQ_PRODUCTION_SETUP:
+inputs:
+  - name: census-rm-kubernetes-dependencies-repo
+run:
+  path: bash
+  args:
+    - -exc
+    - |
+      export GOOGLE_APPLICATION_CREDENTIALS=/root/gcloud-service-key.json
+      export GCP_PROJECT=census-rm-$ENV
+      cat >$GOOGLE_APPLICATION_CREDENTIALS <<EOL
+      $ADMIN_SERVICE_ACCOUNT_JSON
+      EOL
+      gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
+      gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT}
+
+      cd census-rm-kubernetes-dependencies-repo
+
+      ENV=${ENV} RABBITMQ_PRODUCTION_SETUP=${RABBITMQ_PRODUCTION_SETUP} ./rabbitmq-update.sh

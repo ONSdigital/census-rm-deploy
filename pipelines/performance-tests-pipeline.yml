@@ -600,8 +600,8 @@ jobs:
         GRAFANA_CONFIG_VALUES_FILE: release/monitoring/grafana-deployment.yml
       input_mapping: {census-rm-kubernetes-monitoring-repo: census-rm-kubernetes-release-unpacked}
 
-  # Run Helm
-- name: "Run Helm"
+  # Run Rabbitmq
+- name: "Run Rabbitmq"
   disable_manual_trigger: true
   serial: true
   on_failure: *slack_failure_alert
@@ -635,13 +635,14 @@ jobs:
       file: census-rm-deploy/tasks/unpack-release.yml
       input_mapping: {release: census-rm-kubernetes-release}
       output_mapping: {unpacked-release: census-rm-kubernetes-release-unpacked}
-    - task: "Run Helm"
-      file: census-rm-deploy/tasks/helm.yml
+    - task: "Run Rabbitmq"
+      file: ((rabbitmq-file))
       params:
         ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
         ENV: performance
         KUBERNETES_CLUSTER: rm-k8s-cluster
-        RABBITMQ_CONFIG_VALUES_FILE: release/rabbitmq/values_prod.yml
+        RABBITMQ_CONFIG_VALUES_FILE: ((rabbit-config))
+        RABBITMQ_PRODUCTION_SETUP: ((rabbitmq-production-setup))
       input_mapping: {census-rm-kubernetes-dependencies-repo: census-rm-kubernetes-release-unpacked}
 
 - name: "Action Scheduler"
@@ -656,7 +657,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Helm"]
+    passed: ["Run Rabbitmq"]
   - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
@@ -687,7 +688,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Helm"]
+    passed: ["Run Rabbitmq"]
   - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
@@ -717,7 +718,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Helm"]
+    passed: ["Run Rabbitmq"]
   - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
@@ -747,7 +748,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Helm"]
+    passed: ["Run Rabbitmq"]
   - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
@@ -777,7 +778,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Helm"]
+    passed: ["Run Rabbitmq"]
   - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
@@ -807,7 +808,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Helm"]
+    passed: ["Run Rabbitmq"]
   - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
@@ -837,7 +838,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Helm"]
+    passed: ["Run Rabbitmq"]
   - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
@@ -867,7 +868,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Helm"]
+    passed: ["Run Rabbitmq"]
   - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
@@ -897,7 +898,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Helm"]
+    passed: ["Run Rabbitmq"]
   - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
@@ -927,7 +928,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Helm"]
+    passed: ["Run Rabbitmq"]
   - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
@@ -957,7 +958,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Helm"]
+    passed: ["Run Rabbitmq"]
   - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
@@ -987,7 +988,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Helm"]
+    passed: ["Run Rabbitmq"]
   - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
@@ -1017,7 +1018,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Helm"]
+    passed: ["Run Rabbitmq"]
   - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
@@ -1047,7 +1048,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Helm"]
+    passed: ["Run Rabbitmq"]
   - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
@@ -1078,7 +1079,7 @@ jobs:
   - get: census-rm-deploy
   - get: every-minute
     trigger: true
-    passed: ["Run Helm"]
+    passed: ["Run Rabbitmq"]
   - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
@@ -1304,19 +1305,8 @@ jobs:
             gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
             gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
 
-            # Install helm and helm-tiller
-            apt-get install -y procps  # NB: procps is used by Helm
-            curl -L https://git.io/get_helm.sh | bash -s -- --version v2.16.3
-            helm init --client-only
-            helm plugin install https://github.com/rimusz/helm-tiller
-
-            # Purge Rabbit helm
-            helm tiller run helm delete rm --purge
-
-            # Delete Rabbit persistent volumes
-            kubectl delete pvc data-rabbitmq-0
-            kubectl delete pvc data-rabbitmq-1
-            kubectl delete pvc data-rabbitmq-2
+            # Purge the RabbitMQ Cluster
+            kubectl delete -f rabbitmq/operator-configuration.yml
 
   - task: "Remove node-pools"
     config:

@@ -30,7 +30,7 @@ groups:
   - "Build UAC QID Service Latest"
   - "CI Terraform"
   - "CI Monitoring"
-  - "CI Helm"
+  - "CI Rabbitmq"
   - "CI Apply Database Patches"
   - "CI Deploy Action-Scheduler"
   - "CI Deploy Action-Worker"
@@ -55,7 +55,7 @@ groups:
   - "CI Nightly Regression ATs"
   - "WL Terraform"
   - "WL Monitoring"
-  - "WL Helm"
+  - "WL Rabbitmq"
   - "WL Apply Database Patches"
   - "WL Deploy Action-Scheduler"
   - "WL Deploy Action-Worker"
@@ -111,7 +111,7 @@ groups:
   - "CI Terraform"
   - "CI Reset Apps and DB"
   - "CI Monitoring"
-  - "CI Helm"
+  - "CI Rabbitmq"
   - "CI Apply Database Patches"
   - "CI Deploy Action-Scheduler"
   - "CI Deploy Action-Worker"
@@ -139,7 +139,7 @@ groups:
   jobs:
   - "WL Terraform"
   - "WL Monitoring"
-  - "WL Helm"
+  - "WL Rabbitmq"
   - "WL Apply Database Patches"
   - "WL Deploy Action-Scheduler"
   - "WL Deploy Action-Worker"
@@ -219,7 +219,7 @@ resources:
   source:
     uri: git@github.com:ONSdigital/census-rm-kubernetes.git
     private_key: ((github.service_account_private_key))
-    paths: [dependencies/*, rabbitmq/*, setup-dependencies.sh]
+    paths: [rabbitmq/*, setup-rabbitmq.sh, rabbitmq-install.sh, rabbitmq-update.sh]
 
 - name: census-rm-kubernetes-monitoring-repo
   type: git
@@ -2260,11 +2260,11 @@ jobs:
       input_mapping: {census-rm-kubernetes-monitoring-repo: census-rm-kubernetes-monitoring-repo}
 
 
-- name: "CI Helm"
+- name: "CI Rabbitmq"
   serial: true
   serial_groups: [ci-terraform,
                   ci-acceptance-tests,
-                  ci-helm,
+                  ci-rabbitmq,
                   ci-patch,
                   acceptance-tests-build,
                   ci-monitoring,
@@ -2360,13 +2360,13 @@ jobs:
     - get: ops-ui-master
       trigger: true
       passed: ["CI Terraform"]
-    - task: "CI Helm"
-      file: census-rm-deploy/tasks/helm.yml
+    - task: "CI Rabbitmq"
+      file: ((rabbitmq-file))
       params:
         ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
         ENV: ci
         KUBERNETES_CLUSTER: rm-k8s-cluster
-        RABBITMQ_CONFIG_VALUES_FILE: rabbitmq/values.yml
+        RABBITMQ_PRODUCTION_SETUP: ((rabbitmq-production-setup))
       input_mapping: {census-rm-kubernetes-dependencies-repo: census-rm-kubernetes-dependencies-repo}
 
 
@@ -2375,7 +2375,7 @@ jobs:
   serial: true
   serial_groups: [ci-monitoring,
                   ci-acceptance-tests,
-                  ci-helm,
+                  ci-rabbitmq,
                   ci-patch,
                   acceptance-tests-build,
                   action-scheduler-build,
@@ -2416,62 +2416,62 @@ jobs:
   plan:
   - get: census-rm-ddl-master
     trigger: true
-    passed: ["CI Helm"]
+    passed: ["CI Rabbitmq"]
   - get: census-rm-kubernetes-optional-repo
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
-    passed: ["CI Helm"]
+    passed: ["CI Rabbitmq"]
   - get: census-rm-deploy
   - get: census-rm-kubernetes-microservices-repo
-    passed: ["CI Helm"]
+    passed: ["CI Rabbitmq"]
     trigger: true
   - get: action-scheduler-master
-    passed: ["CI Helm"]
+    passed: ["CI Rabbitmq"]
     trigger: true
   - get: action-worker-master
-    passed: ["CI Helm"]
+    passed: ["CI Rabbitmq"]
     trigger: true
   - get: action-processor-master
-    passed: ["CI Helm"]
+    passed: ["CI Rabbitmq"]
     trigger: true
   - get: case-api-master
-    passed: ["CI Helm"]
+    passed: ["CI Rabbitmq"]
     trigger: true
   - get: case-processor-master
-    passed: ["CI Helm"]
+    passed: ["CI Rabbitmq"]
     trigger: true
   - get: uac-qid-service-master
-    passed: ["CI Helm"]
+    passed: ["CI Rabbitmq"]
     trigger: true
   - get: pubsub-adapter
-    passed: ["CI Helm"]
+    passed: ["CI Rabbitmq"]
     trigger: true
   - get: print-file-service-master
-    passed: ["CI Helm"]
+    passed: ["CI Rabbitmq"]
     trigger: true
   - get: fieldwork-adapter-master
-    passed: ["CI Helm"]
+    passed: ["CI Rabbitmq"]
     trigger: true
   - get: notify-processor-master
-    passed: ["CI Helm"]
+    passed: ["CI Rabbitmq"]
     trigger: true
   - get: notify-stub-master
-    passed: ["CI Helm"]
+    passed: ["CI Rabbitmq"]
     trigger: true
   - get: exception-manager-master
-    passed: ["CI Helm"]
+    passed: ["CI Rabbitmq"]
     trigger: true
   - get: toolbox-master
-    passed: ["CI Helm"]
+    passed: ["CI Rabbitmq"]
     trigger: true
   - get: monitoring-master
-    passed: ["CI Helm"]
+    passed: ["CI Rabbitmq"]
     trigger: true
   - get: census-rm-terraform
-    passed: ["CI Helm"]
+    passed: ["CI Rabbitmq"]
     trigger: true
   - get: ops-ui-master
-    passed: ["CI Helm"]
+    passed: ["CI Rabbitmq"]
     trigger: true
   - get: ddl-docker-image-gcr
     params:
@@ -3266,7 +3266,7 @@ jobs:
   serial: true
   serial_groups: [ci-deploy-infrastructure,
                   ci-acceptance-tests,
-                  ci-helm,
+                  ci-rabbitmq,
                   ci-patch,
                   action-scheduler-build,
                   action-scheduler-deploy,
@@ -3661,8 +3661,8 @@ jobs:
         GRAFANA_CONFIG_VALUES_FILE: monitoring/grafana-deployment.yml
       input_mapping: {census-rm-kubernetes-monitoring-repo: census-rm-kubernetes-monitoring-repo}
 
-# WL Helm
-- name: "WL Helm"
+# WL Rabbitmq
+- name: "WL Rabbitmq"
   serial: true
   serial_groups: [wl-terraform,
                   wl-database-patches,
@@ -3750,13 +3750,13 @@ jobs:
     - get: ops-ui-master
       trigger: true
       passed: ["WL Terraform"]
-    - task: "WL Helm"
-      file: census-rm-deploy/tasks/helm.yml
+    - task: "WL Rabbitmq"
+      file: ((rabbitmq-file))
       params:
         ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
         ENV: whitelodge
         KUBERNETES_CLUSTER: rm-k8s-cluster
-        RABBITMQ_CONFIG_VALUES_FILE: rabbitmq/values.yml
+        RABBITMQ_PRODUCTION_SETUP: ((rabbitmq-production-setup))
       input_mapping: {census-rm-kubernetes-dependencies-repo: census-rm-kubernetes-dependencies-repo}
 
 # Apply Database Patches
@@ -3785,67 +3785,67 @@ jobs:
   plan:
   - get: census-rm-kubernetes-dependencies-repo
     trigger: true
-    passed: ["WL Helm"]
+    passed: ["WL Rabbitmq"]
   - get: census-rm-kubernetes-microservices-repo
     trigger: true
-    passed: ["WL Helm"]
+    passed: ["WL Rabbitmq"]
   - get: census-rm-kubernetes-optional-repo
     trigger: true
-    passed: ["WL Helm"]
+    passed: ["WL Rabbitmq"]
   - get: census-rm-deploy
   - get: census-rm-ddl-master
     trigger: true
-    passed: ["WL Helm"]
+    passed: ["WL Rabbitmq"]
   - get: census-rm-terraform
-    passed: ["WL Helm"]
+    passed: ["WL Rabbitmq"]
     trigger: true
   - get: action-scheduler-master
-    passed: ["WL Helm"]
+    passed: ["WL Rabbitmq"]
     trigger: true
   - get: action-worker-master
-    passed: ["WL Helm"]
+    passed: ["WL Rabbitmq"]
     trigger: true
   - get: action-processor-master
-    passed: ["WL Helm"]
+    passed: ["WL Rabbitmq"]
     trigger: true
   - get: case-api-master
-    passed: ["WL Helm"]
+    passed: ["WL Rabbitmq"]
     trigger: true
   - get: case-processor-master
-    passed: ["WL Helm"]
+    passed: ["WL Rabbitmq"]
     trigger: true
   - get: uac-qid-service-master
-    passed: ["WL Helm"]
+    passed: ["WL Rabbitmq"]
     trigger: true
   - get: pubsub-adapter
-    passed: ["WL Helm"]
+    passed: ["WL Rabbitmq"]
     trigger: true
   - get: print-file-service-master
-    passed: ["WL Helm"]
+    passed: ["WL Rabbitmq"]
     trigger: true
   - get: fieldwork-adapter-master
-    passed: ["WL Helm"]
+    passed: ["WL Rabbitmq"]
     trigger: true
   - get: notify-processor-master
-    passed: ["WL Helm"]
+    passed: ["WL Rabbitmq"]
     trigger: true
   - get: notify-stub-master
-    passed: ["WL Helm"]
+    passed: ["WL Rabbitmq"]
     trigger: true
   - get: exception-manager-master
-    passed: ["WL Helm"]
+    passed: ["WL Rabbitmq"]
     trigger: true
   - get: toolbox-master
-    passed: ["WL Helm"]
+    passed: ["WL Rabbitmq"]
     trigger: true
   - get: monitoring-master
-    passed: ["WL Helm"]
+    passed: ["WL Rabbitmq"]
     trigger: true
   - get: qid-batch-runner-master
-    passed: ["WL Helm"]
+    passed: ["WL Rabbitmq"]
     trigger: true
   - get: ops-ui-master
-    passed: ["WL Helm"]
+    passed: ["WL Rabbitmq"]
     trigger: true
   - get: ddl-docker-image-gcr
     params:
