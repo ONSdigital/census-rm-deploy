@@ -159,3 +159,4 @@ jobs:
             terraform-branch: master
             rabbitmq-file: census-rm-deploy/tasks/prod-helm.yml
             rabbitmq-production-setup: true
+            rabbit-config: release/rabbitmq/values_prod.yml
