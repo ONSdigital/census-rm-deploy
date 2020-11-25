@@ -1254,10 +1254,6 @@ jobs:
   - get: every-minute
     trigger: true
     passed: ["Performance Tests"]
-  - task: unpack-kubernetes-release
-    file: census-rm-deploy/tasks/unpack-release.yml
-    input_mapping: {release: census-rm-kubernetes-release}
-    output_mapping: {unpacked-release: census-rm-kubernetes-release-unpacked}
   - task: "Remove Print Files"
     config:
         platform: linux
@@ -1296,7 +1292,6 @@ jobs:
         SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
         KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
         GCP_PROJECT_NAME: ((performance-gcp-project-name))
-      input_mapping: {census-rm-kubernetes-dependencies-repo: census-rm-kubernetes-release-unpacked}
       run:
         path: bash
         args:
@@ -1310,27 +1305,17 @@ jobs:
             gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
             gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
 
-            kubectl get customresourcedefinitions.apiextensions.k8s.io/rabbitmqclusters.rabbitmq.com 2> /dev/null
-            rabbitmq_crd_exists=$?
-
-            if [ $rabbitmq_crd_exists -eq 0 ]; then
-                # Purge the RabbitMQ Cluster 
-                cd census-rm-kubernetes-dependencies-repo
-                ./teardown-rabbitmq.sh || true
-            else
-                # Install helm and helm-tiller
-                apt-get install -y procps  # NB: procps is used by Helm
-                curl -L https://git.io/get_helm.sh | bash -s -- --version v2.16.3
-                helm init --client-only
-                helm plugin install https://github.com/rimusz/helm-tiller
-                # Purge Rabbit helm
-                helm tiller run helm delete rm --purge
-                # Delete Rabbit persistent volumes
-                kubectl delete pvc data-rabbitmq-0
-                kubectl delete pvc data-rabbitmq-1
-                kubectl delete pvc data-rabbitmq-2
-            fi
-
+            # Install helm and helm-tiller
+            apt-get install -y procps  # NB: procps is used by Helm
+            curl -L https://git.io/get_helm.sh | bash -s -- --version v2.16.3
+            helm init --client-only
+            helm plugin install https://github.com/rimusz/helm-tiller
+            # Purge Rabbit helm
+            helm tiller run helm delete rm --purge
+            # Delete Rabbit persistent volumes
+            kubectl delete pvc data-rabbitmq-0
+            kubectl delete pvc data-rabbitmq-1
+            kubectl delete pvc data-rabbitmq-2
 
   - task: "Remove node-pools"
     config:
