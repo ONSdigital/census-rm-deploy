@@ -1332,8 +1332,6 @@ jobs:
             fi
 
 
-            
-
   - task: "Remove node-pools"
     config:
       platform: linux
