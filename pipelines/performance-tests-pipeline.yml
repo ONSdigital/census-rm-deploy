@@ -1256,6 +1256,7 @@ jobs:
     passed: ["Performance Tests"]
   - get: census-rm-kubernetes-release
     params: {include_source_tarball: true}
+  - get: census-rm-deploy
   - task: unpack-kubernetes-release
     file: census-rm-deploy/tasks/unpack-release.yml
     input_mapping: {release: census-rm-kubernetes-release}
