@@ -1288,10 +1288,10 @@ jobs:
               gsutil -m rm gs://census-rm-performance-sent-print-files/** || true
 
   - task: "Tear Down Rabbit"
-    input_mapping: {census-rm-kubernetes-release-unpacked: unpacked-release}
+    input_mapping: {census-rm-kubernetes-repo: census-rm-kubernetes-release-unpacked}
     config:
       inputs:
-      - name: census-rm-kubernetes-release-unpacked
+      - name: census-rm-kubernetes-repo
       platform: linux
       image_resource:
         type: docker-image
@@ -1314,7 +1314,7 @@ jobs:
             gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
             gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
             
-            cd census-rm-kubernetes-release-unpacked
+            cd census-rm-kubernetes-repo
             ./teardown-rabbitmq.sh
 
 
