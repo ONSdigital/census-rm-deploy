@@ -157,6 +157,6 @@ jobs:
             action-processor-replicas: 2
             uac-qid-replicas: 2
             terraform-branch: master
-            rabbitmq-file: census-rm-deploy/tasks/rabbitmq-provision.yml
+            rabbitmq-file: census-rm-deploy/tasks/performance-rabbitmq-provision.yml
             rabbitmq-production-setup: true
             rabbit-config: release/rabbitmq/values_prod.yml
