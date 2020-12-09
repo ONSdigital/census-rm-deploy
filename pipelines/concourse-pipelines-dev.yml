@@ -130,7 +130,6 @@ jobs:
             gcp-environment-name: blacklodge
             gcp-project-name: census-rm-blacklodge
             kubernetes-cluster-name: rm-k8s-cluster
-            rabbit-config: release/rabbitmq/values_prod.yml
             prometheus-config: release/monitoring/prometheus-values.yml
             grafana-config: release/monitoring/grafana-deployment.yml
             rabbitmq-file: census-rm-deploy/tasks/rabbitmq-provision.yml
@@ -159,4 +158,3 @@ jobs:
             terraform-branch: master
             rabbitmq-file: census-rm-deploy/tasks/performance-rabbitmq-provision.yml
             rabbitmq-production-setup: true
-            rabbit-config: release/rabbitmq/values_prod.yml

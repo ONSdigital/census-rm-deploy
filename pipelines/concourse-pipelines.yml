@@ -111,7 +111,6 @@ jobs:
             gcp-environment-name: greylodge
             gcp-project-name: census-rm-greylodge
             kubernetes-cluster-name: rm-k8s-cluster
-            rabbit-config: release/rabbitmq/values_prod.yml
             prometheus-config: release/monitoring/prometheus-values.yml
             grafana-config: release/monitoring/grafana-deployment.yml
             rabbitmq-file: census-rm-deploy/tasks/rabbitmq-provision.yml
