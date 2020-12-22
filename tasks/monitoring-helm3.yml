@@ -25,7 +25,7 @@ run:
       gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT}
 
       apt-get install -y procps  # NB: procps is used by Helm
-      curl -L https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+      curl -L https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash -s -- --version v3.4.2
       helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 
       cd census-rm-kubernetes-monitoring-repo
