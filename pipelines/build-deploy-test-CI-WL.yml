@@ -2250,7 +2250,7 @@ jobs:
     - get: census-rm-deploy
     - get: census-rm-terraform
     - task: "CI Monitoring"
-      file: census-rm-deploy/tasks/monitoring.yml
+      file: census-rm-deploy/tasks/monitoring-helm3.yml
       params:
         ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
         ENV: ci
@@ -3652,7 +3652,7 @@ jobs:
     - get: census-rm-terraform
       passed: ["WL Terraform"]
     - task: "WL Monitoring"
-      file: census-rm-deploy/tasks/monitoring.yml
+      file: census-rm-deploy/tasks/monitoring-helm3.yml
       params:
         ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
         ENV: whitelodge
