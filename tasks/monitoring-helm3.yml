@@ -1,0 +1,32 @@
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: google/cloud-sdk
+params:
+  ADMIN_SERVICE_ACCOUNT_JSON:
+  ENV:
+  KUBERNETES_CLUSTER:
+  PROMETHEUS_CONFIG_VALUES_FILE:
+  GRAFANA_CONFIG_VALUES_FILE:
+inputs:
+  - name: census-rm-kubernetes-monitoring-repo
+run:
+  path: bash
+  args:
+    - -exc
+    - |
+      export GOOGLE_APPLICATION_CREDENTIALS=/root/gcloud-service-key.json
+      export GCP_PROJECT=census-rm-$ENV
+      cat >$GOOGLE_APPLICATION_CREDENTIALS <<EOL
+      $ADMIN_SERVICE_ACCOUNT_JSON
+      EOL
+      gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
+      gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT}
+
+      apt-get install -y procps  # NB: procps is used by Helm
+      curl -L https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+      helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+
+      cd census-rm-kubernetes-monitoring-repo
+      ENV=${ENV} PROMETHEUS_CONFIG_VALUES_FILE=${PROMETHEUS_CONFIG_VALUES_FILE} GRAFANA_CONFIG_VALUES_FILE=${GRAFANA_CONFIG_VALUES_FILE} ./setup-monitoring.sh
