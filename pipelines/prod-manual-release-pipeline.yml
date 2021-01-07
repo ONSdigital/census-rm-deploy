@@ -1056,7 +1056,7 @@ jobs:
       input_mapping: {release: census-rm-kubernetes-release}
       output_mapping: {unpacked-release: census-rm-kubernetes-release-unpacked}
     - task: "Deploy Monitoring"
-      file: census-rm-deploy/tasks/monitoring.yml
+      file: census-rm-deploy/tasks/monitoring-helm3.yml
       params:
         ADMIN_SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
         ENV: ((gcp-environment-name))
