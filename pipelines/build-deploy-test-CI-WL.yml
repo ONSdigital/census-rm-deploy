@@ -75,6 +75,7 @@ groups:
   - "WL Deploy Rabbit Monitor"
   - "WL Deploy Regional Counts"
   - "WL Deploy QID Batch Runner"
+  - "WL Deloy Bulk Processor"
   - "WL Whitelist"
   - "WL Whitelist Nightly"
 
@@ -159,6 +160,7 @@ groups:
   - "WL Deploy Rabbit Monitor"
   - "WL Deploy Regional Counts"
   - "WL Deploy QID Batch Runner"
+  - "WL Deloy Bulk Processor"
   - "WL Whitelist"
   - "WL Whitelist Nightly"
 
@@ -4573,6 +4575,44 @@ jobs:
     input_mapping: {
       docker-image-resource: qid-batch-runner-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-optional-repo}
+
+- name: "WL Deloy Bulk Processor"
+  disable_manual_trigger: true
+  serial: true
+  serial_groups: [wl-bulkprocessor]
+  on_failure: *slack_failure_alert_wl
+  on_error: *slack_error_alert_wl
+  plan:
+  - get: census-rm-deploy
+  - get: census-rm-terraform
+    trigger: true
+    passed: ["WL Apply Database Patches"]
+  - get: census-rm-kubernetes-dependencies-repo
+    passed: ["WL Apply Database Patches"]
+    trigger: true
+  - get: census-rm-ddl-master
+    passed: ["WL Apply Database Patches"]
+    trigger: true
+  - get: census-rm-kubernetes-optional-repo
+    passed: ["WL Apply Database Patches"]
+    trigger: true
+  - get: toolbox-master
+    passed: ["WL Apply Database Patches"]
+    trigger: true
+  - get: toolbox-docker-image-gcr
+    params:
+      skip_download: true
+  - task: apply-deployment
+    file: census-rm-deploy/tasks/kubectl-apply-cronjob.yml
+    params:
+      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
+      GCP_PROJECT_NAME: ((wl-gcp-project-name))
+      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
+      KUBERNETES_DEPLOYMENT_NAME: bulk-processor
+      KUBERNETES_FILE_PATH: kubernetes-repo/optional
+      KUBERNETES_FILE_PREFIX: bulk-processor-cronjob
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+    input_mapping: {kubernetes-repo: census-rm-kubernetes-optional-repo}
 
 - name: "WL Whitelist"
   serial: true
