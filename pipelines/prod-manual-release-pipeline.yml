@@ -302,7 +302,7 @@ jobs:
       GCP_PROJECT_NAME: ((gcp-project-name))
       KUBERNETES_CLUSTER: ((kubernetes-cluster-name))
       KUBERNETES_FILE_PATH: kubernetes-repo/release/optional
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 900s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release-unpacked}
 
 - name: "Action Scheduler"
@@ -334,7 +334,7 @@ jobs:
       KUBERNETES_SELECTOR: app=action-scheduler
       KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
       KUBERNETES_FILE_PREFIX: action-scheduler
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 900s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release-unpacked}
 
 - name: "Action Worker"
@@ -366,7 +366,7 @@ jobs:
       KUBERNETES_SELECTOR: app=action-worker
       KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
       KUBERNETES_FILE_PREFIX: action-worker
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 900s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release-unpacked}
 
 - name: "Action Processor"
@@ -398,7 +398,7 @@ jobs:
       KUBERNETES_SELECTOR: app=action-processor
       KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
       KUBERNETES_FILE_PREFIX: action-processor
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 900s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release-unpacked}
 
 - name: "Case API"
@@ -430,7 +430,7 @@ jobs:
       KUBERNETES_SELECTOR: app=case-api
       KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
       KUBERNETES_FILE_PREFIX: case-api
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 900s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release-unpacked}
 
 - name: "Case Processor"
@@ -462,7 +462,7 @@ jobs:
       KUBERNETES_SELECTOR: app=case-processor
       KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
       KUBERNETES_FILE_PREFIX: case-processor
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 900s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release-unpacked}
 
 - name: "UAC QID Service"
@@ -494,7 +494,7 @@ jobs:
       KUBERNETES_SELECTOR: app=uacqidservice
       KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
       KUBERNETES_FILE_PREFIX: uac-qid-service
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 900s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release-unpacked}
 
 - name: "PubSub Adapter"
@@ -526,7 +526,7 @@ jobs:
       KUBERNETES_SELECTOR: app=pubsub-adapter
       KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
       KUBERNETES_FILE_PREFIX: pubsub-adapter
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 900s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release-unpacked}
 
 - name: "Ops UI"
@@ -558,7 +558,7 @@ jobs:
       KUBERNETES_SELECTOR: app=ops-ui
       KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
       KUBERNETES_FILE_PREFIX: ops-ui
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 900s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release-unpacked}
 
 - name: "Print File Service"
@@ -590,7 +590,7 @@ jobs:
       KUBERNETES_SELECTOR: app=printfilesvc
       KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
       KUBERNETES_FILE_PREFIX: print-file-service
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 900s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release-unpacked}
 
 - name: "Fieldwork Adapter"
@@ -622,7 +622,7 @@ jobs:
       KUBERNETES_SELECTOR: app=fieldwork-adapter
       KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
       KUBERNETES_FILE_PREFIX: fieldwork-adapter
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 900s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release-unpacked}
 
 - name: "Notify Processor"
@@ -654,7 +654,7 @@ jobs:
       KUBERNETES_SELECTOR: app=notify-processor
       KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
       KUBERNETES_FILE_PREFIX: notify-processor
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 900s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release-unpacked}
 
 - name: "QID Batch Runner"
@@ -686,7 +686,7 @@ jobs:
       KUBERNETES_SELECTOR: app=qid-batch-runner
       KUBERNETES_FILE_PATH: kubernetes-repo/release/optional
       KUBERNETES_FILE_PREFIX: qid-batch-runner
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 900s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release-unpacked}
 
 - name: "Exception Manager"
@@ -718,7 +718,7 @@ jobs:
       KUBERNETES_SELECTOR: app=exception-manager
       KUBERNETES_FILE_PATH: kubernetes-repo/release/microservices
       KUBERNETES_FILE_PREFIX: exception-manager
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 900s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release-unpacked}
 
 - name: "Toolbox"
@@ -750,7 +750,7 @@ jobs:
       KUBERNETES_SELECTOR: app=census-rm-toolbox
       KUBERNETES_FILE_PATH: kubernetes-repo/release/optional
       KUBERNETES_FILE_PREFIX: census-rm-toolbox
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 900s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release-unpacked}
 
 - name: "Database Monitor"
@@ -782,7 +782,7 @@ jobs:
       KUBERNETES_SELECTOR: app=database-monitor
       KUBERNETES_FILE_PATH: kubernetes-repo/release/optional
       KUBERNETES_FILE_PREFIX: database-monitor
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 900s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release-unpacked}
 
 - name: "Rabbit Monitor"
@@ -814,7 +814,7 @@ jobs:
       KUBERNETES_SELECTOR: app=rabbitmonitor
       KUBERNETES_FILE_PATH: kubernetes-repo/release/optional
       KUBERNETES_FILE_PREFIX: rabbitmonitor
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 900s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release-unpacked}
 
 - name: "Regional Counts"
@@ -846,7 +846,7 @@ jobs:
       KUBERNETES_SELECTOR: app=regionalcounts
       KUBERNETES_FILE_PATH: kubernetes-repo/release/optional
       KUBERNETES_FILE_PREFIX: regional-counts
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 900s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release-unpacked}
 
 - name: "Data Exporter"
@@ -877,7 +877,7 @@ jobs:
       KUBERNETES_DEPLOYMENT_NAME: data-exporter
       KUBERNETES_FILE_PATH: kubernetes-repo/release/optional
       KUBERNETES_FILE_PREFIX: dataexporter
-      WAIT_UNTIL_AVAILABLE_TIMEOUT: 200s
+      WAIT_UNTIL_AVAILABLE_TIMEOUT: 900s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release-unpacked}
 
 - name: "Report Deployment Success"
