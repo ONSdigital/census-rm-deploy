@@ -122,6 +122,7 @@ jobs:
             docker-registry-gcr: eu.gcr.io/census-gcr-rm
             rabbitmq-file: census-rm-deploy/tasks/rabbitmq-provision.yml
             rabbitmq-production-setup: false
+            node-pool-name: rabbit-node-pool
 
         - name: census-rm-blacklodge
           team: rm-dev
@@ -134,6 +135,7 @@ jobs:
             grafana-config: release/monitoring/grafana-deployment.yml
             rabbitmq-file: census-rm-deploy/tasks/rabbitmq-provision.yml
             rabbitmq-production-setup: true
+            node-pool-name: rabbit-node-pool
 
         - name: release-images
           team: rm-dev
@@ -158,3 +160,4 @@ jobs:
             terraform-branch: master
             rabbitmq-file: census-rm-deploy/tasks/performance-rabbitmq-provision.yml
             rabbitmq-production-setup: true
+            node-pool-name: rabbit-node-pool

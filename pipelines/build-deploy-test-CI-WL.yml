@@ -2367,6 +2367,7 @@ jobs:
         ENV: ci
         KUBERNETES_CLUSTER: rm-k8s-cluster
         RABBITMQ_PRODUCTION_SETUP: ((rabbitmq-production-setup))
+        NODE_POOL_NAME: ((node-pool-name))
       input_mapping: {census-rm-kubernetes-dependencies-repo: census-rm-kubernetes-dependencies-repo}
 
 
@@ -3757,6 +3758,7 @@ jobs:
         ENV: whitelodge
         KUBERNETES_CLUSTER: rm-k8s-cluster
         RABBITMQ_PRODUCTION_SETUP: ((rabbitmq-production-setup))
+        NODE_POOL_NAME: ((node-pool-name))
       input_mapping: {census-rm-kubernetes-dependencies-repo: census-rm-kubernetes-dependencies-repo}
 
 # Apply Database Patches

@@ -1024,6 +1024,7 @@ jobs:
       KUBERNETES_CLUSTER: rm-k8s-cluster
       RABBITMQ_CONFIG_VALUES_FILE: ((rabbit-config))
       RABBITMQ_PRODUCTION_SETUP: ((rabbitmq-production-setup))
+      NODE_POOL_NAME: ((node-pool-name))
     input_mapping: {census-rm-kubernetes-dependencies-repo: census-rm-kubernetes-release-unpacked}
 
 - name: "Deploy Monitoring"

@@ -115,6 +115,7 @@ jobs:
             grafana-config: release/monitoring/grafana-deployment.yml
             rabbitmq-file: census-rm-deploy/tasks/rabbitmq-provision.yml
             rabbitmq-production-setup: true
+            node-pool-name: rabbit-node-pool
 
         - name: census-rm-preprod
           team: rm
@@ -128,6 +129,7 @@ jobs:
             grafana-config: release/monitoring/grafana-deployment.yml
             rabbitmq-file: census-rm-deploy/tasks/rabbitmq-provision.yml
             rabbitmq-production-setup: true
+            node-pool-name: rabbit-node-pool
 
         - name: census-rm-prod
           team: rm
@@ -141,3 +143,4 @@ jobs:
             grafana-config: release/monitoring/grafana-deployment.yml
             rabbitmq-file: census-rm-deploy/tasks/rabbitmq-provision.yml
             rabbitmq-production-setup: true
+            node-pool-name: rabbit-node-pool
