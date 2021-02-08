@@ -75,7 +75,7 @@ groups:
   - "WL Deploy Rabbit Monitor"
   - "WL Deploy Regional Counts"
   - "WL Deploy QID Batch Runner"
-  - "WL Deloy Bulk Processor"
+  - "WL Deploy Bulk Processor"
   - "WL Whitelist"
   - "WL Whitelist Nightly"
 
@@ -160,7 +160,7 @@ groups:
   - "WL Deploy Rabbit Monitor"
   - "WL Deploy Regional Counts"
   - "WL Deploy QID Batch Runner"
-  - "WL Deloy Bulk Processor"
+  - "WL Deploy Bulk Processor"
   - "WL Whitelist"
   - "WL Whitelist Nightly"
 
@@ -4576,7 +4576,7 @@ jobs:
       docker-image-resource: qid-batch-runner-docker-image-gcr,
       kubernetes-repo: census-rm-kubernetes-optional-repo}
 
-- name: "WL Deloy Bulk Processor"
+- name: "WL Deploy Bulk Processor"
   disable_manual_trigger: true
   serial: true
   serial_groups: [wl-bulkprocessor]
