@@ -1147,7 +1147,6 @@ jobs:
       GCP_PROJECT_NAME: ((performance-gcp-project-name))
       KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
       PERFORMANCE_TESTS_IMAGE: ((performance-tests-image))
-      CASE_PROCESSOR_REPLICAS: ((case-processor-replicas))
     input_mapping: {performance-tests-repo: performance-tests-repo}
   on_failure: *slack_failure_alert
   on_error: *slack_error_alert
