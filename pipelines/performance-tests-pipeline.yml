@@ -1096,7 +1096,7 @@ jobs:
       WAIT_UNTIL_AVAILABLE_TIMEOUT: 900s
     input_mapping: {kubernetes-repo: census-rm-kubernetes-release-unpacked}
 
-- name: "Scale Up Apps"
+- name: "Performance Tests"
   disable_manual_trigger: true
   serial: true
   serial_groups: [
@@ -1140,83 +1140,6 @@ jobs:
       "Database Monitor",
       "Rabbit Monitor",
       "Ops UI"]
-  - task: "Scale apps"
-    config:
-      platform: linux
-      image_resource:
-        type: docker-image
-        source:
-          repository: eu.gcr.io/census-gcr/gcloud-kubectl
-      params:
-        SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-        KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
-        GCP_PROJECT_NAME: ((performance-gcp-project-name))
-        CASE_PROCESSOR_REPLICAS: ((case-processor-replicas))
-        ACTION_WORKER_REPLICAS: ((action-worker-replicas))
-        ACTION_PROCESSOR_REPLICAS: ((action-processor-replicas))
-        UAC_QID_REPLICAS: ((uac-qid-replicas))
-      run:
-        path: bash
-        args:
-          - -exc
-          - |
-            cat >~/gcloud-service-key.json <<EOL
-            $SERVICE_ACCOUNT_JSON
-            EOL
-
-            # Use gcloud service account to configure kubectl
-            gcloud auth activate-service-account --key-file ~/gcloud-service-key.json
-            gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT_NAME}
-
-            # Scale apps up
-            kubectl scale statefulset action-scheduler --replicas=1
-            kubectl scale deployment action-worker --replicas=$ACTION_WORKER_REPLICAS
-            kubectl scale deployment action-processor --replicas=$ACTION_PROCESSOR_REPLICAS
-            kubectl scale deployment case-api --replicas=1
-            kubectl scale deployment case-processor --replicas=$CASE_PROCESSOR_REPLICAS
-            kubectl scale deployment uacqidservice --replicas=$UAC_QID_REPLICAS
-
-            # Wait for rollout to finish
-            kubectl rollout status sts action-scheduler --watch=true --timeout=200s
-            kubectl rollout status deploy action-worker --watch=true --timeout=400s
-            kubectl rollout status deploy action-processor --watch=true --timeout=200s
-            kubectl rollout status deploy case-api --watch=true --timeout=200s
-            kubectl rollout status deploy case-processor --watch=true --timeout=200s
-            kubectl rollout status deploy uacqidservice --watch=true --timeout=200s
-
-  on_failure: *slack_performance_setup_failure
-  on_error: *slack_performance_setup_error
-
-- name: "Performance Tests"
-  disable_manual_trigger: true
-  serial: true
-  serial_groups: [
-    scale-down,
-    scale-apps,
-    performance-tests,
-    action-scheduler,
-    action-worker,
-    action-processor,
-    case-api,
-    case-processor,
-    fieldwork-adapter,
-    notify-processor,
-    uac-qid-service,
-    pubsub-adapter,
-    print-file-service,
-    exception-manager,
-    toolbox,
-    database-monitor,
-    rabbitmonitor,
-    ops-ui]
-  plan:
-  - get: performance-tests-repo
-  - get: performance-tests-docker-image
-    params:
-      skip_download: true
-  - get: every-minute
-    trigger: true
-    passed: ["Scale Up Apps"]
   - task: "Run Performance Tests (in K8s)"
     file: performance-tests-repo/tasks/kubectl-run-performance-tests.yml
     params:
@@ -1224,7 +1147,6 @@ jobs:
       GCP_PROJECT_NAME: ((performance-gcp-project-name))
       KUBERNETES_CLUSTER: ((performance-kubernetes-cluster-name))
       PERFORMANCE_TESTS_IMAGE: ((performance-tests-image))
-      CASE_PROCESSOR_REPLICAS: ((case-processor-replicas))
     input_mapping: {performance-tests-repo: performance-tests-repo}
   on_failure: *slack_failure_alert
   on_error: *slack_error_alert
