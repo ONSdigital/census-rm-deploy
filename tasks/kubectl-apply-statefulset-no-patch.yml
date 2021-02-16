@@ -33,9 +33,6 @@ run:
       # Apply statefulset config
       kubectl apply -f ${KUBERNETES_FILE_PATH}/${KUBERNETES_FILE_PREFIX}-statefulset.yml --record
 
-      # Patch statefulset with timestamp to force pod recreation
-      kubectl patch sts ${KUBERNETES_STATEFULSET_NAME} -p "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"timestamp\":\"`date +'%s'`\"}}}}}" --record
-
       # Wait for rollout to finish
       kubectl rollout status sts ${KUBERNETES_STATEFULSET_NAME} --watch=true --timeout=${WAIT_UNTIL_AVAILABLE_TIMEOUT}
 
