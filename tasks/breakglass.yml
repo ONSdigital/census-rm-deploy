@@ -24,7 +24,7 @@ run:
       gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
       gcloud container clusters get-credentials ${KUBERNETES_CLUSTER} --zone europe-west2 --project ${GCP_PROJECT}
 
-      for sudoer in (census-rm-breakglass/sudoers)
+      cat census-rm-breakglass/sudoers | while read sudoer 
       do
           gcloud projects add-iam-policy-binding ${GCP_PROJECT} --member=user:${sudoer} --role=roles/owner
       done
