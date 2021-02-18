@@ -394,12 +394,6 @@ resources:
     uri: git@github.com:ONSdigital/census-rm-whitelist.git
     private_key: ((github.service_account_private_key))
 
-- name: breakglass-master
-  type: git
-  source:
-    uri: git@github.com:ONSdigital/census-rm-breakglass.git
-    private_key: ((github.service_account_private_key))
-
 # Docker images
 - name: action-scheduler-docker-image-ci
   type: docker-image
@@ -4719,21 +4713,4 @@ jobs:
       KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
     input_mapping: {
       census-rm-whitelist: whitelist-master
-      }
-
-- name: "WL Break Glass"
-  plan:
-  - get: breakglass-master
-    trigger: true
-  - get: census-rm-deploy
-  - task: break-the-darn-glass
-    file: census-rm-deploy/tasks/breakglass.yml
-    on_failure: *slack_failure_alert_wl
-    on_error: *slack_error_alert_wl
-    params:
-      SERVICE_ACCOUNT_JSON: ((gcp.service_account_json))
-      GCP_PROJECT_NAME: ((wl-gcp-project-name))
-      KUBERNETES_CLUSTER: ((wl-kubernetes-cluster-name))
-    input_mapping: {
-      census-rm-breakglass: breakglass-master
       }
