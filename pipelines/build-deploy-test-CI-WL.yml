@@ -163,7 +163,6 @@ groups:
   - "WL Deploy Bulk Processor"
   - "WL Whitelist"
   - "WL Whitelist Nightly"
-  - "WL Break Glass"
 
 resource_types:
 
